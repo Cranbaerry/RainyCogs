@@ -65,7 +65,6 @@ class Pugs(commands.Cog):
         """
         primaryRoleType = self.parseRole(primaryRole)
         secondaryRoleType = self.parseRole(secondaryRole)
-        message = await ctx.send("%s Mohon tunggu.." % ctx.message.author.mention)
 
         if primaryRoleType == -1 or secondaryRoleType == -1:
             embed = discord.Embed(color=0xEE2222, title="Invalid role for %s" % battletag)
@@ -73,7 +72,6 @@ class Pugs(commands.Cog):
             embed.add_field(name='Primary role', value=str(self.getRoleName(primaryRoleType)), inline=True)
             embed.add_field(name='Secondary role', value=str(self.getRoleName(secondaryRoleType)), inline=True)
             embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
-            await message.delete()
             await ctx.send(content=ctx.message.author.mention, embed=embed)
             return
 
@@ -88,8 +86,8 @@ class Pugs(commands.Cog):
                 embed = discord.Embed(color=0xEE2222, title="Profile **%s** tidak dapat ditemukan" % battletag)
                 embed.description = "Coba periksa kapitalisasi huruf dan coba lagi."
                 embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
-                await message.delete()
                 await ctx.send(content=ctx.message.author.mention, embed=embed)
+                return
 
             if data['private']:
                 embed = discord.Embed(color=0xEE2222, title="Additional data is required")
@@ -98,10 +96,8 @@ class Pugs(commands.Cog):
                 embed.set_footer(text='Gambar 1.0: contoh screenshot')
                 embed.set_image(url='https://i.imgur.com/Im8NpgX.png')
 
-                await message.delete()
                 message = await ctx.send("%s Cek DM untuk instruksi lebih lanjut." % ctx.message.author.mention)
                 await ctx.author.send(embed=embed)
-
                 try:
                     response = await ctx.bot.wait_for(
                         "message", check=lambda m: m.author == ctx.message.author, timeout=120
@@ -109,6 +105,8 @@ class Pugs(commands.Cog):
                 except asyncio.TimeoutError:
                     await ctx.author.send("Your response has timed out, please try again.")
                     return None
+
+                await message.delete()
 
             report_line = [ctx.message.created_at.strftime("%d/%m/%Y %H:%M:%S"),  str(ctx.author), battletag, self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType), response.content if data['private'] else ''.join("{}: {}, ".format(i['role'].capitalize(), i['level']) for i in data['ratings'])[:-2]]
 
@@ -125,7 +123,6 @@ class Pugs(commands.Cog):
             embed.add_field(name='Roles', value='Primary: **%s**\nSecondary: **%s**' % (self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType)))
             embed.set_thumbnail(url=data['icon'])
             embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
-            await message.delete()
             await ctx.send(content=ctx.message.author.mention, embed=embed)
         except Exception as err:
-            await message.edit(content='Terjadi kesalahan. Mohon contact admin.')
+            await ctx.send(content='Terjadi kesalahan. Mohon contact admin.')
