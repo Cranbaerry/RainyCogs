@@ -6,7 +6,7 @@ from redbot.core.data_manager import cog_data_path
 from google.oauth2.service_account import Credentials
 
 class Pugs(commands.Cog):
-    """My custom cog"""
+    """My custom cog test"""
 
     def __init__(self, bot):
         self.bot = bot
