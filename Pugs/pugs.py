@@ -82,9 +82,15 @@ class Pugs(commands.Cog):
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=hdr) as resp:
                 data = await resp.json()
-                status = resp.status
 
         try:
+            if resp.status == 404:
+                embed = discord.Embed(color=0xEE2222, title="Profile **%s** tidak dapat ditemukan" % battletag)
+                embed.description = "Coba periksa kapitalisasi huruf dan coba lagi."
+                embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
+                await message.delete()
+                await ctx.send(content=ctx.message.author.mention, embed=embed)
+
             if data['private']:
                 embed = discord.Embed(color=0xEE2222, title="Additional data is required")
                 embed.description = "Dikarenakan profile kamu private, kami tidak bisa mengakses data SR kamu dari situs Blizzard. Balas chat ini dengan **link screenshot** career profile account kamu agar bisa diproses.\n\nUpload screenshotnya bisa dilakukan dengan [imgur.com](https://discordapp.com), [imgbb.com](https://imgbb.com), atau situs hosting gambar lainnya.\n\nKamu mempunyai waktu **2 menit** untuk membalas pesan ini."
@@ -121,11 +127,5 @@ class Pugs(commands.Cog):
             embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
             await message.delete()
             await ctx.send(content=ctx.message.author.mention, embed=embed)
-        except HTTPError as err:
-            if err.code == 404:
-                embed = discord.Embed(color=0xEE2222, title="Can't find user %s" % battletag)
-                embed.description = "Pastikan profile visibility anda **Public** dan coba lagi sekitar 10 menit."
-                embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
-                await message.delete()
-                await ctx.send(content=ctx.message.author.mention, embed=embed)
+        except Exception as err:
             await message.edit(content='Terjadi kesalahan. Mohon contact admin.')
