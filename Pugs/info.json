@@ -16,7 +16,7 @@
     "name" : "Pugs",
     "permissions" : [],
     "required_cogs" : {},
-    "requirements" : ['aiohttp', 'gspread_asyncio'],
+    "requirements" : ["aiohttp", "gspread_asyncio"],
     "short" : "Overwatch ID Pug System",
     "tags" : [
         "fun", "overwatch"
