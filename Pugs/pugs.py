@@ -1,6 +1,8 @@
 import aiohttp
+import asyncio
 import discord
 import gspread_asyncio
+from aiohttp.web_exceptions import HTTPError
 from redbot.core import commands
 from redbot.core.data_manager import cog_data_path
 from google.oauth2.service_account import Credentials
@@ -40,7 +42,7 @@ class Pugs(commands.Cog):
             'damage': 2,
             'healer': 3,
             'support': 3,
-        }.get(role.lower() if role is not None else 0, -1)
+        }.get(role.lower(), -1) if role is not None else 0
 
     def getRoleName(self, type):
         return {
@@ -61,16 +63,19 @@ class Pugs(commands.Cog):
 
              [role options: **Tank**, **DPS**, **Support**]
         """
+        print(secondaryRole)
 
         primaryRoleType = self.parseRole(primaryRole)
         secondaryRoleType = self.parseRole(secondaryRole)
-        message = await ctx.send("%s mohon tunggu.." % ctx.message.author.mention)
+        message = await ctx.send("%s Mohon tunggu.." % ctx.message.author.mention)
 
         if primaryRoleType == -1 or secondaryRoleType == -1:
             embed = discord.Embed(color=0xEE2222, title="Invalid role for %s" % battletag)
             embed.description = "Role yang tersedia: **Tank**, **DPS**, **Support**"
-            embed.add_field(name='Primary role', value=str(primaryRole), inline=True)
-            embed.add_field(name='Secondary role', value=str(secondaryRole), inline=True)
+            print(primaryRoleType)
+            print(secondaryRoleType)
+            embed.add_field(name='Primary role', value=str(self.getRoleName(primaryRoleType)), inline=True)
+            embed.add_field(name='Secondary role', value=str(self.getRoleName(secondaryRoleType)), inline=True)
             embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
             await message.delete()
             await ctx.send(content=ctx.message.author.mention, embed=embed)
@@ -84,29 +89,46 @@ class Pugs(commands.Cog):
                 status = resp.status
 
         try:
-            if status == 404:
+            if data['private']:
+                embed = discord.Embed(color=0xEE2222, title="Additional data is required")
+                embed.description = "Dikarenakan profile kamu private, kami tidak bisa mengakses data SR kamu dari situs Blizzard. Balas chat ini dengan **link screenshot** career profile account kamu agar bisa diproses.\n\nUpload screenshotnya bisa dilakukan dengan [imgur.com](https://discordapp.com), [imgbb.com](https://imgbb.com), atau situs hosting gambar lainnya.\n\nKamu mempunyai waktu **2 menit** untuk membalas pesan ini."
+                embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
+                embed.set_footer(text='Gambar 1.0: contoh screenshot')
+                embed.set_image(url='https://i.imgur.com/Im8NpgX.png')
+                await message.delete()
+                message = await ctx.send("%s Cek DM untuk instruksi lebih lanjut." % ctx.message.author.mention)
+                await ctx.author.send(embed=embed)
+
+                try:
+                    response = await ctx.bot.wait_for(
+                        "message", check=lambda m: m.author == ctx.message.author, timeout=120
+                    )
+
+                except asyncio.TimeoutError:
+                    await ctx.author.send("Your response has timed out, please try again.")
+                    return None
+
+            report_line = [ctx.message.created_at.strftime("%d/%m/%Y %H:%M:%S"),  str(ctx.author), battletag, self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType), response.content if data['private'] else ''.join("{}: {}, ".format(i['role'].capitalize(), i['level']) for i in data['ratings'])[:-2]]
+            # Always authorize first.
+            # If you have a long-running program call authorize() repeatedly.
+            agc = await self.agcm.authorize()
+            sheet = await agc.open_by_url("https://docs.google.com/spreadsheets/d/1PaegW6jKcLcyEMOtsNQR1SXoabgf46U37Jh_CkfxeMU/edit")
+            worksheet = await sheet.get_worksheet(0)
+            await worksheet.append_row(report_line, value_input_option='USER_ENTERED')
+
+            embed = discord.Embed(color=0xEE2222, title=battletag, timestamp=ctx.message.created_at, url='https://playoverwatch.com/en-us/career/pc/%s/'% (battletag.replace("#", "-")))
+            embed.description="Telah berhasil terdaftar."
+            embed.add_field(name='Skill Ratings', value='*Private*' if data['private'] else ''.join("{}: **{}**\n".format(i['role'].capitalize(), i['level']) for i in data['ratings']))
+            embed.add_field(name='Roles', value='Primary: **%s**\nSecondary: **%s**' % (self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType)))
+            embed.set_thumbnail(url=data['icon'])
+            embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
+            await message.delete()
+            await ctx.send(content=ctx.message.author.mention, embed=embed)
+        except HTTPError as err:
+            if err.code == 404:
                 embed = discord.Embed(color=0xEE2222, title="Can't find user %s" % battletag)
                 embed.description = "Pastikan profile visibility anda **Public** dan coba lagi sekitar 10 menit."
                 embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
                 await message.delete()
                 await ctx.send(content=ctx.message.author.mention, embed=embed)
-            elif status == 200:
-                report_line = [ctx.message.created_at.strftime("%d/%m/%Y %H:%M:%S"),  str(ctx.author), battletag, self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType), ''.join("{}: {}, ".format(i['role'].capitalize(), i['level']) for i in data['ratings'])[:-2]]
-                # Always authorize first.
-                # If you have a long-running program call authorize() repeatedly.
-                agc = await self.agcm.authorize()
-                sheet = await agc.open_by_url("https://docs.google.com/spreadsheets/d/1PaegW6jKcLcyEMOtsNQR1SXoabgf46U37Jh_CkfxeMU/edit")
-                worksheet = await sheet.get_worksheet(0)
-                await worksheet.append_row(report_line, value_input_option='USER_ENTERED')
-
-                embed = discord.Embed(color=0xEE2222, title=battletag, timestamp=ctx.message.created_at, url='https://playoverwatch.com/en-us/career/pc/%s/'% (battletag.replace("#", "-")))
-                embed.description="Telah berhasil terdaftar."
-                embed.add_field(name='Skill Ratings', value=''.join("{}: **{}**\n".format(i['role'].capitalize(), i['level']) for i in data['ratings']))
-                embed.add_field(name='Roles', value='Primary: **%s**\nSecondary: **%s**' % (self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType)))
-                embed.set_thumbnail(url=data['icon'])
-                embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
-                await message.delete()
-                await ctx.send(content=ctx.message.author.mention, embed=embed)
-        except Exception:
-            await message.edit("Terjadi kesalahan. Mohon contact admin.")
-            raise
+            await message.edit(content='Terjadi kesalahan. Mohon contact admin.')
