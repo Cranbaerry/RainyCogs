@@ -63,8 +63,6 @@ class Pugs(commands.Cog):
 
              [role options: **Tank**, **DPS**, **Support**]
         """
-        print(secondaryRole)
-
         primaryRoleType = self.parseRole(primaryRole)
         secondaryRoleType = self.parseRole(secondaryRole)
         message = await ctx.send("%s Mohon tunggu.." % ctx.message.author.mention)
@@ -72,8 +70,6 @@ class Pugs(commands.Cog):
         if primaryRoleType == -1 or secondaryRoleType == -1:
             embed = discord.Embed(color=0xEE2222, title="Invalid role for %s" % battletag)
             embed.description = "Role yang tersedia: **Tank**, **DPS**, **Support**"
-            print(primaryRoleType)
-            print(secondaryRoleType)
             embed.add_field(name='Primary role', value=str(self.getRoleName(primaryRoleType)), inline=True)
             embed.add_field(name='Secondary role', value=str(self.getRoleName(secondaryRoleType)), inline=True)
             embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
@@ -95,6 +91,7 @@ class Pugs(commands.Cog):
                 embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
                 embed.set_footer(text='Gambar 1.0: contoh screenshot')
                 embed.set_image(url='https://i.imgur.com/Im8NpgX.png')
+
                 await message.delete()
                 message = await ctx.send("%s Cek DM untuk instruksi lebih lanjut." % ctx.message.author.mention)
                 await ctx.author.send(embed=embed)
@@ -103,12 +100,12 @@ class Pugs(commands.Cog):
                     response = await ctx.bot.wait_for(
                         "message", check=lambda m: m.author == ctx.message.author, timeout=120
                     )
-
                 except asyncio.TimeoutError:
                     await ctx.author.send("Your response has timed out, please try again.")
                     return None
 
             report_line = [ctx.message.created_at.strftime("%d/%m/%Y %H:%M:%S"),  str(ctx.author), battletag, self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType), response.content if data['private'] else ''.join("{}: {}, ".format(i['role'].capitalize(), i['level']) for i in data['ratings'])[:-2]]
+
             # Always authorize first.
             # If you have a long-running program call authorize() repeatedly.
             agc = await self.agcm.authorize()
