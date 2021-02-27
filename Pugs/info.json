@@ -5,7 +5,7 @@
     "description" : "Overwatch ID Pug System",
     "disabled" : false,
     "hidden" : false,
-    "install_msg" : "Usage: `[p]daftar <battlenet#tag>`",
+    "install_msg" : "Thank you for installing!`",
     "max_bot_version" : "0.0.0",
     "min_bot_version" : "3.1.8",
     "min_python_version" : [
@@ -16,7 +16,7 @@
     "name" : "Pugs",
     "permissions" : [],
     "required_cogs" : {},
-    "requirements" : [],
+    "requirements" : ['aiohttp', 'gspread_asyncio', ],
     "short" : "Overwatch ID Pug System",
     "tags" : [
         "fun", "overwatch"
