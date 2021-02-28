@@ -10,15 +10,19 @@ class Trakteer(commands.Cog):
     # init method or constructor
     def __init__(self, bot):
         self.bot = bot
+        print("Initialized")
         self.bot.loop.create_task(self.wsrun('wss://socket.trakteer.id/app/2ae25d102cc6cd41100a'))
-
+        
     async def wsrun(self, uri):
+        print("Running wsrun")
         async with websockets.connect(uri) as self.websocket:
             await self.websocket.send('{"event":"pusher:subscribe","data":{"channel":"creator-stream.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw"}}')
             await self.websocket.send('{"event":"pusher:subscribe","data":{"channel":"creator-stream-test.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw"}}')
+            print("Sockets sent")
             while True:
+                print("Looping")
                 resp = json.loads(await self.websocket.recv())
-                # print(resp)
+                print(resp)
                 if resp['event'] == "Illuminate\\Notifications\\Events\\BroadcastNotificationCreated":
                     donator = resp['data']
                     embed = discord.Embed(color=0xEE2222, title='%s mentraktir %s %s' % (donator['supporter_name'], donator['quantity'], donator['supporter_message']), timestamp=datetime.datetime.utcnow())
