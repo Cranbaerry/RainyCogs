@@ -115,7 +115,7 @@ class Pugs(commands.Cog):
             agc = await self.agcm.authorize()
             sheet = await agc.open_by_url('https://docs.google.com/spreadsheets/d/1PaegW6jKcLcyEMOtsNQR1SXoabgf46U37Jh_CkfxeMU/edit')
             worksheet = await sheet.get_worksheet(0)
-            await worksheet.append_row(report_line, value_input_option='USER_ENTERED', table_range='A1')
+            await worksheet.append_rows(report_line, value_input_option='USER_ENTERED', table_range='A1')
 
             embed = discord.Embed(color=0xEE2222, title=battletag, timestamp=ctx.message.created_at, url='https://playoverwatch.com/en-us/career/pc/%s/'% (battletag.replace('#', '-')))
             embed.description="Telah berhasil terdaftar."
