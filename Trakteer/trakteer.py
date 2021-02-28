@@ -29,5 +29,3 @@ class Trakteer:
 
     def cog_unload(self):
         self.bot.loop.create_task(self.websocket.close())
-
-p = Trakteer(None)

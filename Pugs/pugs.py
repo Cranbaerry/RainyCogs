@@ -98,13 +98,24 @@ class Pugs(commands.Cog):
                     embed.set_image(url='https://i.imgur.com/Im8NpgX.png')
 
                     message = await ctx.send("%s Cek DM untuk instruksi lebih lanjut." % ctx.message.author.mention)
-                    await ctx.author.send(embed=embed)
+
                     try:
-                        response = await ctx.bot.wait_for(
-                            "message", check=lambda m: m.author == ctx.message.author, timeout=120
-                        )
-                    except asyncio.TimeoutError:
-                        await ctx.author.send("Your response has timed out, please try again.")
+                        await ctx.author.send(embed=embed)
+                        try:
+                            response = await ctx.bot.wait_for(
+                                "message", check=lambda m: m.author == ctx.message.author, timeout=120
+                            )
+                        except asyncio.TimeoutError:
+                            await ctx.author.send("Your response has timed out, please try again.")
+                            return None
+
+                        await ctx.author.send("Your response has been recorded.")
+
+                    except discord.errors.Forbidden:
+                        embed = discord.Embed(color=0xEE2222, title="Forbidden" % battletag)
+                        embed.description = "Tidak bisa mengirim pesan ke kamu di DM.\nPastikan bot ini tidak diblokir dan mengizinkan DMs di dalam server ini."
+                        embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
+                        await ctx.send(content=ctx.message.author.mention, embed=embed)
                         return None
 
                     await message.delete()
