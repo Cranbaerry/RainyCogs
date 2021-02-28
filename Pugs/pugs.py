@@ -58,8 +58,8 @@ class Pugs(commands.Cog):
             Command untuk registrasi PUG Overwatch Indonesia
 
             `battletag` **Case-sensitive**, perkatikan kapitalizasi huruf
-            `primaryRole` Role utama yang mau dimainkan **(wajib di-isi)**
-            `secondaryRole` Role lain (kosongkan jika tidak ada)
+            `primaryRole` Role utama yang mau dimainkan
+            `secondaryRole` (optional) Role lain
 
              [role options: **Tank**, **DPS**, **Support**]
         """
