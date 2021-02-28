@@ -75,57 +75,58 @@ class Pugs(commands.Cog):
             await ctx.send(content=ctx.message.author.mention, embed=embed)
             return
 
-        url = 'https://ow-api.com/v1/stats/pc/us/%s/profile' % (battletag.replace("#", "-"))
-        hdr = { 'User-Agent' : 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)' }
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=hdr) as resp:
-                data = await resp.json()
+        async with ctx.typing():
+            url = 'https://ow-api.com/v1/stats/pc/us/%s/profile' % (battletag.replace("#", "-"))
+            hdr = { 'User-Agent' : 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)' }
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, headers=hdr) as resp:
+                    data = await resp.json()
 
-        try:
-            if resp.status == 404:
-                embed = discord.Embed(color=0xEE2222, title="Profile **%s** tidak dapat ditemukan" % battletag)
-                embed.description = "Mohon periksa kapitalisasi huruf pada battle-tag dan coba lagi."
+            try:
+                if resp.status == 404:
+                    embed = discord.Embed(color=0xEE2222, title="Profile **%s** tidak dapat ditemukan" % battletag)
+                    embed.description = "Mohon periksa kapitalisasi huruf pada battle-tag dan coba lagi."
+                    embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
+                    await ctx.send(content=ctx.message.author.mention, embed=embed)
+                    return
+
+                if data['private']:
+                    embed = discord.Embed(color=0xEE2222, title="Additional data is required")
+                    embed.description = "Dikarenakan profile kamu private, kami tidak bisa mengakses data SR kamu dari situs Blizzard. Balas chat ini dengan **link screenshot** career profile account kamu agar bisa diproses.\n\nUpload screenshotnya bisa dilakukan dengan [imgur.com](https://discordapp.com), [imgbb.com](https://imgbb.com), atau situs hosting gambar lainnya.\n\nKamu mempunyai waktu **2 menit** untuk membalas pesan ini."
+                    embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
+                    embed.set_footer(text='Gambar 1.0: contoh screenshot')
+                    embed.set_image(url='https://i.imgur.com/Im8NpgX.png')
+
+                    message = await ctx.send("%s Cek DM untuk instruksi lebih lanjut." % ctx.message.author.mention)
+                    await ctx.author.send(embed=embed)
+                    try:
+                        response = await ctx.bot.wait_for(
+                            "message", check=lambda m: m.author == ctx.message.author, timeout=120
+                        )
+                    except asyncio.TimeoutError:
+                        await ctx.author.send("Your response has timed out, please try again.")
+                        return None
+
+                    await message.delete()
+
+                report_line = [ctx.message.created_at.strftime("%d/%m/%Y %H:%M:%S"),  str(ctx.author), battletag, self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType), response.content if data['private'] else ''.join("{}: {}, ".format(i['role'].capitalize(), i['level']) for i in data['ratings'])[:-2]]
+
+                # Always authorize first.
+                # If you have a long-running program call authorize() repeatedly.
+                agc = await self.agcm.authorize()
+                sheet = await agc.open_by_url('https://docs.google.com/spreadsheets/d/1PaegW6jKcLcyEMOtsNQR1SXoabgf46U37Jh_CkfxeMU/edit')
+                worksheet = await sheet.get_worksheet(0)
+
+                # Use of append_rows because gspread_asyncio append_row does not have table_range parameter
+                await worksheet.append_rows([report_line], value_input_option='USER_ENTERED', table_range='A1')
+
+                embed = discord.Embed(color=0xEE2222, title=battletag, timestamp=ctx.message.created_at, url='https://playoverwatch.com/en-us/career/pc/%s/'% (battletag.replace('#', '-')))
+                embed.description="Telah berhasil terdaftar."
+                embed.add_field(name='Skill Ratings', value='*Private*' if data['private'] else ''.join("{}: **{}**\n".format(i['role'].capitalize(), i['level']) for i in data['ratings']))
+                embed.add_field(name='Roles', value='Primary: **%s**\nSecondary: **%s**' % (self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType)))
+                embed.set_thumbnail(url=data['icon'])
                 embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
                 await ctx.send(content=ctx.message.author.mention, embed=embed)
-                return
-
-            if data['private']:
-                embed = discord.Embed(color=0xEE2222, title="Additional data is required")
-                embed.description = "Dikarenakan profile kamu private, kami tidak bisa mengakses data SR kamu dari situs Blizzard. Balas chat ini dengan **link screenshot** career profile account kamu agar bisa diproses.\n\nUpload screenshotnya bisa dilakukan dengan [imgur.com](https://discordapp.com), [imgbb.com](https://imgbb.com), atau situs hosting gambar lainnya.\n\nKamu mempunyai waktu **2 menit** untuk membalas pesan ini."
-                embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
-                embed.set_footer(text='Gambar 1.0: contoh screenshot')
-                embed.set_image(url='https://i.imgur.com/Im8NpgX.png')
-
-                message = await ctx.send("%s Cek DM untuk instruksi lebih lanjut." % ctx.message.author.mention)
-                await ctx.author.send(embed=embed)
-                try:
-                    response = await ctx.bot.wait_for(
-                        "message", check=lambda m: m.author == ctx.message.author, timeout=120
-                    )
-                except asyncio.TimeoutError:
-                    await ctx.author.send("Your response has timed out, please try again.")
-                    return None
-
-                await message.delete()
-
-            report_line = [ctx.message.created_at.strftime("%d/%m/%Y %H:%M:%S"),  str(ctx.author), battletag, self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType), response.content if data['private'] else ''.join("{}: {}, ".format(i['role'].capitalize(), i['level']) for i in data['ratings'])[:-2]]
-
-            # Always authorize first.
-            # If you have a long-running program call authorize() repeatedly.
-            agc = await self.agcm.authorize()
-            sheet = await agc.open_by_url('https://docs.google.com/spreadsheets/d/1PaegW6jKcLcyEMOtsNQR1SXoabgf46U37Jh_CkfxeMU/edit')
-            worksheet = await sheet.get_worksheet(0)
-
-            # Use of append_rows because gspread_asyncio append_row does not have table_range parameter
-            await worksheet.append_rows([report_line], value_input_option='USER_ENTERED', table_range='A1')
-
-            embed = discord.Embed(color=0xEE2222, title=battletag, timestamp=ctx.message.created_at, url='https://playoverwatch.com/en-us/career/pc/%s/'% (battletag.replace('#', '-')))
-            embed.description="Telah berhasil terdaftar."
-            embed.add_field(name='Skill Ratings', value='*Private*' if data['private'] else ''.join("{}: **{}**\n".format(i['role'].capitalize(), i['level']) for i in data['ratings']))
-            embed.add_field(name='Roles', value='Primary: **%s**\nSecondary: **%s**' % (self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType)))
-            embed.set_thumbnail(url=data['icon'])
-            embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
-            await ctx.send(content=ctx.message.author.mention, embed=embed)
-        except Exception as err:
-            await ctx.send(content='Terjadi kesalahan. Mohon contact admin.')
-            raise
+            except Exception as err:
+                await ctx.send(content='Terjadi kesalahan. Mohon contact admin.')
+                raise
