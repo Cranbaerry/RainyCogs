@@ -1,7 +1,7 @@
+import discord
 import datetime
 import websockets
 import json
-import discord
 from redbot.core import commands
 
 class Trakteer(commands.Cog):
