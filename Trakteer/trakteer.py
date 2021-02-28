@@ -23,8 +23,9 @@ class Trakteer(commands.Cog):
                     embed = discord.Embed(color=0xEE2222, title='%s mentraktir %s %s' % (donator['supporter_name'], donator['quantity'], donator['unit']), timestamp=datetime.datetime.utcnow())
                     embed.description = donator['supporter_message']
                     embed.set_thumbnail(url=donator['unit_icon'])
+                    embed.set_author(name='Donation Box', icon_url='https://i.imgur.com/kgrkybF.png')
                     embed.set_footer(text=donator['price'], icon_url='https://i.imgur.com/0b4L7uL.png')
-                    await self.bot.get_channel(803626623596363786).send(embed=embed)
+                    await self.bot.get_channel(653090156961857539).send(embed=embed)
 
     def cog_unload(self):
         self.bot.loop.create_task(self.websocket.close())
