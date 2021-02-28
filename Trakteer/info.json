@@ -16,7 +16,7 @@
     "name" : "Pugs",
     "permissions" : [],
     "required_cogs" : {},
-    "requirements" : ["websockets.auth"],
+    "requirements" : ["websockets"],
     "short" : "Overwatch ID and Trakteer.id Intergation",
     "tags" : [
         "fun", "overwatch"
