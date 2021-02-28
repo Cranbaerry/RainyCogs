@@ -84,7 +84,7 @@ class Pugs(commands.Cog):
         try:
             if resp.status == 404:
                 embed = discord.Embed(color=0xEE2222, title="Profile **%s** tidak dapat ditemukan" % battletag)
-                embed.description = "Coba periksa kapitalisasi huruf dan coba lagi."
+                embed.description = "Mohon periksa kapitalisasi huruf pada battle-tag dan coba lagi."
                 embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
                 await ctx.send(content=ctx.message.author.mention, embed=embed)
                 return
@@ -113,11 +113,11 @@ class Pugs(commands.Cog):
             # Always authorize first.
             # If you have a long-running program call authorize() repeatedly.
             agc = await self.agcm.authorize()
-            sheet = await agc.open_by_url("https://docs.google.com/spreadsheets/d/1PaegW6jKcLcyEMOtsNQR1SXoabgf46U37Jh_CkfxeMU/edit")
+            sheet = await agc.open_by_url('https://docs.google.com/spreadsheets/d/1PaegW6jKcLcyEMOtsNQR1SXoabgf46U37Jh_CkfxeMU/edit')
             worksheet = await sheet.get_worksheet(0)
-            await worksheet.append_row(report_line, value_input_option='USER_ENTERED')
+            await worksheet.append_row(report_line, value_input_option='USER_ENTERED', table_range='A1')
 
-            embed = discord.Embed(color=0xEE2222, title=battletag, timestamp=ctx.message.created_at, url='https://playoverwatch.com/en-us/career/pc/%s/'% (battletag.replace("#", "-")))
+            embed = discord.Embed(color=0xEE2222, title=battletag, timestamp=ctx.message.created_at, url='https://playoverwatch.com/en-us/career/pc/%s/'% (battletag.replace('#', '-')))
             embed.description="Telah berhasil terdaftar."
             embed.add_field(name='Skill Ratings', value='*Private*' if data['private'] else ''.join("{}: **{}**\n".format(i['role'].capitalize(), i['level']) for i in data['ratings']))
             embed.add_field(name='Roles', value='Primary: **%s**\nSecondary: **%s**' % (self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType)))
