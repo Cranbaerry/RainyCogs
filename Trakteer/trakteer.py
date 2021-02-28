@@ -18,11 +18,12 @@ class Trakteer(commands.Cog):
                 resp = json.loads(await self.websocket.recv())
                 if resp['event'] == "Illuminate\\Notifications\\Events\\BroadcastNotificationCreated":
                     donator = json.loads(resp['data'])
-
                     embed = discord.Embed(color=0xEE2222, title='%s mentraktir %s %s' % (donator['supporter_name'], donator['quantity'], donator['unit']), timestamp=datetime.datetime.utcnow())
+                    embed.url = 'https://trakteer.id/overwatch-idn/'
                     embed.description = 'Baru saja memberikan %s' % donator['price']
                     embed.set_thumbnail(url=donator['unit_icon'])
                     embed.add_field(name='Klik disini untuk ikut mentraktir',value='https://trakteer.id/overwatch-idn/')
+
                     if 'supporter_message' in donator and len(donator['supporter_message']) > 0:
                         embed.set_footer(text= donator['supporter_message'], icon_url=donator['supporter_avatar'])
 
