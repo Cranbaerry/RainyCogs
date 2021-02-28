@@ -27,7 +27,7 @@ class Trakteer(commands.Cog):
                     if 'supporter_message' in donator and len(donator['supporter_message']) > 0:
                         embed.set_footer(text= donator['supporter_message'], icon_url=donator['supporter_avatar'])
 
-                    await self.bot.get_channel(653090156961857539).send(embed=embed)
+                    await self.bot.get_channel(803626623596363786).send(embed=embed)
 
     def cog_unload(self):
         self.bot.loop.create_task(self.websocket.close())
