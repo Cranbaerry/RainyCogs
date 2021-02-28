@@ -4,8 +4,9 @@ from datetime import datetime
 import websockets
 import json
 import discord
+from redbot.core import commands
 
-class Trakteer:
+class Trakteer(commands.Cog):
     # init method or constructor
     def __init__(self, bot):
         self.bot = bot
