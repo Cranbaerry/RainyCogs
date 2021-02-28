@@ -24,7 +24,9 @@ class Trakteer(commands.Cog):
                 resp = json.loads(await self.websocket.recv())
                 print(resp)
                 if resp['event'] == "Illuminate\\Notifications\\Events\\BroadcastNotificationCreated":
-                    donator = resp['data']
+                    print(resp['data'])
+                    donator = json.loads(resp['data'])
+
                     embed = discord.Embed(color=0xEE2222, title='%s mentraktir %s %s' % (donator['supporter_name'], donator['quantity'], donator['supporter_message']), timestamp=datetime.datetime.utcnow())
                     embed.description = donator['supporter_message']
                     embed.set_thumbnail(url=donator['unit_icon'])
