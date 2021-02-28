@@ -12,7 +12,7 @@ class Trakteer(commands.Cog):
         self.bot = bot
         print("Initialized")
         self.bot.loop.create_task(self.wsrun('wss://socket.trakteer.id/app/2ae25d102cc6cd41100a'))
-        
+
     async def wsrun(self, uri):
         print("Running wsrun")
         async with websockets.connect(uri) as self.websocket:
