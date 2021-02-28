@@ -126,3 +126,4 @@ class Pugs(commands.Cog):
             await ctx.send(content=ctx.message.author.mention, embed=embed)
         except Exception as err:
             await ctx.send(content='Terjadi kesalahan. Mohon contact admin.')
+            raise
