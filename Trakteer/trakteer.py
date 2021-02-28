@@ -1,6 +1,4 @@
-import asyncio
-from datetime import datetime
-
+import datetime
 import websockets
 import json
 import discord
