@@ -112,7 +112,7 @@ class Pugs(commands.Cog):
                         await ctx.author.send("Your response has been recorded.")
 
                     except discord.errors.Forbidden:
-                        embed = discord.Embed(color=0xEE2222, title="Forbidden" % battletag)
+                        embed = discord.Embed(color=0xEE2222, title="Forbidden")
                         embed.description = "Tidak bisa mengirim pesan ke kamu di DM.\nPastikan bot ini tidak diblokir dan mengizinkan DMs di dalam server ini."
                         embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
                         await ctx.send(content=ctx.message.author.mention, embed=embed)
