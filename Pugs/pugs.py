@@ -107,6 +107,7 @@ class Pugs(commands.Cog):
                             )
                         except asyncio.TimeoutError:
                             await ctx.author.send("Your response has timed out, please try again.")
+                            await message.delete()
                             return None
 
                         await ctx.author.send("Your response has been recorded.")
