@@ -10,9 +10,7 @@ class Trakteer(commands.Cog):
     # init method or constructor
     def __init__(self, bot):
         self.bot = bot
-        #await self.wsrun('wss://socket.trakteer.id/app/2ae25d102cc6cd41100a')
-        #asyncio.get_event_loop().run_until_complete()
-        self.wsrun('wss://socket.trakteer.id/app/2ae25d102cc6cd41100a')
+        self.bot.loop.create_task(self.wsrun('wss://socket.trakteer.id/app/2ae25d102cc6cd41100a'))
 
     async def wsrun(self, uri):
         async with websockets.connect(uri) as self.websocket:
