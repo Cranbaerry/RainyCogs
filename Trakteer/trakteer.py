@@ -11,13 +11,15 @@ class Trakteer(commands.Cog):
         self.bot = bot
         self.socket_task = self.bot.loop.create_task(self.wsrun('wss://socket.trakteer.id/app/2ae25d102cc6cd41100a'))
 
+        #loop = asyncio.get_event_loop()
+        #loop.run_until_complete(self.wsrun('wss://socket.trakteer.id/app/2ae25d102cc6cd41100a'))
+
     async def wsrun(self, uri):
         async with websockets.connect(uri) as self.websocket:
             await self.websocket.send('{"event":"pusher:subscribe","data":{"channel":"creator-stream.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw"}}')
             await self.websocket.send('{"event":"pusher:subscribe","data":{"channel":"creator-stream-test.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw"}}')
             while True:
-                try:
-                    self.websocket.connection_closed_exc()
+                try:                    
                     resp = json.loads(await self.websocket.recv())
                     if resp['event'] == "Illuminate\\Notifications\\Events\\BroadcastNotificationCreated":
                         donator = json.loads(resp['data'])
@@ -39,11 +41,14 @@ class Trakteer(commands.Cog):
 
                         await self.bot.get_channel(803626623596363786).send(embed=embed)
                 except websockets.exceptions.ConnectionClosed:
+                    print(">>>>>>>>>>>>>>>>>>>>>Reload")
                     await asyncio.sleep(5)
                     await self.wsrun(uri)
-                    print(">>>>>>>>>>>>>>>>>>>>>Reload")
+
                     break
 
     def cog_unload(self):
         self.socket_task.cancel()
         self.bot.loop.create_task(self.websocket.close())
+
+#Trakteer(None)
