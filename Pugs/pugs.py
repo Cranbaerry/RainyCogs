@@ -6,6 +6,7 @@ from aiohttp.web_exceptions import HTTPError
 from redbot.core import commands
 from redbot.core.data_manager import cog_data_path
 from google.oauth2.service_account import Credentials
+from typing import cast
 
 class Pugs(commands.Cog):
     """My custom cog test 2"""
@@ -132,6 +133,10 @@ class Pugs(commands.Cog):
 
                 # Use of append_rows because gspread_asyncio append_row does not have table_range parameter
                 await worksheet.append_rows([report_line], value_input_option='USER_ENTERED', table_range='A1')
+
+                user = cast(discord.Member, ctx.author)
+                role = ctx.guild.get_role(813700731512946708)
+                await user.add_roles(role, reason="Registered PUG via Bot")
 
                 embed = discord.Embed(color=0xEE2222, title=battletag, timestamp=ctx.message.created_at, url='https://playoverwatch.com/en-us/career/pc/%s/'% (battletag.replace('#', '-')))
                 embed.description="Telah berhasil terdaftar."
