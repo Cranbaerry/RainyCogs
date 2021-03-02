@@ -2,7 +2,7 @@
     "author" : [
         "Rainy"
     ],
-    "description" : "Overwatch ID and Trakteer.id Intergation",
+    "description" : "Overwatch ID and Trakteer.id integration",
     "disabled" : false,
     "hidden" : false,
     "install_msg" : "Thank you for installing!`",
@@ -17,7 +17,7 @@
     "permissions" : [],
     "required_cogs" : {},
     "requirements" : ["websockets"],
-    "short" : "Overwatch ID and Trakteer.id Intergation",
+    "short" : "Overwatch ID and Trakteer.id integration",
     "tags" : [
         "fun", "overwatch"
     ],
