@@ -66,7 +66,7 @@ class Pugs(commands.Cog):
              [role options: **Tank**, **DPS**, **Support**]
         """
         if isinstance(ctx.channel, discord.DMChannel):
-            raise commands.BadArgument("Command ini tidak bisa dilakukan di DM.")
+            return await ctx.author.send("Command ini tidak bisa dilakukan di DM.")
 
         primaryRoleType = self.parseRole(primaryRole)
         secondaryRoleType = self.parseRole(secondaryRole)
