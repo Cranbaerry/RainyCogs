@@ -83,46 +83,46 @@ class Pugs(commands.Cog):
                 async with session.get(url, headers=hdr) as resp:
                     data = await resp.json()
 
-            try:
-                if resp.status == 404:
-                    embed = discord.Embed(color=0xEE2222, title="Profile **%s** tidak dapat ditemukan" % battletag)
-                    embed.description = "Mohon periksa kapitalisasi huruf pada battle-tag dan coba lagi."
-                    embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
-                    await ctx.send(content=ctx.message.author.mention, embed=embed)
-                    return
+        try:
+            if resp.status == 404:
+                embed = discord.Embed(color=0xEE2222, title="Profile **%s** tidak dapat ditemukan" % battletag)
+                embed.description = "Mohon periksa kapitalisasi huruf pada battle-tag dan coba lagi."
+                embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
+                await ctx.send(content=ctx.message.author.mention, embed=embed)
+                return
 
-                if data['private'] or data['ratings'] is None:
-                    embed = discord.Embed(color=0xEE2222, title="Additional data is required")
-                    embed.description = "Dikarenakan profile kamu private atau kamu belum melakukan placement di season ini, kami tidak bisa mengakses data SR kamu dari situs Blizzard. Balas chat ini dengan **link screenshot** career profile placement terakhir kamu agar bisa diproses.\n\nUpload screenshotnya bisa dilakukan dengan [imgur.com](https://discordapp.com), [imgbb.com](https://imgbb.com), atau situs hosting gambar lainnya.\n\nKamu mempunyai waktu **2 menit** untuk membalas pesan ini."
-                    embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
-                    embed.set_footer(text='Gambar 1.0: contoh screenshot')
-                    embed.set_image(url='https://i.imgur.com/Im8NpgX.png')
+            if data['private'] or data['ratings'] is None:
+                embed = discord.Embed(color=0xEE2222, title="Additional data is required")
+                embed.description = "Dikarenakan profile kamu private atau kamu belum melakukan placement di season ini, kami tidak bisa mengakses data SR kamu dari situs Blizzard. Balas chat ini dengan **link screenshot** career profile placement terakhir kamu agar bisa diproses.\n\nUpload screenshotnya bisa dilakukan dengan [imgur.com](https://discordapp.com), [imgbb.com](https://imgbb.com), atau situs hosting gambar lainnya.\n\nKamu mempunyai waktu **2 menit** untuk membalas pesan ini."
+                embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
+                embed.set_footer(text='Gambar 1.0: contoh screenshot')
+                embed.set_image(url='https://i.imgur.com/Im8NpgX.png')
 
-                    message = await ctx.send("%s Cek DM untuk instruksi lebih lanjut." % ctx.message.author.mention)
+                message = await ctx.send("%s Cek DM untuk instruksi lebih lanjut." % ctx.message.author.mention)
 
+                try:
+                    await ctx.author.send(embed=embed)
                     try:
-                        await ctx.author.send(embed=embed)
-                        try:
-                            response = await ctx.bot.wait_for(
-                                "message", check=lambda m: m.author == ctx.message.author, timeout=120
-                            )
-                        except asyncio.TimeoutError:
-                            await ctx.author.send("Your response has timed out, please try again.")
-                            await message.delete()
-                            return None
-
-                        await ctx.author.send("Your response has been recorded.")
-
-                    except discord.errors.Forbidden:
-                        embed = discord.Embed(color=0xEE2222, title="Tidak bisa mengirim pesan ke kamu di DM")
-                        embed.description = "Pastikan bot ini tidak diblokir dan mengizinkan DMs di dalam server ini."
-                        embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
-                        await ctx.send(content=ctx.message.author.mention, embed=embed)
-                        await message.delete()
+                        response = await ctx.bot.wait_for(
+                            "message", check=lambda m: m.author == ctx.message.author, timeout=120
+                        )
+                    except asyncio.TimeoutError:
+                        await ctx.author.send("Your response has timed out, please try again.")
                         return None
 
-                    await message.delete()
+                    await ctx.author.send("Your response has been recorded.")
 
+                except discord.errors.Forbidden:
+                    embed = discord.Embed(color=0xEE2222, title="Tidak bisa mengirim pesan")
+                    embed.description = "Pastikan bot ini tidak diblokir dan mengizinkan DMs di dalam server ini."
+                    embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
+                    await ctx.send(content=ctx.message.author.mention, embed=embed)
+                    await message.delete()
+                    return None
+
+                await message.delete()
+
+            async with ctx.typing():
                 report_line = [ctx.message.created_at.strftime("%d/%m/%Y %H:%M:%S"),  str(ctx.author), battletag, self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType), response.content if data['private'] or data['ratings'] is None else ''.join("{}: {}, ".format(i['role'].capitalize(), i['level']) for i in data['ratings'])[:-2]]
 
                 # Always authorize first.
@@ -138,13 +138,13 @@ class Pugs(commands.Cog):
                 role = ctx.guild.get_role(813700731512946708)
                 await user.add_roles(role, reason="Registered PUG via Bot")
 
-                embed = discord.Embed(color=0xEE2222, title=battletag, timestamp=ctx.message.created_at, url='https://playoverwatch.com/en-us/career/pc/%s/'% (battletag.replace('#', '-')))
-                embed.description="Telah berhasil terdaftar."
-                embed.add_field(name='Skill Ratings', value='*Private*' if data['private'] else ''.join("{}: **{}**\n".format(i['role'].capitalize(), i['level']) for i in data['ratings']))
-                embed.add_field(name='Roles', value='Primary: **%s**\nSecondary: **%s**' % (self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType)))
-                embed.set_thumbnail(url=data['icon'])
-                embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
-                await ctx.send(content=ctx.message.author.mention, embed=embed)
-            except Exception as err:
-                await ctx.send(content='Terjadi kesalahan. Mohon contact admin.')
-                raise
+            embed = discord.Embed(color=0xEE2222, title=battletag, timestamp=ctx.message.created_at, url='https://playoverwatch.com/en-us/career/pc/%s/'% (battletag.replace('#', '-')))
+            embed.description="Telah berhasil terdaftar."
+            embed.add_field(name='Skill Ratings', value='*Private*' if data['private'] else ''.join("{}: **{}**\n".format(i['role'].capitalize(), i['level']) for i in data['ratings']))
+            embed.add_field(name='Roles', value='Primary: **%s**\nSecondary: **%s**' % (self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType)))
+            embed.set_thumbnail(url=data['icon'])
+            embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
+            await ctx.send(content=ctx.message.author.mention, embed=embed)
+        except Exception as err:
+            await ctx.send(content='Terjadi kesalahan. Mohon contact admin.')
+            raise
