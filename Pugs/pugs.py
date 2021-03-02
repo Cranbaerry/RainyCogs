@@ -90,9 +90,9 @@ class Pugs(commands.Cog):
                     await ctx.send(content=ctx.message.author.mention, embed=embed)
                     return
 
-                if data['private']:
+                if data['private'] or data['ratings'] is None:
                     embed = discord.Embed(color=0xEE2222, title="Additional data is required")
-                    embed.description = "Dikarenakan profile kamu private, kami tidak bisa mengakses data SR kamu dari situs Blizzard. Balas chat ini dengan **link screenshot** career profile account kamu agar bisa diproses.\n\nUpload screenshotnya bisa dilakukan dengan [imgur.com](https://discordapp.com), [imgbb.com](https://imgbb.com), atau situs hosting gambar lainnya.\n\nKamu mempunyai waktu **2 menit** untuk membalas pesan ini."
+                    embed.description = "Dikarenakan profile kamu private atau kamu belum melakukan placement di season ini, kami tidak bisa mengakses data SR kamu dari situs Blizzard. Balas chat ini dengan **link screenshot** career profile account kamu agar bisa diproses.\n\nUpload screenshotnya bisa dilakukan dengan [imgur.com](https://discordapp.com), [imgbb.com](https://imgbb.com), atau situs hosting gambar lainnya.\n\nKamu mempunyai waktu **2 menit** untuk membalas pesan ini."
                     embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
                     embed.set_footer(text='Gambar 1.0: contoh screenshot')
                     embed.set_image(url='https://i.imgur.com/Im8NpgX.png')

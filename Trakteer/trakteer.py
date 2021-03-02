@@ -19,7 +19,7 @@ class Trakteer(commands.Cog):
             await self.websocket.send('{"event":"pusher:subscribe","data":{"channel":"creator-stream.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw"}}')
             await self.websocket.send('{"event":"pusher:subscribe","data":{"channel":"creator-stream-test.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw"}}')
             while True:
-                try:                    
+                try:
                     resp = json.loads(await self.websocket.recv())
                     if resp['event'] == "Illuminate\\Notifications\\Events\\BroadcastNotificationCreated":
                         donator = json.loads(resp['data'])
@@ -41,10 +41,8 @@ class Trakteer(commands.Cog):
 
                         await self.bot.get_channel(803626623596363786).send(embed=embed)
                 except websockets.exceptions.ConnectionClosed:
-                    print(">>>>>>>>>>>>>>>>>>>>>Reload")
-                    await asyncio.sleep(5)
+                    #await asyncio.sleep(5)
                     await self.wsrun(uri)
-
                     break
 
     def cog_unload(self):
