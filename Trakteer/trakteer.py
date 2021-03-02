@@ -17,6 +17,7 @@ class Trakteer(commands.Cog):
             await self.websocket.send('{"event":"pusher:subscribe","data":{"channel":"creator-stream-test.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw"}}')
             while True:
                 try:
+                    self.websocket.connection_closed_exc()
                     resp = json.loads(await self.websocket.recv())
                     if resp['event'] == "Illuminate\\Notifications\\Events\\BroadcastNotificationCreated":
                         donator = json.loads(resp['data'])
