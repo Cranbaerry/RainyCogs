@@ -8,6 +8,7 @@ from redbot.core.data_manager import cog_data_path
 from google.oauth2.service_account import Credentials
 from typing import cast
 
+
 class Pugs(commands.Cog):
     """My custom cog test 2"""
 
@@ -54,7 +55,7 @@ class Pugs(commands.Cog):
         }.get(type, None)
 
     @commands.command()
-    async def daftar(self, ctx, battletag, primaryRole, secondaryRole = None):
+    async def daftar(self, ctx, battletag, primaryRole, secondaryRole=None):
         """
             Command untuk registrasi PUG Overwatch Indonesia
 
@@ -64,6 +65,9 @@ class Pugs(commands.Cog):
 
              [role options: **Tank**, **DPS**, **Support**]
         """
+        if isinstance(ctx.channel, discord.DMChannel):
+            raise commands.BadArgument("Command ini tidak bisa dilakukan di DM.")
+
         primaryRoleType = self.parseRole(primaryRole)
         secondaryRoleType = self.parseRole(secondaryRole)
 
@@ -78,7 +82,7 @@ class Pugs(commands.Cog):
 
         async with ctx.typing():
             url = 'https://ow-api.com/v1/stats/pc/us/%s/profile' % (battletag.replace("#", "-"))
-            hdr = { 'User-Agent' : 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)' }
+            hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, headers=hdr) as resp:
                     data = await resp.json()
@@ -123,12 +127,16 @@ class Pugs(commands.Cog):
                 await message.delete()
 
             async with ctx.typing():
-                report_line = [ctx.message.created_at.strftime("%d/%m/%Y %H:%M:%S"),  str(ctx.author), battletag, self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType), response.content if data['private'] or data['ratings'] is None else ''.join("{}: {}, ".format(i['role'].capitalize(), i['level']) for i in data['ratings'])[:-2]]
+                report_line = [ctx.message.created_at.strftime("%d/%m/%Y %H:%M:%S"), str(ctx.author), battletag,
+                               self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType),
+                               response.content if data['private'] or data['ratings'] is None else ''.join(
+                                   "{}: {}, ".format(i['role'].capitalize(), i['level']) for i in data['ratings'])[:-2]]
 
                 # Always authorize first.
                 # If you have a long-running program call authorize() repeatedly.
                 agc = await self.agcm.authorize()
-                sheet = await agc.open_by_url('https://docs.google.com/spreadsheets/d/1PaegW6jKcLcyEMOtsNQR1SXoabgf46U37Jh_CkfxeMU/edit')
+                sheet = await agc.open_by_url(
+                    'https://docs.google.com/spreadsheets/d/1PaegW6jKcLcyEMOtsNQR1SXoabgf46U37Jh_CkfxeMU/edit')
                 worksheet = await sheet.get_worksheet(0)
 
                 # Use of append_rows because gspread_asyncio append_row does not have table_range parameter
@@ -138,10 +146,13 @@ class Pugs(commands.Cog):
                 role = ctx.guild.get_role(813700731512946708)
                 await user.add_roles(role, reason="Registered PUG via Bot")
 
-            embed = discord.Embed(color=0xEE2222, title=battletag, timestamp=ctx.message.created_at, url='https://playoverwatch.com/en-us/career/pc/%s/'% (battletag.replace('#', '-')))
-            embed.description="Telah berhasil terdaftar."
-            embed.add_field(name='Skill Ratings', value='*Private*' if data['private'] else ''.join("{}: **{}**\n".format(i['role'].capitalize(), i['level']) for i in data['ratings']))
-            embed.add_field(name='Roles', value='Primary: **%s**\nSecondary: **%s**' % (self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType)))
+            embed = discord.Embed(color=0xEE2222, title=battletag, timestamp=ctx.message.created_at,
+                                  url='https://playoverwatch.com/en-us/career/pc/%s/' % (battletag.replace('#', '-')))
+            embed.description = "Telah berhasil terdaftar."
+            embed.add_field(name='Skill Ratings', value='*Private*' if data['private'] else ''.join(
+                "{}: **{}**\n".format(i['role'].capitalize(), i['level']) for i in data['ratings']))
+            embed.add_field(name='Roles', value='Primary: **%s**\nSecondary: **%s**' % (
+            self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType)))
             embed.set_thumbnail(url=data['icon'])
             embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
             await ctx.send(content=ctx.message.author.mention, embed=embed)
