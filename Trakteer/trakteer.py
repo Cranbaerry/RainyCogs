@@ -21,7 +21,6 @@ class Trakteer(commands.Cog):
             while True:
                 try:
                     resp = json.loads(await self.websocket.recv())
-                    print(resp)
                     if resp['event'] == "Illuminate\\Notifications\\Events\\BroadcastNotificationCreated":
                         donator = json.loads(resp['data'])
 
