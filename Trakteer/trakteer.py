@@ -24,18 +24,18 @@ class Trakteer(commands.Cog):
                     print(resp)
                     if resp['event'] == "Illuminate\\Notifications\\Events\\BroadcastNotificationCreated":
                         donator = json.loads(resp['data'])
-                        '''
+
                         embed = discord.Embed(color=0xEE2222, title='%s mentraktir %s %s' % (donator['supporter_name'], donator['quantity'], donator['unit']), timestamp=datetime.datetime.utcnow())
                         embed.url = 'https://trakteer.id/overwatch-idn/'
                         embed.description = 'Baru saja memberikan **%s**' % donator['price']
                         embed.set_thumbnail(url=donator['unit_icon'])
                         embed.add_field(name='Klik disini untuk ikut mentraktir',value='https://trakteer.id/overwatch-idn/')
-                        '''
 
+                        '''
                         embed = discord.Embed(color=0xEE2222, title='%s baru saja mengirimkan %s' % (donator['supporter_name'], donator['price']), timestamp=datetime.datetime.utcnow())
                         embed.description = '👉 https://trakteer.id/overwatch-idn/'
                         embed.set_thumbnail(url=donator['unit_icon'])
-                        embed.set_author(name='Donation Box', icon_url='https://i.imgur.com/kgrkybF.png')
+                        embed.set_author(name='Donation Box', icon_url='https://i.imgur.com/kgrkybF.png')'''
 
                         if 'supporter_message' in donator and len(donator['supporter_message']) > 0:
                             embed.set_footer(text= donator['supporter_message'], icon_url=donator['supporter_avatar'])
