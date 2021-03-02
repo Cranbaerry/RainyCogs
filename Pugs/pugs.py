@@ -2,7 +2,6 @@ import aiohttp
 import asyncio
 import discord
 import gspread_asyncio
-from aiohttp.web_exceptions import HTTPError
 from redbot.core import commands
 from redbot.core.data_manager import cog_data_path
 from google.oauth2.service_account import Credentials
@@ -10,9 +9,10 @@ from typing import cast
 
 
 class Pugs(commands.Cog):
-    """My custom cog test 2"""
+    """ Overwatch ID PUG system """
 
     def __init__(self, bot):
+        super().__init__()
         self.bot = bot
         self.path = str(cog_data_path(self)).replace("\\", "/")
         self.credentials = self.path + '/My First Project-162dbc0aa595.json'
@@ -34,7 +34,8 @@ class Pugs(commands.Cog):
         ])
         return scoped
 
-    def parseRole(self, role):
+    @staticmethod
+    def parse_role(role):
         return {
             # -1: Invalid role name
             #  0: No input is given
@@ -46,16 +47,17 @@ class Pugs(commands.Cog):
             'support': 3,
         }.get(role.lower(), -1) if role is not None else 0
 
-    def getRoleName(self, type):
+    @staticmethod
+    def get_role_name(role_type):
         return {
             0: 'Tidak ada',
             1: 'Tank',
             2: 'DPS',
             3: 'Support'
-        }.get(type, None)
+        }.get(role_type, None)
 
     @commands.command()
-    async def daftar(self, ctx, battletag, primaryRole, secondaryRole=None):
+    async def daftar(self, ctx, battle_tag, primary_role, secondary_role=None):
         """
             Command untuk registrasi PUG Overwatch Indonesia
 
@@ -68,28 +70,29 @@ class Pugs(commands.Cog):
         if isinstance(ctx.channel, discord.DMChannel):
             return await ctx.author.send("Command ini tidak bisa dilakukan di DM.")
 
-        primaryRoleType = self.parseRole(primaryRole)
-        secondaryRoleType = self.parseRole(secondaryRole)
+        primary_role_type = self.parse_role(primary_role)
+        secondary_role_type = self.parse_role(secondary_role)
 
-        if primaryRoleType == -1 or secondaryRoleType == -1:
-            embed = discord.Embed(color=0xEE2222, title="Invalid role for %s" % battletag)
+        if primary_role_type == -1 or secondary_role_type == -1:
+            embed = discord.Embed(color=0xEE2222, title="Invalid role for %s" % battle_tag)
             embed.description = "Role yang tersedia: **Tank**, **DPS**, **Support**"
-            embed.add_field(name='Primary role', value=str(self.getRoleName(primaryRoleType)), inline=True)
-            embed.add_field(name='Secondary role', value=str(self.getRoleName(secondaryRoleType)), inline=True)
+            embed.add_field(name='Primary role', value=str(self.get_role_name(primary_role_type)), inline=True)
+            embed.add_field(name='Secondary role', value=str(self.get_role_name(secondary_role_type)), inline=True)
             embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
             await ctx.send(content=ctx.message.author.mention, embed=embed)
             return
 
         async with ctx.typing():
-            url = 'https://ow-api.com/v1/stats/pc/us/%s/profile' % (battletag.replace("#", "-"))
+            url = 'https://ow-api.com/v1/stats/pc/us/%s/profile' % (battle_tag.replace("#", "-"))
             hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, headers=hdr) as resp:
                     data = await resp.json()
 
+        response = None
         try:
             if resp.status == 404:
-                embed = discord.Embed(color=0xEE2222, title="Profile **%s** tidak dapat ditemukan" % battletag)
+                embed = discord.Embed(color=0xEE2222, title="Profile **%s** tidak dapat ditemukan" % battle_tag)
                 embed.description = "Mohon periksa kapitalisasi huruf pada battle-tag dan coba lagi."
                 embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
                 await ctx.send(content=ctx.message.author.mention, embed=embed)
@@ -97,7 +100,12 @@ class Pugs(commands.Cog):
 
             if data['private'] or data['ratings'] is None:
                 embed = discord.Embed(color=0xEE2222, title="Additional data is required")
-                embed.description = "Dikarenakan profile kamu private atau kamu belum melakukan placement di season ini, kami tidak bisa mengakses data SR kamu dari situs Blizzard. Balas chat ini dengan **link screenshot** career profile placement terakhir kamu agar bisa diproses.\n\nUpload screenshotnya bisa dilakukan dengan [imgur.com](https://discordapp.com), [imgbb.com](https://imgbb.com), atau situs hosting gambar lainnya.\n\nKamu mempunyai waktu **2 menit** untuk membalas pesan ini."
+                embed.description = "Dikarenakan profile kamu private atau kamu belum melakukan placement di season " \
+                                    "ini, kami tidak bisa mengakses data SR kamu dari situs Blizzard. Balas chat ini " \
+                                    "dengan **link screenshot** career profile placement terakhir kamu agar bisa " \
+                                    "diproses.\n\nUpload screenshotnya bisa dilakukan dengan [imgur.com](" \
+                                    "https://discordapp.com), [imgbb.com](https://imgbb.com), atau situs hosting " \
+                                    "gambar lainnya.\n\nKamu mempunyai waktu **2 menit** untuk membalas pesan ini. "
                 embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
                 embed.set_footer(text='Gambar 1.0: contoh screenshot')
                 embed.set_image(url='https://i.imgur.com/Im8NpgX.png')
@@ -127,10 +135,10 @@ class Pugs(commands.Cog):
                 await message.delete()
 
             async with ctx.typing():
-                report_line = [ctx.message.created_at.strftime("%d/%m/%Y %H:%M:%S"), str(ctx.author), battletag,
-                               self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType),
-                               response.content if data['private'] or data['ratings'] is None else ''.join(
-                                   "{}: {}, ".format(i['role'].capitalize(), i['level']) for i in data['ratings'])[:-2]]
+                report_line = str([ctx.message.created_at.strftime("%d/%m/%Y %H:%M:%S"), str(ctx.author), battle_tag,
+                                   self.get_role_name(primary_role_type), self.get_role_name(secondary_role_type),
+                                   response.content if data['private'] or data['ratings'] is None else ''.join(
+                                       "{}: {}, ".format(i['role'].capitalize(), i['level']) for i in data['ratings'])[:-2]])
 
                 # Always authorize first.
                 # If you have a long-running program call authorize() repeatedly.
@@ -146,16 +154,16 @@ class Pugs(commands.Cog):
                 role = ctx.guild.get_role(813700731512946708)
                 await user.add_roles(role, reason="Registered PUG via Bot")
 
-            embed = discord.Embed(color=0xEE2222, title=battletag, timestamp=ctx.message.created_at,
-                                  url='https://playoverwatch.com/en-us/career/pc/%s/' % (battletag.replace('#', '-')))
-            embed.description = "Telah berhasil terdaftar."
+            embed = discord.Embed(color=0xEE2222, title=battle_tag, timestamp=ctx.message.created_at,
+                                  url='https://playoverwatch.com/en-us/career/pc/%s/' % (battle_tag.replace('#', '-')))
+            embed.description = 'Telah berhasil terdaftar.'
             embed.add_field(name='Skill Ratings', value='*Private*' if data['private'] else ''.join(
                 "{}: **{}**\n".format(i['role'].capitalize(), i['level']) for i in data['ratings']))
             embed.add_field(name='Roles', value='Primary: **%s**\nSecondary: **%s**' % (
-            self.getRoleName(primaryRoleType), self.getRoleName(secondaryRoleType)))
+                self.get_role_name(primary_role_type), self.get_role_name(secondary_role_type)))
             embed.set_thumbnail(url=data['icon'])
             embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
             await ctx.send(content=ctx.message.author.mention, embed=embed)
-        except Exception as err:
+        except Exception:
             await ctx.send(content='Terjadi kesalahan. Mohon contact admin.')
             raise
