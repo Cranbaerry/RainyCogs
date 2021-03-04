@@ -21,6 +21,7 @@ class Trakteer(commands.Cog):
             while True:
                 try:
                     resp = json.loads(await self.websocket.recv())
+                    print(resp)
                     if resp['event'] == "Illuminate\\Notifications\\Events\\BroadcastNotificationCreated":
                         donator = json.loads(resp['data'])
 
@@ -42,6 +43,7 @@ class Trakteer(commands.Cog):
                         await self.bot.get_channel(803626623596363786).send(embed=embed)
                 except websockets.exceptions.ConnectionClosed:
                     #await asyncio.sleep(5)
+                    print('[trakter] Reconnecting, since the connection is closed')
                     await self.wsrun(uri)
                     break
 
