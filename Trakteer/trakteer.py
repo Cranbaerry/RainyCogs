@@ -29,7 +29,7 @@ class Trakteer(commands.Cog):
                         embed.url = 'https://trakteer.id/overwatch-idn/'
                         embed.description = 'Baru saja memberikan **%s**' % donator['price']
                         embed.set_thumbnail(url=donator['unit_icon'])
-                        embed.add_field(name='Klik disini untuk ikut mentraktir',value='https://trakteer.id/overwatch-idn/')
+                        embed.add_field(name='Klik disini untuk ikut mentraktir', value='https://trakteer.id/overwatch-idn/')
 
                         '''
                         embed = discord.Embed(color=0xEE2222, title='%s baru saja mengirimkan %s' % (donator['supporter_name'], donator['price']), timestamp=datetime.datetime.utcnow())

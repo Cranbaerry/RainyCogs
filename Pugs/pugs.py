@@ -135,10 +135,10 @@ class Pugs(commands.Cog):
                 await message.delete()
 
             async with ctx.typing():
-                report_line = str([ctx.message.created_at.strftime("%d/%m/%Y %H:%M:%S"), str(ctx.author), battle_tag,
+                report_line = [ctx.message.created_at.strftime("%d/%m/%Y %H:%M:%S"), str(ctx.author), battle_tag,
                                    self.get_role_name(primary_role_type), self.get_role_name(secondary_role_type),
                                    response.content if data['private'] or data['ratings'] is None else ''.join(
-                                       "{}: {}, ".format(i['role'].capitalize(), i['level']) for i in data['ratings'])[:-2]])
+                                       "{}: {}, ".format(i['role'].capitalize(), i['level']) for i in data['ratings'])[:-2]]
 
                 # Always authorize first.
                 # If you have a long-running program call authorize() repeatedly.
