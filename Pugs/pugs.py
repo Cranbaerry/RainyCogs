@@ -136,9 +136,9 @@ class Pugs(commands.Cog):
 
             async with ctx.typing():
                 report_line = [ctx.message.created_at.strftime("%d/%m/%Y %H:%M:%S"), str(ctx.author), battle_tag,
-                                   self.get_role_name(primary_role_type), self.get_role_name(secondary_role_type),
-                                   response.content if data['private'] or data['ratings'] is None else ''.join(
-                                       "{}: {}, ".format(i['role'].capitalize(), i['level']) for i in data['ratings'])[:-2]]
+                               self.get_role_name(primary_role_type), self.get_role_name(secondary_role_type),
+                               response.content if data['private'] or data['ratings'] is None else ''.join(
+                                   "{}: {}, ".format(i['role'].capitalize(), i['level']) for i in data['ratings'])[:-2]]
 
                 # Always authorize first.
                 # If you have a long-running program call authorize() repeatedly.
@@ -154,11 +154,17 @@ class Pugs(commands.Cog):
                 role = ctx.guild.get_role(813700731512946708)
                 await user.add_roles(role, reason="Registered PUG via Bot")
 
+            if data['ratings'] is None:
+                sr = '*Unranked*'
+            elif data['private']:
+                sr = '*Private*'
+            else:
+                sr = ''.join("{}: **{}**\n".format(i['role'].capitalize(), i['level']) for i in data['ratings'])
+
             embed = discord.Embed(color=0xEE2222, title=battle_tag, timestamp=ctx.message.created_at,
                                   url='https://playoverwatch.com/en-us/career/pc/%s/' % (battle_tag.replace('#', '-')))
             embed.description = 'Telah berhasil terdaftar.'
-            embed.add_field(name='Skill Ratings', value='*Private*' if data['private'] else ''.join(
-                "{}: **{}**\n".format(i['role'].capitalize(), i['level']) for i in data['ratings']))
+            embed.add_field(name='Skill Ratings', value=sr)
             embed.add_field(name='Roles', value='Primary: **%s**\nSecondary: **%s**' % (
                 self.get_role_name(primary_role_type), self.get_role_name(secondary_role_type)))
             embed.set_thumbnail(url=data['icon'])
