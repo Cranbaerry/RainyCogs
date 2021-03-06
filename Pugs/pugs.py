@@ -154,10 +154,10 @@ class Pugs(commands.Cog):
                 role = ctx.guild.get_role(813700731512946708)
                 await user.add_roles(role, reason="Registered PUG via Bot")
 
-            if data['ratings'] is None:
-                sr = '*Unranked*'
-            elif data['private']:
+            if data['private']:
                 sr = '*Private*'
+            elif data['ratings'] is None:
+                sr = '*Unranked*'
             else:
                 sr = ''.join("{}: **{}**\n".format(i['role'].capitalize(), i['level']) for i in data['ratings'])
 
