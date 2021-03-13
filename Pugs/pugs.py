@@ -68,10 +68,10 @@ class Pugs(commands.Cog):
 
     @commands.command()
     @checks.admin_or_permissions(manage_guild=True)
-    async def pug(self, ctx, cmd, *title):
+    async def pug(self, ctx, cmd, title):
         if cmd == "title":
             await self.config.title.set(title)
-            await ctx.send("Title of the PUG has been changed!")
+            await ctx.send("Nama PUG telah berhasil diganti menjadi: **%s**" % title)
 
     @commands.command()
     async def daftar(self, ctx, battle_tag, primary_role, secondary_role=None):
