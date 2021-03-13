@@ -115,7 +115,7 @@ class Pugs(commands.Cog):
                         data = await resp.json()
                     else:
                         embed = discord.Embed(color=0xEE2222, title="Terjadi kesalahan")
-                        embed.description = "Mohon coba lagi dalam beberapa menit.\nUnexpected content-type response from API."
+                        embed.description = "Mohon coba lagi dalam beberapa menit.\nUnexpected content-type response from the API."
                         embed.set_author(name=title, icon_url='https://i.imgur.com/kgrkybF.png')
                         await ctx.send(content=ctx.message.author.mention, embed=embed)
                         return None
