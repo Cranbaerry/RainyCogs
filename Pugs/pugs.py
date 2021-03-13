@@ -23,7 +23,7 @@ class Pugs(commands.Cog):
         }
 
         self.config.register_global(**default_global)
-        self.credentials = await self.config.googleCredentials()
+        self.credentials = self.config.googleCredentials()
 
         # Create an AsyncioGspreadClientManager object which
         # will give us access to the Spreadsheet API.
