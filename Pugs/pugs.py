@@ -80,8 +80,9 @@ class Pugs(commands.Cog):
 
     @commands.command()
     async def daftar(self, ctx, battle_tag, primary_role, secondary_role=None):
+        title = await self.config.title() + " Registration"
         """
-            Command untuk registrasi tournament
+            Command untuk  """ + title + """
 
             `battletag` **Case-sensitive**, perkatikan kapitalizasi huruf
             `primaryRole` Role utama yang mau dimainkan
@@ -89,7 +90,8 @@ class Pugs(commands.Cog):
 
              [role options: **Tank**, **DPS**, **Support**, **Flex**]
         """
-        title = await self.config.title() + " Registration"
+
+
         if isinstance(ctx.channel, discord.DMChannel):
             return await ctx.author.send("Command ini tidak bisa dilakukan di DM.")
 
