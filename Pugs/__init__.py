@@ -1,5 +1,6 @@
 from .pugs import Pugs
 
-def setup(bot):
+async def setup(bot):
     n = Pugs(bot)
     bot.add_cog(n)
+    await n.initalize()

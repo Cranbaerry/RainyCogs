@@ -23,7 +23,9 @@ class Pugs(commands.Cog):
         }
 
         self.config.register_global(**default_global)
-        self.credentials = await str(self.config.googleCredentials())
+
+    async def initialize(self):
+        self.credentials = await self.config.googleCredentials()
         print('here -> ' + self.credentials)
 
         # Create an AsyncioGspreadClientManager object which
