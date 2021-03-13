@@ -77,6 +77,7 @@ class Pugs(commands.Cog):
             await ctx.send("Nama PUG telah berhasil diganti menjadi: **%s**" % value)
         elif cmd == "credentials":
             await self.config.googleCredentials.set(value)
+            await ctx.send("Credentials PUG telah berhasil diganti menjadi: **%s**" % value)
 
     @commands.command()
     async def daftar(self, ctx, battle_tag, primary_role, secondary_role=None):
