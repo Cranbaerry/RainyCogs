@@ -26,7 +26,6 @@ class Pugs(commands.Cog):
 
     async def initialize(self):
         self.credentials = await self.config.googleCredentials()
-        print('here -> ' + self.credentials)
 
         # Create an AsyncioGspreadClientManager object which
         # will give us access to the Spreadsheet API.
