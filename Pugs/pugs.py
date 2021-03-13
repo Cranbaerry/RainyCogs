@@ -2,7 +2,7 @@ import aiohttp
 import asyncio
 import discord
 import gspread_asyncio
-from redbot.core import commands
+from redbot.core import Config, commands, checks
 from redbot.core.data_manager import cog_data_path
 from google.oauth2.service_account import Credentials
 from typing import cast
@@ -15,7 +15,15 @@ class Pugs(commands.Cog):
         super().__init__()
         self.bot = bot
         self.path = str(cog_data_path(self)).replace("\\", "/")
-        self.credentials = self.path + '/My First Project-162dbc0aa595.json'
+        self.config = Config.get_conf(self, identifier=123999999, force_registration=True)
+
+        default_global = {
+            'title': 'Overwatch PUG',
+            'googleCredentials': self.path + '/My First Project-162dbc0aa595.json'
+        }
+
+        self.config.register_global(**default_global)
+        self.credentials = await self.config.googleCredentials()
 
         # Create an AsyncioGspreadClientManager object which
         # will give us access to the Spreadsheet API.
@@ -45,6 +53,7 @@ class Pugs(commands.Cog):
             'damage': 2,
             'healer': 3,
             'support': 3,
+            'flex': 4
         }.get(role.lower(), -1) if role is not None else 0
 
     @staticmethod
@@ -53,8 +62,16 @@ class Pugs(commands.Cog):
             0: 'Tidak ada',
             1: 'Tank',
             2: 'DPS',
-            3: 'Support'
+            3: 'Support',
+            4: 'Flex'
         }.get(role_type, None)
+
+    @commands.command()
+    @checks.admin_or_permissions(manage_guild=True)
+    async def pug(self, ctx, cmd, *title):
+        if cmd == "title":
+            await self.config.title.set(title)
+            await ctx.send("Title of the PUG has been changed!")
 
     @commands.command()
     async def daftar(self, ctx, battle_tag, primary_role, secondary_role=None):
@@ -65,8 +82,9 @@ class Pugs(commands.Cog):
             `primaryRole` Role utama yang mau dimainkan
             `secondaryRole` (optional) Role lain
 
-             [role options: **Tank**, **DPS**, **Support**]
+             [role options: **Tank**, **DPS**, **Support**, **Flex**]
         """
+        title = await self.config.title() + " Registration"
         if isinstance(ctx.channel, discord.DMChannel):
             return await ctx.author.send("Command ini tidak bisa dilakukan di DM.")
 
@@ -78,7 +96,7 @@ class Pugs(commands.Cog):
             embed.description = "Role yang tersedia: **Tank**, **DPS**, **Support**"
             embed.add_field(name='Primary role', value=str(self.get_role_name(primary_role_type)), inline=True)
             embed.add_field(name='Secondary role', value=str(self.get_role_name(secondary_role_type)), inline=True)
-            embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
+            embed.set_author(name=title, icon_url='https://i.imgur.com/kgrkybF.png')
             await ctx.send(content=ctx.message.author.mention, embed=embed)
             return
 
@@ -94,7 +112,7 @@ class Pugs(commands.Cog):
             if resp.status == 404:
                 embed = discord.Embed(color=0xEE2222, title="Profile **%s** tidak dapat ditemukan" % battle_tag)
                 embed.description = "Mohon periksa kapitalisasi huruf pada battle-tag dan coba lagi."
-                embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
+                embed.set_author(name=title, icon_url='https://i.imgur.com/kgrkybF.png')
                 await ctx.send(content=ctx.message.author.mention, embed=embed)
                 return
 
@@ -106,7 +124,7 @@ class Pugs(commands.Cog):
                                     "diproses.\n\nUpload screenshotnya bisa dilakukan dengan [imgur.com](" \
                                     "https://discordapp.com), [imgbb.com](https://imgbb.com), atau situs hosting " \
                                     "gambar lainnya.\n\nKamu mempunyai waktu **2 menit** untuk membalas pesan ini. "
-                embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
+                embed.set_author(name=title, icon_url='https://i.imgur.com/kgrkybF.png')
                 embed.set_footer(text='Gambar 1.0: contoh screenshot')
                 embed.set_image(url='https://i.imgur.com/Im8NpgX.png')
 
@@ -127,7 +145,7 @@ class Pugs(commands.Cog):
                 except discord.errors.Forbidden:
                     embed = discord.Embed(color=0xEE2222, title="Tidak bisa mengirim pesan")
                     embed.description = "Pastikan bot ini tidak diblokir dan mengizinkan DMs di dalam server ini."
-                    embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
+                    embed.set_author(name=title, icon_url='https://i.imgur.com/kgrkybF.png')
                     await ctx.send(content=ctx.message.author.mention, embed=embed)
                     await message.delete()
                     return None
@@ -168,7 +186,7 @@ class Pugs(commands.Cog):
             embed.add_field(name='Roles', value='Primary: **%s**\nSecondary: **%s**' % (
                 self.get_role_name(primary_role_type), self.get_role_name(secondary_role_type)))
             embed.set_thumbnail(url=data['icon'])
-            embed.set_author(name='Pick-Up Games Registration', icon_url='https://i.imgur.com/kgrkybF.png')
+            embed.set_author(name=title, icon_url='https://i.imgur.com/kgrkybF.png')
             await ctx.send(content=ctx.message.author.mention, embed=embed)
         except Exception:
             await ctx.send(content='Terjadi kesalahan. Mohon contact admin.')
