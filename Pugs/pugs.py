@@ -23,10 +23,11 @@ class Pugs(commands.Cog):
         }
 
         """remove later """
-        print(self.path + '/My First Project-162dbc0aa595.json')
+
 
         self.config.register_global(**default_global)
-        self.credentials = self.config.googleCredentials()
+        self.credentials = str(self.config.googleCredentials())
+        print(self.credentials)
 
         # Create an AsyncioGspreadClientManager object which
         # will give us access to the Spreadsheet API.
