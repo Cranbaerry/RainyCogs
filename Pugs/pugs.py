@@ -71,7 +71,7 @@ class Pugs(commands.Cog):
 
     @commands.command()
     @checks.admin_or_permissions(manage_guild=True)
-    async def pug(self, ctx, cmd, value):
+    async def pug(self, ctx, *, value):
         if cmd == "title":
             await self.config.title.set(value)
             await ctx.send("Nama PUG telah berhasil diganti menjadi: **%s**" % value)
