@@ -22,6 +22,9 @@ class Pugs(commands.Cog):
             'googleCredentials': self.path + '/My First Project-162dbc0aa595.json'
         }
 
+        """remove later """
+        print(self.path + '/My First Project-162dbc0aa595.json')
+
         self.config.register_global(**default_global)
         self.credentials = self.config.googleCredentials()
 
@@ -68,10 +71,12 @@ class Pugs(commands.Cog):
 
     @commands.command()
     @checks.admin_or_permissions(manage_guild=True)
-    async def pug(self, ctx, cmd, title):
+    async def pug(self, ctx, cmd, value):
         if cmd == "title":
-            await self.config.title.set(title)
-            await ctx.send("Nama PUG telah berhasil diganti menjadi: **%s**" % title)
+            await self.config.title.set(value)
+            await ctx.send("Nama PUG telah berhasil diganti menjadi: **%s**" % value)
+        elif cmd == "credentials":
+            await self.config.googleCredentials.set(value)
 
     @commands.command()
     async def daftar(self, ctx, battle_tag, primary_role, secondary_role=None):
