@@ -111,7 +111,14 @@ class Pugs(commands.Cog):
             hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, headers=hdr) as resp:
-                    data = await resp.json()
+                    if resp.headers.get('content-type') == 'application/json':
+                        data = await resp.json()
+                    else:
+                        embed = discord.Embed(color=0xEE2222, title="Terjadi kesalahan")
+                        embed.description = "Mohon coba lagi dalam beberapa menit.\nUnexpected content-type response from API."
+                        embed.set_author(name=title, icon_url='https://i.imgur.com/kgrkybF.png')
+                        await ctx.send(content=ctx.message.author.mention, embed=embed)
+                        return None
 
         response = None
         try:
