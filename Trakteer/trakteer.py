@@ -1,3 +1,5 @@
+import logging
+
 import discord
 import datetime
 import websockets
@@ -10,6 +12,7 @@ class Trakteer(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.socket_task = self.bot.loop.create_task(self.wsrun('wss://socket.trakteer.id/app/2ae25d102cc6cd41100a'))
+        self.log = logging.getLogger("red")
 
         #loop = asyncio.get_event_loop()
         #loop.run_until_complete(self.wsrun('wss://socket.trakteer.id/app/2ae25d102cc6cd41100a'))
@@ -20,30 +23,26 @@ class Trakteer(commands.Cog):
             await self.websocket.send('{"event":"pusher:subscribe","data":{"channel":"creator-stream-test.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw"}}')
             while True:
                 try:
-                    resp = json.loads(await self.websocket.recv())
-                    print(resp)
-                    if resp['event'] == "Illuminate\\Notifications\\Events\\BroadcastNotificationCreated":
-                        donator = json.loads(resp['data'])
-
+                    resp = await self.websocket.recv()
+                    self.log.debug("[trakteer] Received response: %s", resp)
+                    data = json.loads(resp)
+                    if data['event'] == "Illuminate\\Notifications\\Events\\BroadcastNotificationCreated":
+                        donator = json.loads(data['data'])
                         embed = discord.Embed(color=0xEE2222, title='%s mentraktir %s %s' % (donator['supporter_name'], donator['quantity'], donator['unit']), timestamp=datetime.datetime.utcnow())
                         embed.url = 'https://trakteer.id/overwatch-idn/'
                         embed.description = 'Baru saja memberikan **%s**' % donator['price']
                         embed.set_thumbnail(url=donator['unit_icon'])
                         embed.add_field(name='Klik disini untuk ikut mentraktir', value='https://trakteer.id/overwatch-idn/')
 
-                        '''
-                        embed = discord.Embed(color=0xEE2222, title='%s baru saja mengirimkan %s' % (donator['supporter_name'], donator['price']), timestamp=datetime.datetime.utcnow())
-                        embed.description = '👉 https://trakteer.id/overwatch-idn/'
-                        embed.set_thumbnail(url=donator['unit_icon'])
-                        embed.set_author(name='Donation Box', icon_url='https://i.imgur.com/kgrkybF.png')'''
-
                         if 'supporter_message' in donator and len(donator['supporter_message']) > 0:
                             embed.set_footer(text= donator['supporter_message'], icon_url=donator['supporter_avatar'])
 
                         await self.bot.get_channel(803626623596363786).send(embed=embed)
+                    else:
+                        self.log.debug("[trakteer] Attempting to reconnect due to unexpected response")
+                        await self.wsrun(uri)
                 except websockets.exceptions.ConnectionClosed:
-                    #await asyncio.sleep(5)
-                    print('[trakter] Reconnecting, since the connection is closed')
+                    self.log.debug("[trakteer] Attempting to reconnect due to exception")
                     await self.wsrun(uri)
                     break
 
