@@ -81,7 +81,7 @@ class Pugs(commands.Cog):
     @commands.command()
     async def daftar(self, ctx, battle_tag, primary_role, secondary_role=None):
         """
-            Command untuk registrasi PUG Overwatch Indonesia
+            Command untuk registrasi tournament
 
             `battletag` **Case-sensitive**, perkatikan kapitalizasi huruf
             `primaryRole` Role utama yang mau dimainkan
