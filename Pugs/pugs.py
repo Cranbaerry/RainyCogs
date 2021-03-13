@@ -81,7 +81,7 @@ class Pugs(commands.Cog):
     @commands.command()
     async def daftar(self, ctx, battle_tag, primary_role, secondary_role=None):
         """
-            Command untuk  """ + await self.config.title() + """ Registration
+            Command untuk Overwatch Resurrect Community Tournament Registration
 
             `battletag` **Case-sensitive**, perkatikan kapitalizasi huruf
             `primaryRole` Role utama yang mau dimainkan
