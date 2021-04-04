@@ -41,7 +41,6 @@ class Trakteer(commands.Cog):
     async def wsrun(self):
         try:
             self.websocket = await asyncio.wait_for(self.connect(), 30)
-            self.log.debug("[trakteer] Attempting to connect")
             while True:
                 response = json.loads(await self.websocket.recv())
                 # print(response)
@@ -57,7 +56,7 @@ class Trakteer(commands.Cog):
                     embed.set_thumbnail(url=donator['unit_icon'])
                     embed.add_field(name='Klik disini untuk ikut mentraktir',
                                     value='https://trakteer.id/overwatch-idn/')
-                    if 'supporter_message' in donator and len(donator['supporter_message']) > 0:
+                    if 'supporter_message' in donator:
                         embed.set_footer(text=donator['supporter_message'], icon_url=donator['supporter_avatar'])
 
                     await self.bot.get_channel(803626623596363786).send(embed=embed)
