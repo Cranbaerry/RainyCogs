@@ -42,10 +42,10 @@ class IPN(commands.Cog):
 
     async def wsrun(self):
         try:
-            async with websockets.serve(self.listen, "localhost", 8887):
+            await websockets.serve(self.listen, "localhost", 8887)
                 #self.stop_event = threading.Event()
                 #self.bot.loop.run_in_executor(None, self.stop_event.wait)
-                self.log.debug("Stop stop stop")
+                #self.log.debug("Stop stop stop")
             self.log.debug("[IPN] PayPal IPN websocket server started on port 8887")
             while True:
                 await asyncio.sleep(1)
