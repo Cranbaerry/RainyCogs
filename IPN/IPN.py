@@ -27,13 +27,17 @@ class IPN(commands.Cog):
                 data = json.loads(msg)
 
                 self.log.debug(f"[IPN] < {msg}")
-                embed = discord.Embed(color=0xEE2222, title='Instant Payment Notification')
-                # embed.description = msg
+                embed = discord.Embed(color=0xEE2222, title='Payment from %s $s' % (data['first_name'], data['last_name']))
+                embed.description = msg
+                embed.add_field(name='Payment Received', value='%s %s' % (data['mc_gross'], data['mc_currency']))
+                embed.add_field(name='Fee', value=data['mc_fee'])
+                embed.add_field(name='Transaction ID', value=data['txn_id'])
+                embed.add_field(name='Status', value=data['payment_status'])
 
-                for key, value in data.items():
-                    embed.add_field(name=key, value=value)
+                #for key, value in data.items():
+                #    embed.add_field(name=key, value=value)
 
-                embed.set_thumbnail(url='https://upload.wikimedia.org/wikipedia/commons/a/a4/Paypal_2014_logo.png')
+                embed.set_thumbnail(url='https://i.imgur.com/Mz2rAzF.png')
                 await self.bot.get_channel(830267832889114644).send(embed=embed)
 
                 await websocket.send("Hello")
