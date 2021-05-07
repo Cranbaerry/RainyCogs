@@ -3,6 +3,7 @@ import logging
 import discord
 import websockets
 import asyncio
+import threading
 from redbot.core import commands
 
 
@@ -14,6 +15,8 @@ class IPN(commands.Cog):
         self.bot = bot
         self.socket_task = self.bot.loop.create_task(self.wsrun())
         self.log = logging.getLogger("red")
+        self.stop_event = threading.Event()
+        self.stop = self.bot.loop.run_in_executor(None, self.stop_event.wait)
 
         #loop = asyncio.get_event_loop()
         #loop.run_until_complete(self.wsrun())
@@ -45,7 +48,8 @@ class IPN(commands.Cog):
 
     async def wsrun(self):
         try:
-            await websockets.serve(self.listen, "localhost", 8887)
+            async with websockets.serve(self.listen, "localhost", 8887):
+                await self.stop
             self.log.debug("[IPN] PayPal IPN websocket server started on port 8887")
             while True:
                 await asyncio.sleep(1)
@@ -60,7 +64,8 @@ class IPN(commands.Cog):
             await self.wsrun()
 
     def cog_unload(self):
-        #self.stop_event.set()
+        self.log.debug("[IPN] Shutting down websocket server..")
+        self.stop_event.set()
         self.socket_task.cancel()
 
 
