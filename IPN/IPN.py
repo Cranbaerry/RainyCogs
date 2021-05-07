@@ -33,7 +33,7 @@ class IPN(commands.Cog):
                 embed.add_field(name='Country', value=data['address_country'], inline=False)
                 embed.add_field(name='Transaction ID', value=data['txn_id'], inline=False)
                 embed.add_field(name='Status', value=data['payment_status'], inline=False)
-                embed.set_image(self, url="https://i.pinimg.com/originals/f3/e0/5e/f3e05e008d8d5e0eda6c0fa8f559ab28.gif")
+                embed.set_image(url="https://i.pinimg.com/originals/f3/e0/5e/f3e05e008d8d5e0eda6c0fa8f559ab28.gif")
                 embed.set_thumbnail(url='https://i.imgur.com/Mz2rAzF.png')
                 embed.set_footer(text=data['payment_date'])
                 await self.bot.get_channel(830267832889114644).send(embed=embed)
