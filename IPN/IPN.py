@@ -24,7 +24,7 @@ class IPN(commands.Cog):
             self.log.debug("[IPN] Client connection established")
             while True:
                 msg = await websocket.recv()
-                data = json.loads(data)
+                data = json.loads(msg)
 
                 self.log.debug(f"[IPN] < {msg}")
                 embed = discord.Embed(color=0xEE2222, title='Instant Payment Notification')
