@@ -5,7 +5,7 @@
     "description" : "c",
     "disabled" : false,
     "hidden" : false,
-    "install_msg" : "Thank you for installing!`",
+    "install_msg" : "Thank you for installing!",
     "max_bot_version" : "0.0.0",
     "min_bot_version" : "3.1.8",
     "min_python_version" : [

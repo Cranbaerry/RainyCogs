@@ -30,7 +30,7 @@ class IPN(commands.Cog):
                 embed = discord.Embed(color=0xEE2222, title='Instant Payment Notification')
                 # embed.description = msg
 
-                for key, value in data.items()
+                for key, value in data.items():
                     embed.add_field(name=key, value=value)
 
                 embed.set_thumbnail(url='https://upload.wikimedia.org/wikipedia/commons/a/a4/Paypal_2014_logo.png')
