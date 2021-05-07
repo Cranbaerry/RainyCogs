@@ -28,12 +28,14 @@ class IPN(commands.Cog):
                 self.log.debug(f"[IPN] < {msg}")
                 embed = discord.Embed(color=0xEE2222, title='Payment from %s %s' % (data['first_name'], data['last_name']))
                 embed.description = msg
-                embed.add_field(name='Payment Received', value='%s %s' % (data['mc_gross'], data['mc_currency']), inline=False)
-                embed.add_field(name='Fee', value='%s %s' % (data['mc_fee'], data['mc_currency']), inline=False)
-                embed.add_field(name='E-mail address', value=data['payer_email'], inline=False)
+                embed.add_field(name='Payment Received', value='%s %s' % (data['mc_gross'], data['mc_currency']), inline=True)
+                embed.add_field(name='Transaction Fee', value='%s %s' % (data['mc_fee'], data['mc_currency']), inline=True)
+                embed.add_field(name='E-mail Address', value=data['payer_email'], inline=False)
+                embed.add_field(name='Country Address', value=data['address_country'], inline=False)
                 embed.add_field(name='Transaction ID', value=data['txn_id'], inline=False)
                 embed.add_field(name='Status', value=data['payment_status'], inline=False)
                 embed.set_thumbnail(url='https://i.imgur.com/Mz2rAzF.png')
+                embed.set_footer(text=data['payment_date'])
                 await self.bot.get_channel(830267832889114644).send(embed=embed)
 
                 await websocket.send("Hello")
