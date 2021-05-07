@@ -48,9 +48,9 @@ class IPN(commands.Cog):
 
     async def wsrun(self):
         try:
+            self.log.debug("[IPN] Serving websocket on port 8887")
             async with websockets.serve(self.listen, "localhost", 8887):
                 await self.stop
-            self.log.debug("[IPN] PayPal IPN websocket server started on port 8887")
             while True:
                 await asyncio.sleep(1)
         except asyncio.exceptions.TimeoutError:
