@@ -1,3 +1,4 @@
+import json
 import logging
 import discord
 import websockets
@@ -23,22 +24,21 @@ class IPN(commands.Cog):
             self.log.debug("[IPN] Client connection established")
             while True:
                 msg = await websocket.recv()
+                data = json.loads(data)
+
                 self.log.debug(f"[IPN] < {msg}")
+                embed = discord.Embed(color=0xEE2222, title='Instant Payment Notification')
+                # embed.description = msg
 
-                embed = discord.Embed(color=0xEE2222, title='%s mentraktir %s %s' % (
-                    'silly', 'test', 'gay'),
-                                      timestamp=datetime.datetime.utcnow())
-                embed.url = 'https://trakteer.id/overwatch-idn/'
-                embed.description = msg
-                #embed.set_thumbnail(url=donator['unit_icon'])
-                embed.add_field(name='Klik disini untuk ikut mentraktir',
-                                value='https://trakteer.id/overwatch-idn/')
+                for key, value in data.items()
+                    embed.add_field(name=key, value=value)
 
-
+                embed.set_thumbnail(url='https://upload.wikimedia.org/wikipedia/commons/a/a4/Paypal_2014_logo.png')
                 await self.bot.get_channel(830267832889114644).send(embed=embed)
 
                 await websocket.send("Hello")
         except websockets.exceptions.ConnectionClosedError:
+        except websockets.exceptions.ConnectionClosed:
             self.log.debug("[IPN] Client connection closed")
 
     async def wsrun(self):

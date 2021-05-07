@@ -44,7 +44,9 @@ class Trakteer(commands.Cog):
             while True:
                 response = json.loads(await self.websocket.recv())
                 # print(response)
-                self.log.debug('[trakteer] %s' % response)
+                if response['event'] != 'pusher:pong':
+                    self.log.debug('[trakteer] %s' % response)
+
                 if response['event'] == 'Illuminate\\Notifications\\Events\\BroadcastNotificationCreated':
                     donator = json.loads(response['data'])
 
