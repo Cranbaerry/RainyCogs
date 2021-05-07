@@ -36,6 +36,7 @@ class IPN(commands.Cog):
                 embed.set_image(url="https://i.pinimg.com/originals/f3/e0/5e/f3e05e008d8d5e0eda6c0fa8f559ab28.gif")
                 embed.set_thumbnail(url='https://i.imgur.com/Mz2rAzF.png')
                 embed.set_footer(text=data['payment_date'])
+                embed.url = 'https://www.paypal.com/activity/payment/%s' % data['txn_id']
                 await self.bot.get_channel(830267832889114644).send(embed=embed)
 
                 await websocket.send("Hello")
