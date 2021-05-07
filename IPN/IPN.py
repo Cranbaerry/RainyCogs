@@ -3,7 +3,6 @@ import logging
 import discord
 import websockets
 import asyncio
-import threading
 from redbot.core import commands
 
 
@@ -27,7 +26,7 @@ class IPN(commands.Cog):
                 data = json.loads(msg)
 
                 self.log.debug(f"[IPN] < {msg}")
-                embed = discord.Embed(color=0xEE2222, title='Payment from %s $s' % (data['first_name'], data['last_name']))
+                embed = discord.Embed(color=0xEE2222, title='Payment from %s %s' % (data['first_name'], data['last_name']))
                 embed.description = msg
                 embed.add_field(name='Payment Received', value='%s %s' % (data['mc_gross'], data['mc_currency']))
                 embed.add_field(name='Fee', value=data['mc_fee'])
@@ -43,9 +42,6 @@ class IPN(commands.Cog):
     async def wsrun(self):
         try:
             await websockets.serve(self.listen, "localhost", 8887)
-                #self.stop_event = threading.Event()
-                #self.bot.loop.run_in_executor(None, self.stop_event.wait)
-                #self.log.debug("Stop stop stop")
             self.log.debug("[IPN] PayPal IPN websocket server started on port 8887")
             while True:
                 await asyncio.sleep(1)
