@@ -33,10 +33,6 @@ class IPN(commands.Cog):
                 embed.add_field(name='Fee', value=data['mc_fee'])
                 embed.add_field(name='Transaction ID', value=data['txn_id'])
                 embed.add_field(name='Status', value=data['payment_status'])
-
-                #for key, value in data.items():
-                #    embed.add_field(name=key, value=value)
-
                 embed.set_thumbnail(url='https://i.imgur.com/Mz2rAzF.png')
                 await self.bot.get_channel(830267832889114644).send(embed=embed)
 
@@ -48,7 +44,7 @@ class IPN(commands.Cog):
         try:
             async with websockets.serve(self.listen, "localhost", 8887):
                 self.stop_event = threading.Event()
-                asyncio.get_event_loop().run_in_executor(None, self.stop_event.wait)
+                self.bot.loop.run_in_executor(None, self.stop_event.wait)
             self.log.debug("[IPN] PayPal IPN websocket server started on port 8887")
             while True:
                 await asyncio.sleep(1)
