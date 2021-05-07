@@ -37,8 +37,7 @@ class IPN(commands.Cog):
                 await self.bot.get_channel(830267832889114644).send(embed=embed)
 
                 await websocket.send("Hello")
-        except websockets.exceptions.ConnectionClosedError:
-        except websockets.exceptions.ConnectionClosed:
+        except (websockets.exceptions.ConnectionClosedError, websockets.exceptions.ConnectionClosed):
             self.log.debug("[IPN] Client connection closed")
 
     async def wsrun(self):
