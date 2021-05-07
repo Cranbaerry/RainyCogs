@@ -37,15 +37,14 @@ class IPN(commands.Cog):
 
                 await self.bot.get_channel(830267832889114644).send(embed=embed)
 
-                #await websocket.send(greeting)
-                #print(f"> {greeting}")
+                await websocket.send("Hello")
         except websockets.exceptions.ConnectionClosedError:
             self.log.debug("[IPN] Client connection closed")
 
     async def wsrun(self):
         try:
             await websockets.serve(self.listen, "localhost", 8887)
-            self.log.warning("[IPN] PayPal IPN websocket server started on port 8887")
+            self.log.debug("[IPN] PayPal IPN websocket server started on port 8887")
             while True:
                 await asyncio.sleep(1)
         except asyncio.exceptions.TimeoutError:
