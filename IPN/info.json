@@ -13,7 +13,7 @@
         7,
         2
     ],
-    "name" : "Pugs",
+    "name" : "IPN",
     "permissions" : [],
     "required_cogs" : {},
     "requirements" : ["websockets"],
