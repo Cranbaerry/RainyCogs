@@ -31,7 +31,10 @@ class IPN(commands.Cog):
                 self.log.debug(f"[IPN] < {msg}")
                 embed = discord.Embed(color=0xCBC3E3, title='Payment from %s %s' % (data['first_name'], data['last_name']))
                 embed.add_field(name='Payment Received', value='%s %s' % (data['mc_gross'], data['mc_currency']), inline=True)
-                embed.add_field(name='Fee', value='%s %s' % (data['mc_fee'], data['mc_currency']), inline=True)
+
+                if 'mc_fee' in data:
+                    embed.add_field(name='Fee', value='%s %s' % (data['mc_fee'], data['mc_currency']), inline=True)
+
                 embed.add_field(name='E-mail Address', value=data['payer_email'], inline=False)
                 embed.add_field(name='Country', value=data['address_country'], inline=False)
                 embed.add_field(name='Transaction ID', value=data['txn_id'], inline=False)
