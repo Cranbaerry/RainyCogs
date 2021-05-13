@@ -4,6 +4,7 @@ import discord
 import websockets
 import asyncio
 import threading
+import pycountry
 from redbot.core import commands
 
 
@@ -30,18 +31,20 @@ class IPN(commands.Cog):
 
                 self.log.debug(f"[IPN] < {msg}")
                 embed = discord.Embed(color=0xCBC3E3, title='Payment from %s %s' % (data['first_name'], data['last_name']))
+                # embed.set_author(name='%s %s' % (data['first_name'], data['last_name']), icon_url='https://cdn.discordapp.com/embed/avatars/0.png')
                 embed.add_field(name='Payment Received', value='%s %s' % (data['mc_gross'], data['mc_currency']), inline=True)
 
                 if 'mc_fee' in data:
                     embed.add_field(name='Fee', value='%s %s' % (data['mc_fee'], data['mc_currency']), inline=True)
 
                 embed.add_field(name='E-mail Address', value=data['payer_email'], inline=False)
-                embed.add_field(name='Country', value=data['address_country'], inline=False)
+                embed.add_field(name='Country', value='%s (%s)' % (pycountry.countries.get(alpha_2=data['residence_country']).name, data['residence_country']), inline=False)
                 embed.add_field(name='Transaction ID', value=data['txn_id'], inline=False)
-                embed.add_field(name='Status', value=data['payment_status'], inline=False)
+                embed.add_field(name='Date', value=data['payment_status'], inline=False)
+                embed.add_field(name='Status', value=data['payment_date'], inline=False)
                 embed.set_image(url="https://i.pinimg.com/originals/f3/e0/5e/f3e05e008d8d5e0eda6c0fa8f559ab28.gif")
                 embed.set_thumbnail(url='https://i.imgur.com/Mz2rAzF.png')
-                embed.set_footer(text=data['payment_date'])
+                embed.set_footer(text='Track ID: %s | %s' % (data['ipn_track_id'].upper(), data['payment_date']))
                 embed.url = 'https://www.paypal.com/activity/payment/%s' % data['txn_id']
                 await self.bot.get_channel(830267832889114644).send(embed=embed)
 

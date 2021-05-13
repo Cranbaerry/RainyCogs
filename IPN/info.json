@@ -16,7 +16,7 @@
     "name" : "IPN",
     "permissions" : [],
     "required_cogs" : {},
-    "requirements" : ["websockets"],
+    "requirements" : ["websockets", "pycountry"],
     "short" : "PayPal IPN",
     "tags" : [
         "fun"
