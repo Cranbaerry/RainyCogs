@@ -54,8 +54,8 @@ class TikTok(commands.Cog):
     async def background_get_new_videos(self):
         for guild in self.bot.guilds:
             try:
-                subs = await self.conf.guild(guild).subscriptions()
-                cache = await self.conf.guild(guild).cache()
+                subs = await self.config.guild(guild).subscriptions()
+                cache = await self.config.guild(guild).cache()
             except:
                 self.log.debug("Unable to fetch data, config is empty..")
                 return
@@ -70,7 +70,7 @@ class TikTok(commands.Cog):
                     # TODO: Send embed and post in channel
                     # Add id to published cache
                     cache.append(tiktok["id"])
-                    await self.conf.guild(guild).cache.set(cache)
+                    await self.config.guild(guild).cache.set(cache)
 
     @background_get_new_videos.before_loop
     async def wait_for_red(self):
@@ -122,10 +122,10 @@ class TikTok(commands.Cog):
         Very low values will probably get you rate limited
 
         Default is 300 seconds (5 minutes)"""
-        await self.conf.interval.set(interval)
+        await self.config.interval.set(interval)
         self.background_get_new_videos.change_interval(seconds=interval)
-        await ctx.send(f"Interval set to {await self.conf.interval()}")
+        await ctx.send(f"Interval set to {await self.config.interval()}")
 
-    
+
 if __name__ == "__main__":
     main = TikTok(None)
