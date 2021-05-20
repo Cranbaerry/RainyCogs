@@ -114,6 +114,18 @@ class TikTok(commands.Cog):
         await self.config.guild(ctx.guild).subscriptions.set(subs)
         await ctx.send(f"Subscription added: {newSub}")
 
+    @checks.is_owner()
+    @tiktok.command(name="setinterval", hidden=True)
+    async def set_interval(self, ctx: commands.Context, interval: int):
+        """Set the interval in seconds at which to check for updates
 
+        Very low values will probably get you rate limited
+
+        Default is 300 seconds (5 minutes)"""
+        await self.conf.interval.set(interval)
+        self.background_get_new_videos.change_interval(seconds=interval)
+        await ctx.send(f"Interval set to {await self.conf.interval()}")
+
+    
 if __name__ == "__main__":
     main = TikTok(None)
