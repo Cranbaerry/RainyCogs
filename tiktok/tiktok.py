@@ -30,7 +30,7 @@ class TikTok(commands.Cog):
             import threading
 
             stop_event = threading.Event()
-            self.stop = asyncio.get_event_loop().run_in_executor(None, stop_event.wait) if __name__ == "__main__" else self.bot.run_in_executor(None, stop_event.wait)
+            self.stop = asyncio.get_event_loop().run_in_executor(None, stop_event.wait) if __name__ == "__main__" else self.bot.loop.run_in_executor(None, stop_event.wait)
             # stop_event.set()
         elif platform.system() == "Linux":
             # The stop condition is set when receiving SIGTERM.
