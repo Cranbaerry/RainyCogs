@@ -43,7 +43,7 @@ class TikTok(commands.Cog):
 
         if __name__ != "__main__":
             self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
-            self.conf.register_guild(subscriptions=[], cache=[])
+            self.config.register_guild(subscriptions=[], cache=[])
             self.config.register_global(interval=300, cache_size=500)
             self.background_get_new_videos.start()
 
