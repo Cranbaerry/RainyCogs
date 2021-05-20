@@ -26,7 +26,7 @@ class TikTok(commands.Cog):
         self.api = TikTokApi.get_instance(custom_verifyFp="verify_kox68gzm_z2N190FQ_dmGv_4YgN_9eQo_YUNXoHldT8T6", use_selenium=True,
                                           logging_level=logging.ERROR, executablePath=ChromeDriverManager().install())
 
-        self.debug.log("Verify: verify_kox68gzm_z2N190FQ_dmGv_4YgN_9eQo_YUNXoHldT8T6")
+        self.log.debug("Verify: verify_kox68gzm_z2N190FQ_dmGv_4YgN_9eQo_YUNXoHldT8T6")
 
         if platform.system() == 'Windows':
             import threading
@@ -82,7 +82,7 @@ class TikTok(commands.Cog):
 
     def cog_unload(self):
         self.log.debug("Shutting down TikTok service..")
-        self.api.browser.browser.quit()
+        #self.api.browser.browser.quit()
         if sys.platform.system() == 'Windows':
             self.stop_event.set()
         elif sys.platform.system() == "Linux":
