@@ -5,6 +5,10 @@ import asyncio
 from redbot.core import commands
 from TikTokApi import TikTokApi
 
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+driver = webdriver.Chrome(ChromeDriverManager().install())
+
 
 class tiktok(commands.Cog):
     # init method or constructor
