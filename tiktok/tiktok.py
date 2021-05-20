@@ -86,7 +86,15 @@ class TikTok(commands.Cog):
             self.loop.close()
         self.background_get_new_videos.cancel()
 
-    @commands.command()
+    @commands.group()
+    @commands.guild_only()
+    async def tiktok(self: commands.Cog, ctx: commands.Context) -> None:
+        """
+        Role tools commands
+        """
+        pass
+
+    @tiktok.command()
     @checks.admin_or_permissions(manage_guild=True)
     async def add(self, ctx, tiktokId, channelDiscord: discord.TextChannel = None):
         """Subscribe a Discord channel to a TikTok Channel
@@ -96,13 +104,13 @@ class TikTok(commands.Cog):
         if not channelDiscord:
             channelDiscord = ctx.channel
 
-        subs = await self.conf.guild(ctx.guild).subscriptions()
+        subs = await self.config.guild(ctx.guild).subscriptions()
         newSub = {'id': tiktokId,
                   'channel': {"name": channelDiscord.name,
                               "id": channelDiscord.id}}
 
         subs.append(newSub)
-        await self.conf.guild(ctx.guild).subscriptions.set(subs)
+        await self.config.guild(ctx.guild).subscriptions.set(subs)
         await ctx.send(f"Subscription added: {newSub}")
 
 
