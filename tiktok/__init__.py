@@ -1,5 +1,5 @@
-from .tiktok import tiktok
+from .tiktok import TikTok
 
 def setup(bot):
-    n = tiktok(bot)
+    n = TikTok(bot)
     bot.add_cog(n)
