@@ -13,10 +13,10 @@
         7,
         2
     ],
-    "name" : "IPN",
+    "name" : "TikTok",
     "permissions" : [],
     "required_cogs" : {},
-    "requirements" : ["websockets", ""],
+    "requirements" : ["TikTokApi", "webdriver_manager"],
     "short" : "TikTok",
     "tags" : [
         "fun"
