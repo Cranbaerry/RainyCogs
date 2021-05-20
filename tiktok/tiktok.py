@@ -23,8 +23,10 @@ class TikTok(commands.Cog):
         self.bot = bot
         self.log = logging.getLogger("tiktok")
         self.log.setLevel(logging.DEBUG)
-        self.api = TikTokApi.get_instance(use_test_endpoints=True, custom_verifyFp="verify_kox68gzm_z2N190FQ_dmGv_4YgN_9eQo_YUNXoHldT8T6", use_selenium=True,
+        self.api = TikTokApi.get_instance(custom_verifyFp="verify_kox68gzm_z2N190FQ_dmGv_4YgN_9eQo_YUNXoHldT8T6", use_selenium=True,
                                           logging_level=logging.ERROR, executablePath=ChromeDriverManager().install())
+
+        self.debug.log("Verify: verify_kox68gzm_z2N190FQ_dmGv_4YgN_9eQo_YUNXoHldT8T6")
 
         if platform.system() == 'Windows':
             import threading
