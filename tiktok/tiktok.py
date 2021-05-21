@@ -53,6 +53,7 @@ class TikTok(commands.Cog):
 
     @tasks.loop(seconds=300)
     async def background_get_new_videos(self):
+        self.log.error("Running background..")
         for guild in self.bot.guilds:
             try:
                 subs = await self.config.guild(guild).subscriptions()
