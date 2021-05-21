@@ -57,7 +57,7 @@ class TikTok(commands.Cog):
                 self.log.debug("Fetching data from guild: " + sub["channel"]["name"])
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 tiktok = self.get_tiktok_by_name(sub["id"], 3)
-                self.log.debug("Response: " + tiktok)
+                self.log.debug("Response: " + str(tiktok))
                 if not channel:
                     self.log.debug("Channel not found: " + sub["channel"]["name"])
                     continue
