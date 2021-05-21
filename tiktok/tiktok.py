@@ -61,19 +61,22 @@ class TikTok(commands.Cog):
             for i, sub in enumerate(subs):
                 self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
-                tiktok = self.get_tiktok_by_name(sub["id"], 3)
-                self.log.debug("Response: " + str(tiktok))
+                tiktoks = self.get_tiktok_by_name(sub["id"], 3)
+                self.log.debug("Response: " + str(tiktoks))
                 if not channel:
                     self.log.debug("Channel not found: " + sub["channel"]["name"])
                     continue
                 self.log.debug("Items: " + str(cache))
-                if not tiktok["id"] in cache.keys():
-                    self.log.debug("Sending data to channel: " + sub["channel"]["name"])
-                    # TODO: Send embed and post in channel
-                    # Add id to published cache
-                    cache.append(tiktok["id"])
-                    await self.config.guild(guild).cache.set(cache)
-                    self.log.debug("Saved cache data: " + cache)
+                for post in tiktoks:
+                    self.log.debug("Post ID: " + post["id"])
+                    self.log.debug("Post Content: " + str(post))
+                    if not post["id"] in cache.keys():
+                        self.log.debug("Sending data to channel: " + sub["channel"]["name"])
+                        # TODO: Send embed and post in channel
+                        # Add id to published cache
+                        cache.append(post["id"])
+                        await self.config.guild(guild).cache.set(cache)
+                        self.log.debug("Saved cache data: " + cache)
 
     @background_get_new_videos.before_loop
     async def wait_for_red(self):
