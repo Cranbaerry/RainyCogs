@@ -59,7 +59,7 @@ class TikTok(commands.Cog):
                 return
 
             for i, sub in enumerate(subs):
-                self.log.debug("Fetching data from guild: " + sub["channel"]["name"])
+                self.log.debug(f"Fetching data of {sub['id']} from guild: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 tiktok = self.get_tiktok_by_name(sub["id"], 3)
                 self.log.debug("Response: " + str(tiktok))
