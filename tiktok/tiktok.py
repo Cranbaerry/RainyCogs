@@ -103,7 +103,7 @@ class TikTok(commands.Cog):
                         await self.config.guild(guild).cache.set(cache)
                         self.log.debug("Saved cache data: " + str(cache))
                     else:
-                        self.log.debug("Skipping: " + post["id"])''''
+                        self.log.debug("Skipping: " + post["id"])'''
 
                 self.log.debug("Sleeping 5 seconds..")
                 await asyncio.sleep(5)
