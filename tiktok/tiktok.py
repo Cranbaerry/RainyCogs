@@ -94,6 +94,12 @@ class TikTok(commands.Cog):
     @background_get_new_videos.before_loop
     async def wait_for_red(self):
         await self.bot.wait_until_red_ready()
+        self.log.debug(f"Ready")
+        self.log.debug(f"Ready")
+        self.log.debug(f"Ready")
+        self.log.debug(f"Ready")
+        self.log.debug(f"Ready")
+        self.log.debug(f"Ready")
         interval = await self.config.interval()
         self.log.debug(f"Background process interval is set to {interval}")
         self.background_get_new_videos.change_interval(seconds=interval)
