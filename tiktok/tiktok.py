@@ -7,6 +7,7 @@ import asyncio
 
 import websockets
 import platform
+import functools
 
 from TikTokApi.exceptions import TikTokCaptchaError
 from discord.ext import tasks
@@ -15,6 +16,7 @@ from TikTokApi import TikTokApi
 from urllib3.exceptions import NewConnectionError, ProxyError, MaxRetryError
 from requests.exceptions import ConnectionError
 from webdriver_manager.chrome import ChromeDriverManager
+
 
 UNIQUE_ID = 0x696969669
 
@@ -71,8 +73,9 @@ class TikTok(commands.Cog):
                     channel = self.bot.get_channel(int(sub["channel"]["id"]))
 
                     try:
-                        tiktoks = await self.bot.loop.run_in_executor(None, self.get_tiktok_by_name(sub["id"], 3))
-
+                        task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
+                        task = self.bot.loop.run_in_executor(None, task)
+                        tiktoks = await asyncio.wait_for(task, timeout=60)
                     except TikTokCaptchaError:
                         self.log.error("Asking captcha, need proxy")
                         continue
