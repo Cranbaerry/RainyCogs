@@ -51,7 +51,7 @@ class TikTok(commands.Cog):
     async def get_tiktok_by_name(self, username, count):
         return self.api.byUsername(username, count=count)
 
-    @tasks.loop(seconds=1)
+    @tasks.loop(seconds=300)
     async def background_get_new_videos(self):
         for guild in self.bot.guilds:
             try:
