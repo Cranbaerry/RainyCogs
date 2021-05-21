@@ -48,7 +48,7 @@ class TikTok(commands.Cog):
 
         self.log.debug(f"Proxy: {await self.config.proxy()}")
 
-    def get_tiktok_by_name(self, username, count):
+    async def get_tiktok_by_name(self, username, count):
         stuff = self.api.byUsername(username, count=count)
         return stuff
 
@@ -82,7 +82,7 @@ class TikTok(commands.Cog):
             for i, sub in enumerate(subs):
                 self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
-                tiktoks = self.get_tiktok_by_name(sub["id"], 3)
+                tiktoks = await self.get_tiktok_by_name(sub["id"], 3)
                 '''#try:
                    
                 except TikTokCaptchaError:
