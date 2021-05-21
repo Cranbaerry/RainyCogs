@@ -87,6 +87,10 @@ class TikTok(commands.Cog):
                     else:
                         self.log.debug("Skipping: " + post["id"])
 
+                self.log.debug("Sleeping 5 seconds..")
+                asyncio.sleep(5)
+
+
     @background_get_new_videos.before_loop
     async def wait_for_red(self):
         await self.bot.wait_until_red_ready()
