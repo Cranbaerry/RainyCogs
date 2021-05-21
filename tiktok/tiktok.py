@@ -5,7 +5,6 @@ import discord
 import logging
 import asyncio
 
-import requests
 import websockets
 import platform
 
@@ -14,6 +13,7 @@ from discord.ext import tasks
 from redbot.core import commands, Config, checks
 from TikTokApi import TikTokApi
 from urllib3.exceptions import NewConnectionError, ProxyError, MaxRetryError
+from requests.exceptions import ConnectionError
 from webdriver_manager.chrome import ChromeDriverManager
 
 UNIQUE_ID = 0x696969669
@@ -76,8 +76,8 @@ class TikTok(commands.Cog):
                     except TikTokCaptchaError:
                         self.log.error("Asking captcha, need proxy")
                         continue
-                    except (requests.exceptions.ConnectionError, NewConnectionError, ProxyError, MaxRetryError):
-                        self.log.error("No connection could be made because the target machine actively refused it")
+                    except (ConnectionError, NewConnectionError, ProxyError, MaxRetryError):
+                        self.log.error("Proxy failed")
                         continue
                     except Exception as exception:
                         exc_type, value, traceback = sys.exc_info()
