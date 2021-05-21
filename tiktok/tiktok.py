@@ -60,7 +60,7 @@ class TikTok(commands.Cog):
             except:
                 self.log.debug("Unable to fetch data, config is empty..")
                 return
-
+            self.log.debug(f"Iterating in: {guild.name}")
             for i, sub in enumerate(subs):
                 self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
