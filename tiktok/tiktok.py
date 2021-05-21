@@ -130,7 +130,7 @@ class TikTok(commands.Cog):
         self.api.proxy = proxy
 
         await self.config.proxy.set(proxy)
-        await ctx.send(f"Proxy set to {await self.config.proxy}")
+        await ctx.send(f"Proxy set to {await self.config.proxy()}")
 
 
 if __name__ == "__main__":
