@@ -33,7 +33,6 @@ class TikTok(commands.Cog):
             self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
             self.config.register_guild(subscriptions=[], cache=[])
             self.config.register_global(interval=300, cache_size=500, proxy=[])
-            #self.background_get_new_videos.start()
             self.main_task = self.bot.loop.create_task(self.initialize())
             self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
 
@@ -72,7 +71,8 @@ class TikTok(commands.Cog):
                     channel = self.bot.get_channel(int(sub["channel"]["id"]))
 
                     try:
-                        tiktoks = await self.get_tiktok_by_name(sub["id"], 3)
+                        tiktoks = await self.bot.loop.run_in_executor(None, self.get_tiktok_by_name(sub["id"], 3))
+
                     except TikTokCaptchaError:
                         self.log.error("Asking captcha, need proxy")
                         continue
