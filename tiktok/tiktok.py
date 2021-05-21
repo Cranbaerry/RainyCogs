@@ -32,12 +32,12 @@ class TikTok(commands.Cog):
             self.background_get_new_videos.start()
 
             try:
-                proxy = await self.config.proxy()
+                proxy = self.config.proxy()
             except:
                 proxy = None
                 pass
 
-            self.log.debug(f"Proxy: {await self.config.proxy()}")
+            self.log.debug(f"Proxy: {self.config.proxy()}")
 
         self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True, custom_verifyFp="verify_kox6wops_bqKwq1Wc_OhSG_4O03_9CG2_t8CvbVmI3gZn",
                                               logging_level=logging.DEBUG, executablePath=ChromeDriverManager().install(), proxy=proxy)
