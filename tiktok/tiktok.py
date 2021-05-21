@@ -76,7 +76,7 @@ class TikTok(commands.Cog):
                         # Add id to published cache
                         cache.append(post["id"])
                         await self.config.guild(guild).cache.set(cache)
-                        self.log.debug("Saved cache data: " + cache)
+                        self.log.debug("Saved cache data: " + str(cache))
 
     @background_get_new_videos.before_loop
     async def wait_for_red(self):
@@ -121,6 +121,12 @@ class TikTok(commands.Cog):
     async def update(self, ctx):
         """Manually force update"""
         self.background_get_new_videos()
+
+    @tiktok.command()
+    @checks.is_owner()
+    async def stop(self, ctx):
+        """Manually stop background process to check videos"""
+        self.background_get_new_videos().cancel()
 
     @tiktok.command()
     @checks.is_owner()
