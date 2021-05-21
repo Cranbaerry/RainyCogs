@@ -81,12 +81,13 @@ class TikTok(commands.Cog):
             for i, sub in enumerate(subs):
                 self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
-                try:
-                    tiktoks = self.get_tiktok_by_name(sub["id"], 3)
+                tiktoks = self.get_tiktok_by_name(sub["id"], 3)
+                '''#try:
+                   
                 except TikTokCaptchaError:
                     self.log.error("Asking captcha, need proxy")
                     continue
-                #self.log.debug("Response: " + str(tiktoks))
+                self.log.debug("Response: " + str(tiktoks))
                 if not channel:
                     self.log.debug("Channel not found: " + sub["channel"]["name"])
                     continue
@@ -102,7 +103,7 @@ class TikTok(commands.Cog):
                         await self.config.guild(guild).cache.set(cache)
                         self.log.debug("Saved cache data: " + str(cache))
                     else:
-                        self.log.debug("Skipping: " + post["id"])
+                        self.log.debug("Skipping: " + post["id"])''''
 
                 self.log.debug("Sleeping 5 seconds..")
                 await asyncio.sleep(5)
