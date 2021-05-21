@@ -1,28 +1,21 @@
 import sys
-from datetime import datetime
 
 import discord
 import logging
 import asyncio
-
-import websockets
-import platform
 import functools
 
 from TikTokApi.exceptions import TikTokCaptchaError
-from discord.ext import tasks
 from redbot.core import commands, Config, checks
 from TikTokApi import TikTokApi
 from urllib3.exceptions import NewConnectionError, ProxyError, MaxRetryError
 from requests.exceptions import ConnectionError
 from webdriver_manager.chrome import ChromeDriverManager
 
-
 UNIQUE_ID = 0x696969669
 
 
 class TikTok(commands.Cog):
-    # init method or constructor
     def __init__(self, bot, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -30,13 +23,13 @@ class TikTok(commands.Cog):
         self.log = logging.getLogger("tiktok")
         self.log.setLevel(logging.DEBUG)
         self.proxy = None
+        self.api = None
 
-        if __name__ != "__main__":
-            self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
-            self.config.register_guild(subscriptions=[], cache=[])
-            self.config.register_global(interval=300, cache_size=500, proxy=[])
-            self.main_task = self.bot.loop.create_task(self.initialize())
-            self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
+        self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
+        self.config.register_guild(subscriptions=[], cache=[])
+        self.config.register_global(interval=300, cache_size=500, proxy=[])
+        self.main_task = self.bot.loop.create_task(self.initialize())
+        self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
 
     async def initialize(self):
         await self.bot.wait_until_red_ready()
@@ -54,8 +47,7 @@ class TikTok(commands.Cog):
         self.log.debug(f"Proxy: {await self.config.proxy()}")
 
     def get_tiktok_by_name(self, username, count):
-        stuff = self.api.byUsername(username, count=count)
-        return stuff
+        return self.api.byUsername(username, count=count)
 
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
@@ -82,11 +74,7 @@ class TikTok(commands.Cog):
                     except (ConnectionError, NewConnectionError, ProxyError, MaxRetryError):
                         self.log.error("Proxy failed")
                         continue
-                    except Exception as exception:
-                        exc_type, value, traceback = sys.exc_info()
-                        assert exc_type.__name__ == 'NameError'
-                        self.log.error("Failed with exception [%s]" % exc_type.__name_)
-                        continue
+
                     self.log.debug("Response: " + str(tiktoks))
                     if not channel:
                         self.log.debug("Channel not found: " + sub["channel"]["name"])
@@ -97,7 +85,12 @@ class TikTok(commands.Cog):
                         self.log.debug("Post Content: " + str(post))
                         if not post["id"] in cache:
                             self.log.debug("Sending data to channel: " + sub["channel"]["name"])
-                            # TODO: Send embed and post in channel
+                            # Send embed and post in channel
+                            embed = discord.Embed(color=0xEE2222, title=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
+                            embed.description = post['desc']
+                            embed.set_image(url=post['video']['dynamicCover'])
+                            embed.set_footer(text=f"{post['music']['title']} - {post['music']['authorName']}", icon_url='https://i.imgur.com/RziGM2t.png')
+                            await self.bot.get_channel(sub["channel"]["id"]).send(embed=embed)
                             # Add id to published cache
                             cache.append(post["id"])
                             await self.config.guild(guild).cache.set(cache)
@@ -116,8 +109,6 @@ class TikTok(commands.Cog):
         self.log.debug("Shutting down TikTok service..")
         self.background_task.cancel()
         self.main_task.cancel()
-        #self.background_get_new_videos.cancel()
-        # self.api.browser.browser.quit()
 
     @commands.group()
     @commands.guild_only()
@@ -191,6 +182,12 @@ class TikTok(commands.Cog):
 
     @tiktok.command()
     @checks.is_owner()
+    async def clear(self, ctx):
+        """Clear cache"""
+        await self.config.guild(ctx.guild).cache.set([])
+
+    @tiktok.command()
+    @checks.is_owner()
     async def setinterval(self, ctx: commands.Context, interval: int):
         """Set the interval in seconds at which to check for updates
 
@@ -198,7 +195,6 @@ class TikTok(commands.Cog):
 
         Default is 300 seconds (5 minutes)"""
         await self.config.interval.set(interval)
-        #self.background_get_new_videos.change_interval(seconds=interval)
         await ctx.send(f"Interval set to {await self.config.interval()}")
 
     @tiktok.command()
@@ -209,7 +205,3 @@ class TikTok(commands.Cog):
 
         await self.config.proxy.set(proxy)
         await ctx.send(f"Proxy set to {await self.config.proxy()}")
-
-
-if __name__ == "__main__":
-    main = TikTok(None)
