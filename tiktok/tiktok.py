@@ -35,7 +35,7 @@ class TikTok(commands.Cog):
             #self.init_task = self.bot.loop.create_task(self.initialize())
             #self.init_task.start()
 
-    @tasks.loop()
+    @tasks()
     async def initialize(self):
         await self.bot.wait_until_red_ready()
         try:
