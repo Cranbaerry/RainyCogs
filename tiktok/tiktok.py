@@ -132,11 +132,11 @@ class TikTok(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.guild_only()
     @tiktok.command()
-    async def unsubscribe(self, ctx: commands.Context, channelYouTube, channelDiscord: discord.TextChannel = None):
+    async def remove(self, ctx: commands.Context, channelYouTube, channelDiscord: discord.TextChannel = None):
         """Unsubscribe a Discord channel from a TikTok channel
 
         If no Discord channel is specified, the subscription will be removed from all channels"""
-        subs = await self.conf.guild(ctx.guild).subscriptions()
+        subs = await self.config.guild(ctx.guild).subscriptions()
         unsubbed = []
         if channelDiscord:
             newSub = {'id': channelYouTube,
@@ -157,7 +157,7 @@ class TikTok(commands.Cog):
             if not len(unsubbed):
                 await ctx.send("Subscription not found")
                 return
-        await self.conf.guild(ctx.guild).subscriptions.set(subs)
+        await self.config.guild(ctx.guild).subscriptions.set(subs)
         await ctx.send(f"Subscription(s) removed: {unsubbed}")
 
     @tiktok.command()
