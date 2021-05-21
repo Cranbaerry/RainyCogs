@@ -247,7 +247,7 @@ class TikTok(commands.Cog):
 
         Default is 300 seconds (5 minutes)"""
         await self.config.interval.set(interval)
-        self.background_get_new_videos.change_interval(seconds=interval)
+        #self.background_get_new_videos.change_interval(seconds=interval)
         await ctx.send(f"Interval set to {await self.config.interval()}")
 
     @tiktok.command()
