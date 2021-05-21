@@ -31,17 +31,17 @@ class TikTok(commands.Cog):
             self.config.register_global(interval=300, cache_size=500, proxy=[])
             self.background_get_new_videos.start()
 
-        self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True,
-                                          custom_verifyFp="verify_kox6wops_bqKwq1Wc_OhSG_4O03_9CG2_t8CvbVmI3gZn",
-                                          logging_level=logging.DEBUG, executablePath=ChromeDriverManager().install(),
-                                          proxy=self.proxy)
-
     async def init_proxy(self):
         try:
             self.proxy = await self.config.proxy()
         except:
             self.proxy = None
             pass
+
+        self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True,
+                                          custom_verifyFp="verify_kox6wops_bqKwq1Wc_OhSG_4O03_9CG2_t8CvbVmI3gZn",
+                                          logging_level=logging.DEBUG, executablePath=ChromeDriverManager().install(),
+                                          proxy=self.proxy)
 
         self.log.debug(f"Proxy: {self.config.proxy()}")
 
@@ -119,7 +119,7 @@ class TikTok(commands.Cog):
 
     @tiktok.command()
     @checks.admin_or_permissions(manage_guild=True)
-    async def update(self, ctx, tiktokId, channelDiscord: discord.TextChannel = None):
+    async def update(self, ctx):
         """Manually force update"""
         self.background_get_new_videos()
 
