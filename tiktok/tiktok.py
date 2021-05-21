@@ -20,10 +20,10 @@ class TikTok(commands.Cog):
     def __init__(self, bot, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-
         self.bot = bot
         self.log = logging.getLogger("tiktok")
         self.log.setLevel(logging.DEBUG)
+        self.proxy = None
 
         if __name__ != "__main__":
             self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
@@ -31,16 +31,21 @@ class TikTok(commands.Cog):
             self.config.register_global(interval=300, cache_size=500, proxy=[])
             self.background_get_new_videos.start()
 
-            try:
-                proxy = self.config.proxy()
-            except:
-                proxy = None
-                pass
 
-            self.log.debug(f"Proxy: {self.config.proxy()}")
+        self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True,
+                                          custom_verifyFp="verify_kox6wops_bqKwq1Wc_OhSG_4O03_9CG2_t8CvbVmI3gZn",
+                                          logging_level=logging.DEBUG, executablePath=ChromeDriverManager().install(),
+                                          proxy=self.proxy)
 
-        self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True, custom_verifyFp="verify_kox6wops_bqKwq1Wc_OhSG_4O03_9CG2_t8CvbVmI3gZn",
-                                              logging_level=logging.DEBUG, executablePath=ChromeDriverManager().install(), proxy=proxy)
+    async def init_proxy(self):
+        try:
+            self.proxy = await self.config.proxy()
+        except:
+            self.proxy = None
+            pass
+
+        self.log.debug(f"Proxy: {self.config.proxy()}")
+
 
     def get_tiktok_by_name(self, username, count):
             return self.api.byUsername(username, count=count)
@@ -80,7 +85,7 @@ class TikTok(commands.Cog):
 
     def cog_unload(self):
         self.log.debug("Shutting down TikTok service..")
-        #self.api.browser.browser.quit()
+        # self.api.browser.browser.quit()
         if sys.platform.system() == 'Windows':
             self.stop_event.set()
         elif sys.platform.system() == "Linux":
