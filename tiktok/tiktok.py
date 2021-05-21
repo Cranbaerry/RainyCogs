@@ -49,7 +49,8 @@ class TikTok(commands.Cog):
         self.log.debug(f"Proxy: {await self.config.proxy()}")
 
     def get_tiktok_by_name(self, username, count):
-        return self.api.byUsername(username, count=count)
+        stuff = self.api.byUsername(username, count=count)
+        return stuff
 
     @tasks.loop(seconds=300)
     async def background_get_new_videos3(self):
