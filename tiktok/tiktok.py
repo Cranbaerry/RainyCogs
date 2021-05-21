@@ -106,9 +106,9 @@ class TikTok(commands.Cog):
         await self.config.guild(ctx.guild).subscriptions.set(subs)
         await ctx.send(f"Subscription added: {newSub}")
 
+    @tiktok.command()
     @checks.is_owner()
-    @tiktok.command(name="setinterval", hidden=True)
-    async def set_interval(self, ctx: commands.Context, interval: int):
+    async def setinterval(self, ctx: commands.Context, interval: int):
         """Set the interval in seconds at which to check for updates
 
         Very low values will probably get you rate limited
@@ -118,9 +118,9 @@ class TikTok(commands.Cog):
         self.background_get_new_videos.change_interval(seconds=interval)
         await ctx.send(f"Interval set to {await self.config.interval()}")
 
+    @tiktok.command()
     @checks.is_owner()
-    @tiktok.command(name="setproxy")
-    async def set_proxy(self, ctx: commands.Context, proxy):
+    async def setproxy(self, ctx: commands.Context, proxy):
         self.api.proxy = proxy
         await ctx.send(f"Proxy set to {await self.api.proxy}")
 
