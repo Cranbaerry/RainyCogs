@@ -53,7 +53,7 @@ class TikTok(commands.Cog):
 
         self.log.debug(f"Proxy: {await self.config.proxy()}")
 
-    async def get_tiktok_by_name(self, username, count):
+    def get_tiktok_by_name(self, username, count):
         stuff = self.api.byUsername(username, count=count)
         return stuff
 
