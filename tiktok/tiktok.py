@@ -66,7 +66,7 @@ class TikTok(commands.Cog):
                 if not channel:
                     self.log.debug("Channel not found: " + sub["channel"]["name"])
                     continue
-                self.log.debug("Items: " + cache())
+                self.log.debug("Items: " + str(cache))
                 if not tiktok["id"] in cache.keys():
                     self.log.debug("Sending data to channel: " + sub["channel"]["name"])
                     # TODO: Send embed and post in channel
