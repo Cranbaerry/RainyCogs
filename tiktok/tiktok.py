@@ -139,7 +139,7 @@ class TikTok(commands.Cog):
                 await asyncio.sleep(5)
 
 
-    @background_get_new_videos.before_loop
+    #@background_get_new_videos.before_loop
     async def wait_for_red(self):
         await self.bot.wait_until_red_ready()
         self.log.debug(f"Ready")
