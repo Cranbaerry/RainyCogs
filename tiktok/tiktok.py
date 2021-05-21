@@ -20,13 +20,19 @@ class TikTok(commands.Cog):
     def __init__(self, bot, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        try:
+            proxy = self.config.proxy()
+        except:
+            proxy = None
+            pass
+
         self.bot = bot
         self.log = logging.getLogger("tiktok")
         self.log.setLevel(logging.DEBUG)
         self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True, custom_verifyFp="verify_kox6wops_bqKwq1Wc_OhSG_4O03_9CG2_t8CvbVmI3gZn",
-                                          logging_level=logging.DEBUG, executablePath=ChromeDriverManager().install(), proxy="119.81.189.194:8123")
+                                          logging_level=logging.DEBUG, executablePath=ChromeDriverManager().install(), proxy=proxy)
 
-        self.log.debug("Verify: verify_kox68gzm_z2N190FQ_dmGv_4YgN_9eQo_YUNXoHldT8T6")
+        self.log.debug(f"Proxy: {proxy}")
 
         if __name__ != "__main__":
             self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
@@ -122,7 +128,9 @@ class TikTok(commands.Cog):
     @checks.is_owner()
     async def setproxy(self, ctx: commands.Context, proxy):
         self.api.proxy = proxy
-        await ctx.send(f"Proxy set to {await self.api.proxy}")
+
+        await self.config.proxy.set(proxy)
+        await ctx.send(f"Proxy set to {await self.config.proxy}")
 
 
 if __name__ == "__main__":
