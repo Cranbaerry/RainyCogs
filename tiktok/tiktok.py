@@ -31,11 +31,10 @@ class TikTok(commands.Cog):
             self.config.register_guild(subscriptions=[], cache=[])
             self.config.register_global(interval=300, cache_size=500, proxy=[])
             self.background_get_new_videos.start()
-            self.initialize.start()
-            #self.init_task = self.bot.loop.create_task(self.initialize())
+            self.initialize()
+            #self.init_task = self.bot.loop.create_task()
             #self.init_task.start()
 
-    @tasks()
     async def initialize(self):
         await self.bot.wait_until_red_ready()
         try:
