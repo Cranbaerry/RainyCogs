@@ -24,24 +24,9 @@ class TikTok(commands.Cog):
         self.log = logging.getLogger("tiktok")
         self.log.setLevel(logging.DEBUG)
         self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True, custom_verifyFp="verify_kox6wops_bqKwq1Wc_OhSG_4O03_9CG2_t8CvbVmI3gZn",
-                                          logging_level=logging.ERROR, executablePath=ChromeDriverManager().install(), proxy="187.60.171.34:8081")
+                                          logging_level=logging.DEBUG, executablePath=ChromeDriverManager().install(), proxy="91.234.127.222:53281")
 
         self.log.debug("Verify: verify_kox68gzm_z2N190FQ_dmGv_4YgN_9eQo_YUNXoHldT8T6")
-
-        if platform.system() == 'Windows':
-            import threading
-
-            stop_event = threading.Event()
-            self.stop = asyncio.get_event_loop().run_in_executor(None, stop_event.wait) if __name__ == "__main__" else self.bot.loop.run_in_executor(None, stop_event.wait)
-            # stop_event.set()
-        elif platform.system() == "Linux":
-            # The stop condition is set when receiving SIGTERM.
-            # https://stackoverflow.com/questions/56663152/how-to-stop-websocket-server-created-with-websockets-serve
-            import signal
-
-            self.stop = asyncio.get_event_loop().create_future() if __name__ == "__main__" else self.bot.loop.create_future()
-            self.bot.loop.add_signal_handler(signal.SIGTERM, self.stop.set_result, None)
-            # loop.close()
 
         if __name__ != "__main__":
             self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
@@ -63,6 +48,7 @@ class TikTok(commands.Cog):
                 return
 
             for i, sub in enumerate(subs):
+                self.log.debug("Fetching data from guild: " + sub["channel"]["name"])
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 tiktok = self.get_tiktok_by_name(sub["id"], 3)
                 if not channel:
