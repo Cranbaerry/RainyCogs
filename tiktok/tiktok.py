@@ -88,7 +88,7 @@ class TikTok(commands.Cog):
                         self.log.debug("Skipping: " + post["id"])
 
                 self.log.debug("Sleeping 5 seconds..")
-                asyncio.sleep(5)
+                await asyncio.sleep(5)
 
 
     @background_get_new_videos.before_loop
