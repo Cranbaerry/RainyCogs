@@ -70,7 +70,7 @@ class TikTok(commands.Cog):
                 for post in tiktoks:
                     self.log.debug("Post ID: " + post["id"])
                     self.log.debug("Post Content: " + str(post))
-                    if not post["id"] in cache.keys():
+                    if not post["id"] in cache:
                         self.log.debug("Sending data to channel: " + sub["channel"]["name"])
                         # TODO: Send embed and post in channel
                         # Add id to published cache
