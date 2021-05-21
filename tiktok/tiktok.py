@@ -118,6 +118,12 @@ class TikTok(commands.Cog):
         await ctx.send(f"Subscription added: {newSub}")
 
     @tiktok.command()
+    @checks.update(manage_guild=True)
+    async def add(self, ctx, tiktokId, channelDiscord: discord.TextChannel = None):
+        """Manually force update"""
+        self.background_get_new_videos()
+
+    @tiktok.command()
     @checks.is_owner()
     async def setinterval(self, ctx: commands.Context, interval: int):
         """Set the interval in seconds at which to check for updates
@@ -132,6 +138,7 @@ class TikTok(commands.Cog):
     @tiktok.command()
     @checks.is_owner()
     async def setproxy(self, ctx: commands.Context, proxy):
+        """Set proxy address"""
         self.api.proxy = proxy
 
         await self.config.proxy.set(proxy)
