@@ -29,9 +29,10 @@ class TikTok(commands.Cog):
             self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
             self.config.register_guild(subscriptions=[], cache=[])
             self.config.register_global(interval=300, cache_size=500, proxy=[])
+            self.background_get_new_videos.start()
 
     async def initialize(self):
-        await self.bot.wait_until_red_ready()
+        #await self.bot.wait_until_red_ready()
         try:
             self.proxy = await self.config.proxy()
         except:
@@ -42,8 +43,6 @@ class TikTok(commands.Cog):
                                           custom_verifyFp="verify_kox6wops_bqKwq1Wc_OhSG_4O03_9CG2_t8CvbVmI3gZn",
                                           logging_level=logging.DEBUG, executablePath=ChromeDriverManager().install(),
                                           proxy=self.proxy)
-
-        self.background_get_new_videos.start()
 
         self.log.debug(f"Proxy: {await self.config.proxy()}")
 
