@@ -20,19 +20,10 @@ class TikTok(commands.Cog):
     def __init__(self, bot, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        try:
-            proxy = self.config.proxy()
-        except:
-            proxy = None
-            pass
 
         self.bot = bot
         self.log = logging.getLogger("tiktok")
         self.log.setLevel(logging.DEBUG)
-        self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True, custom_verifyFp="verify_kox6wops_bqKwq1Wc_OhSG_4O03_9CG2_t8CvbVmI3gZn",
-                                          logging_level=logging.DEBUG, executablePath=ChromeDriverManager().install(), proxy=proxy)
-
-        self.log.debug(f"Proxy: {proxy}")
 
         if __name__ != "__main__":
             self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
@@ -40,8 +31,19 @@ class TikTok(commands.Cog):
             self.config.register_global(interval=300, cache_size=500, proxy=[])
             self.background_get_new_videos.start()
 
+            try:
+                proxy = self.config.proxy()
+            except:
+                proxy = None
+                pass
+
+            self.log.debug(f"Proxy: {proxy}")
+
+        self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True, custom_verifyFp="verify_kox6wops_bqKwq1Wc_OhSG_4O03_9CG2_t8CvbVmI3gZn",
+                                              logging_level=logging.DEBUG, executablePath=ChromeDriverManager().install(), proxy=proxy)
+
     def get_tiktok_by_name(self, username, count):
-        return self.api.byUsername(username, count=count)
+            return self.api.byUsername(username, count=count)
 
     @tasks.loop(seconds=1)
     async def background_get_new_videos(self):
