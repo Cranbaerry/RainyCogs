@@ -24,7 +24,7 @@ class TikTok(commands.Cog):
         self.log = logging.getLogger("tiktok")
         self.log.setLevel(logging.DEBUG)
         self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True, custom_verifyFp="verify_kox6wops_bqKwq1Wc_OhSG_4O03_9CG2_t8CvbVmI3gZn",
-                                          logging_level=logging.ERROR, executablePath=ChromeDriverManager().install())
+                                          logging_level=logging.ERROR, executablePath=ChromeDriverManager().install(), proxy="187.60.171.34:8081")
 
         self.log.debug("Verify: verify_kox68gzm_z2N190FQ_dmGv_4YgN_9eQo_YUNXoHldT8T6")
 
