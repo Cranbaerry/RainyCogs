@@ -24,7 +24,7 @@ class TikTok(commands.Cog):
         self.log = logging.getLogger("tiktok")
         self.log.setLevel(logging.DEBUG)
         self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True, custom_verifyFp="verify_kox6wops_bqKwq1Wc_OhSG_4O03_9CG2_t8CvbVmI3gZn",
-                                          logging_level=logging.DEBUG, executablePath=ChromeDriverManager().install(), proxy="43.128.42.210:3128")
+                                          logging_level=logging.DEBUG, executablePath=ChromeDriverManager().install(), proxy="119.81.189.194:8123")
 
         self.log.debug("Verify: verify_kox68gzm_z2N190FQ_dmGv_4YgN_9eQo_YUNXoHldT8T6")
 
@@ -117,6 +117,12 @@ class TikTok(commands.Cog):
         await self.config.interval.set(interval)
         self.background_get_new_videos.change_interval(seconds=interval)
         await ctx.send(f"Interval set to {await self.config.interval()}")
+
+    @checks.is_owner()
+    @tiktok.command(name="setproxy")
+    async def set_proxy(self, ctx: commands.Context, proxy):
+        self.api.proxy = proxy
+        await ctx.send(f"Proxy set to {await self.api.proxy}")
 
 
 if __name__ == "__main__":
