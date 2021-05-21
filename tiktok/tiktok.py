@@ -60,7 +60,7 @@ class TikTok(commands.Cog):
             except:
                 self.log.debug("Unable to fetch data, config is empty..")
                 return
-            self.log.debug(f"Iterating in: {guild.name}")
+            #self.log.debug(f"Iterating in: {guild.name}")
             for i, sub in enumerate(subs):
                 self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
@@ -95,6 +95,7 @@ class TikTok(commands.Cog):
     async def wait_for_red(self):
         await self.bot.wait_until_red_ready()
         interval = await self.config.interval()
+        self.log.debug(f"Background process interval is set to {interval}")
         self.background_get_new_videos.change_interval(seconds=interval)
 
     def cog_unload(self):
