@@ -57,11 +57,11 @@ class TikTok(commands.Cog):
                 self.log.debug("Fetching data from guild: " + sub["channel"]["name"])
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 tiktok = self.get_tiktok_by_name(sub["id"], 3)
+                self.log.debug("Response: " + tiktok)
                 if not channel:
                     self.log.debug("Channel not found: " + sub["channel"]["name"])
                     continue
-                self.log.debug("Items: " + cache.items())
-                self.log.debug("Keys: " + cache.keys())
+                self.log.debug("Items: " + cache())
                 if not tiktok["id"] in cache.keys():
                     self.log.debug("Sending data to channel: " + sub["channel"]["name"])
                     # TODO: Send embed and post in channel
