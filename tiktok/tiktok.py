@@ -14,7 +14,6 @@ from discord.ext import tasks
 from redbot.core import commands, Config, checks
 from TikTokApi import TikTokApi
 from urllib3.exceptions import NewConnectionError, ProxyError, MaxRetryError
-from urllib3 import ConnectionRefusedError
 from webdriver_manager.chrome import ChromeDriverManager
 
 UNIQUE_ID = 0x696969669
