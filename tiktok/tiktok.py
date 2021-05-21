@@ -52,13 +52,17 @@ class TikTok(commands.Cog):
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 tiktok = self.get_tiktok_by_name(sub["id"], 3)
                 if not channel:
+                    self.log.debug("Channel not found: " + sub["channel"]["name"])
                     continue
+                self.log.debug("Items: " + cache.items())
+                self.log.debug("Keys: " + cache.keys())
                 if not tiktok["id"] in cache.keys():
                     self.log.debug("Sending data to channel: " + sub["channel"]["name"])
                     # TODO: Send embed and post in channel
                     # Add id to published cache
                     cache.append(tiktok["id"])
                     await self.config.guild(guild).cache.set(cache)
+                    self.log.debug("Saved cache data: " + cache)
 
     @background_get_new_videos.before_loop
     async def wait_for_red(self):
