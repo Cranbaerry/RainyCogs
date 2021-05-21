@@ -78,8 +78,9 @@ class TikTok(commands.Cog):
                         self.log.error("No connection could be made because the target machine actively refused it")
                         continue
                     except Exception as exception:
-
-                        self.log.error("Oh no")
+                        exc_type, value, traceback = sys.exc_info()
+                        assert exc_type.__name__ == 'NameError'
+                        self.log.error("Failed with exception [%s]" % exc_type.__name_)
                         continue
                     self.log.debug("Response: " + str(tiktoks))
                     if not channel:
