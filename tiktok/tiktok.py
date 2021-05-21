@@ -43,7 +43,7 @@ class TikTok(commands.Cog):
                                           logging_level=logging.DEBUG, executablePath=ChromeDriverManager().install(),
                                           proxy=self.proxy)
 
-        self.log.debug(f"Proxy: {self.config.proxy()}")
+        self.log.debug(f"Proxy: {await self.config.proxy()}")
 
     def get_tiktok_by_name(self, username, count):
         return self.api.byUsername(username, count=count)
