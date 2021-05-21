@@ -53,7 +53,24 @@ class TikTok(commands.Cog):
 
     @tasks.loop(seconds=300)
     async def background_get_new_videos(self):
-        self.log.error("Running background..")
+        self.log.debug("Running background..")
+        for guild in self.bot.guilds:
+            try:
+                subs = await self.config.guild(guild).subscriptions()
+                cache = await self.config.guild(guild).cache()
+            except:
+                self.log.debug("Unable to fetch data, config is empty..")
+                return
+            self.log.debug(f"Iterating in: {guild.name}")
+            for i, sub in enumerate(subs):
+                self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
+                channel = self.bot.get_channel(int(sub["channel"]["id"]))
+                self.log.debug("Sleeping 5 seconds..")
+                await asyncio.sleep(5)
+
+    @tasks.loop(seconds=300)
+    async def background_get_new_videos2(sself):
+        self.log.debug("Running background..")
         for guild in self.bot.guilds:
             try:
                 subs = await self.config.guild(guild).subscriptions()
