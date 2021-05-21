@@ -32,7 +32,7 @@ class TikTok(commands.Cog):
             self.config.register_global(interval=300, cache_size=500, proxy=[])
             self.background_get_new_videos.start()
             self.init_task = self.bot.loop.create_task(self.initialize())
-            self.init_task.start()
+            #self.init_task.start()
 
     async def initialize(self):
         await self.bot.wait_until_red_ready()
@@ -70,7 +70,7 @@ class TikTok(commands.Cog):
                 except TikTokCaptchaError:
                     self.log.error("Asking captcha, need proxy")
                     continue
-                self.log.debug("Response: " + str(tiktoks))
+                #self.log.debug("Response: " + str(tiktoks))
                 if not channel:
                     self.log.debug("Channel not found: " + sub["channel"]["name"])
                     continue
@@ -129,6 +129,37 @@ class TikTok(commands.Cog):
         subs.append(newSub)
         await self.config.guild(ctx.guild).subscriptions.set(subs)
         await ctx.send(f"Subscription added: {newSub}")
+
+    @checks.admin_or_permissions(manage_guild=True)
+    @commands.guild_only()
+    @tiktok.command()
+    async def unsubscribe(self, ctx: commands.Context, channelYouTube, channelDiscord: discord.TextChannel = None):
+        """Unsubscribe a Discord channel from a TikTok channel
+
+        If no Discord channel is specified, the subscription will be removed from all channels"""
+        subs = await self.conf.guild(ctx.guild).subscriptions()
+        unsubbed = []
+        if channelDiscord:
+            newSub = {'id': channelYouTube,
+                      'channel': {"name": channelDiscord.name,
+                                  "id": channelDiscord.id}}
+            newSub['uid'] = self.sub_uid(newSub)
+            for i, sub in enumerate(subs):
+                if sub['uid'] == newSub['uid']:
+                    unsubbed.append(subs.pop(i))
+                    break
+            else:
+                await ctx.send("Subscription not found")
+                return
+        else:
+            for i, sub in enumerate(subs):
+                if sub['id'] == channelYouTube:
+                    unsubbed.append(subs.pop(i))
+            if not len(unsubbed):
+                await ctx.send("Subscription not found")
+                return
+        await self.conf.guild(ctx.guild).subscriptions.set(subs)
+        await ctx.send(f"Subscription(s) removed: {unsubbed}")
 
     @tiktok.command()
     @checks.admin_or_permissions(manage_guild=True)
