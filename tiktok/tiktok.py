@@ -118,8 +118,8 @@ class TikTok(commands.Cog):
         await ctx.send(f"Subscription added: {newSub}")
 
     @tiktok.command()
-    @checks.update(manage_guild=True)
-    async def add(self, ctx, tiktokId, channelDiscord: discord.TextChannel = None):
+    @checks.is_owner(manage_guild=True)
+    async def update(self, ctx, tiktokId, channelDiscord: discord.TextChannel = None):
         """Manually force update"""
         self.background_get_new_videos()
 
