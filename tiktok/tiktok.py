@@ -48,11 +48,11 @@ class TikTok(commands.Cog):
 
         self.log.debug(f"Proxy: {await self.config.proxy()}")
 
-    async def get_tiktok_by_name(self, username, count):
+    def get_tiktok_by_name(self, username, count):
         return self.api.byUsername(username, count=count)
 
     @tasks.loop(seconds=300)
-    async def background_get_new_videos(self):
+    async def background_get_new_videos3(self):
         self.log.debug("Running background..")
         for guild in self.bot.guilds:
             try:
@@ -69,7 +69,7 @@ class TikTok(commands.Cog):
                 await asyncio.sleep(5)
 
     @tasks.loop(seconds=300)
-    async def background_get_new_videos2(sself):
+    async def background_get_new_videos(self):
         self.log.debug("Running background..")
         for guild in self.bot.guilds:
             try:
@@ -78,12 +78,11 @@ class TikTok(commands.Cog):
             except:
                 self.log.debug("Unable to fetch data, config is empty..")
                 return
-            #self.log.debug(f"Iterating in: {guild.name}")
             for i, sub in enumerate(subs):
                 self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 try:
-                    tiktoks = await self.get_tiktok_by_name(sub["id"], 3)
+                    tiktoks = self.get_tiktok_by_name(sub["id"], 3)
                 except TikTokCaptchaError:
                     self.log.error("Asking captcha, need proxy")
                     continue
