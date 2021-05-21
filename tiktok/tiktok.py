@@ -78,10 +78,8 @@ class TikTok(commands.Cog):
                         self.log.error("No connection could be made because the target machine actively refused it")
                         continue
                     except Exception as exception:
-                        assert type(exception).__name__ == 'NameError'
-                        assert exception.__class__.__name__ == 'NameError'
-                        assert exception.__class__.__qualname__ == 'NameError'
-                        self.log.error("No connection could be made because the target machine actively refused it")
+
+                        self.log.error("Oh no")
                         continue
                     self.log.debug("Response: " + str(tiktoks))
                     if not channel:
