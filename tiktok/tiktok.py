@@ -11,6 +11,7 @@ from TikTokApi.exceptions import TikTokCaptchaError
 from discord.ext import tasks
 from redbot.core import commands, Config, checks
 from TikTokApi import TikTokApi
+from urllib3.exceptions import NewConnectionError
 from webdriver_manager.chrome import ChromeDriverManager
 
 UNIQUE_ID = 0x696969669
@@ -67,11 +68,14 @@ class TikTok(commands.Cog):
                 for i, sub in enumerate(subs):
                     self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
                     channel = self.bot.get_channel(int(sub["channel"]["id"]))
-                    tiktoks = await self.get_tiktok_by_name(sub["id"], 3)
-                    '''#try:
-                       
+
+                    try:
+                        tiktoks = await self.get_tiktok_by_name(sub["id"], 3)
                     except TikTokCaptchaError:
                         self.log.error("Asking captcha, need proxy")
+                        continue
+                    except NewConnectionError:
+                        self.log.error("No connection could be made because the target machine actively refused it")
                         continue
                     self.log.debug("Response: " + str(tiktoks))
                     if not channel:
@@ -89,7 +93,7 @@ class TikTok(commands.Cog):
                             await self.config.guild(guild).cache.set(cache)
                             self.log.debug("Saved cache data: " + str(cache))
                         else:
-                            self.log.debug("Skipping: " + post["id"])'''
+                            self.log.debug("Skipping: " + post["id"])
 
                     self.log.debug("Sleeping 5 seconds..")
                     await asyncio.sleep(5)
