@@ -7,6 +7,7 @@ import asyncio
 import websockets
 import platform
 
+from TikTokApi.exceptions import TikTokCaptchaError
 from discord.ext import tasks
 from redbot.core import commands, Config, checks
 from TikTokApi import TikTokApi
@@ -62,7 +63,11 @@ class TikTok(commands.Cog):
             for i, sub in enumerate(subs):
                 self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
-                tiktoks = await self.get_tiktok_by_name(sub["id"], 3)
+                try:
+                    tiktoks = await self.get_tiktok_by_name(sub["id"], 3)
+                except TikTokCaptchaError:
+                    self.log.error("Asking captcha, need proxy")
+                    continue
                 self.log.debug("Response: " + str(tiktoks))
                 if not channel:
                     self.log.debug("Channel not found: " + sub["channel"]["name"])
