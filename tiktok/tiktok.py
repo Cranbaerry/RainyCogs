@@ -46,7 +46,7 @@ class TikTok(commands.Cog):
 
         self.log.debug(f"Proxy: {await self.config.proxy()}")
 
-    def get_tiktok_by_name(self, username, count):
+    async def get_tiktok_by_name(self, username, count):
         return self.api.byUsername(username, count=count)
 
     @tasks.loop(seconds=1)
@@ -62,7 +62,7 @@ class TikTok(commands.Cog):
             for i, sub in enumerate(subs):
                 self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
-                tiktoks = self.get_tiktok_by_name(sub["id"], 3)
+                tiktoks = await self.get_tiktok_by_name(sub["id"], 3)
                 self.log.debug("Response: " + str(tiktoks))
                 if not channel:
                     self.log.debug("Channel not found: " + sub["channel"]["name"])
