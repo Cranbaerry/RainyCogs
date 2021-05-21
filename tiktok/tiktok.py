@@ -86,12 +86,8 @@ class TikTok(commands.Cog):
 
     def cog_unload(self):
         self.log.debug("Shutting down TikTok service..")
-        # self.api.browser.browser.quit()
-        if sys.platform.system() == 'Windows':
-            self.stop_event.set()
-        elif sys.platform.system() == "Linux":
-            self.loop.close()
         self.background_get_new_videos.cancel()
+        # self.api.browser.browser.quit()
 
     @commands.group()
     @commands.guild_only()
@@ -141,7 +137,7 @@ class TikTok(commands.Cog):
     @tiktok.command()
     @checks.is_owner()
     async def setproxy(self, ctx: commands.Context, proxy):
-        """Set proxy address"""
+        """Set HTTP proxy address"""
         self.api.proxy = proxy
 
         await self.config.proxy.set(proxy)
