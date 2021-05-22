@@ -67,7 +67,7 @@ class TikTok(commands.Cog):
 
         return f"{tiktok['id']}.gif"
 
-    def get_new_proxy(self):
+    async def get_new_proxy(self):
         url = 'http://pubproxy.com/api/proxy?limit=1&format=txt&type=http'
         hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}
         async with aiohttp.ClientSession() as session:
