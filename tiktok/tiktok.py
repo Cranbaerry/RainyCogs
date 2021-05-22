@@ -205,14 +205,13 @@ class TikTok(commands.Cog):
                 self.log.debug("Sleeping 5 seconds..")
                 await asyncio.sleep(5)
 
-        interval = await self.config.interval()
-        self.log.debug(f"Sleeping {interval} seconds..")
-        await asyncio.sleep(interval)
-
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
         while True:
             await self.get_new_videos()
+            interval = await self.config.interval()
+            self.log.debug(f"Sleeping {interval} seconds..")
+            await asyncio.sleep(interval)
 
     def cog_unload(self):
         self.log.debug("Shutting down TikTok service..")
@@ -306,7 +305,6 @@ class TikTok(commands.Cog):
     async def update(self, ctx):
         """Manually force feed update"""
         await self.get_new_videos()
-        await ctx.send("Cache database cleared!")
 
     @tiktok.command()
     @checks.is_owner()
