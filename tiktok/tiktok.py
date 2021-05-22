@@ -55,8 +55,8 @@ class TikTok(commands.Cog):
     def get_tiktok_by_name(self, username, count):
         return self.api.byUsername(username, count=count)
 
-    async def get_tikok_dynamic_cover(self, tiktok):
-        image_data = self.api.getBytes(url=tiktok['video']['dynamicCover'])
+    def get_tikok_dynamic_cover(self, post):
+        image_data = self.api.getBytes(url=post['video']['dynamicCover'])
 
         im = Image.open(io.BytesIO(image_data))
         im.info.pop('background', None)
@@ -65,7 +65,7 @@ class TikTok(commands.Cog):
             im.save(image_binary, 'gif', save_all=True)
             image_binary.seek(0)
 
-            self.log.debug(f"Saved {tiktok['id']}.gif")
+            self.log.debug(f"Saved {post['id']}.gif")
             return image_binary
 
     async def get_new_proxy(self):
