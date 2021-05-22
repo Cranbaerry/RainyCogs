@@ -111,6 +111,7 @@ class TikTok(commands.Cog):
         res = r.text
 
         self.log.debug(f"Response: {res}")
+        self.log.debug(f'Headers: {r.headers}')
 
         url_time = r.headers['last-modified']
         url_date = parsedate(url_time)
