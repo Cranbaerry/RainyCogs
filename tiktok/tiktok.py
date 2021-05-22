@@ -64,9 +64,9 @@ class TikTok(commands.Cog):
         with io.BytesIO() as image_binary:
             im.save(image_binary, 'gif', save_all=True)
             image_binary.seek(0)
-
+            file = discord.File(fp=image_binary, filename=f"{post['id']}.gif")
             self.log.debug(f"Saved {post['id']}.gif")
-            return image_binary
+            return file
 
     async def get_new_proxy(self):
         url = 'http://pubproxy.com/api/proxy?limit=1&format=txt&type=http'
@@ -120,10 +120,8 @@ class TikTok(commands.Cog):
                             self.log.debug("Sending data to channel: " + sub["channel"]["name"])
                             task = functools.partial(self.get_tikok_dynamic_cover, post)
                             task = self.bot.loop.run_in_executor(None, task)
-                            cover_binary = await asyncio.wait_for(task, timeout=60)
-                            self.log.debug("Converted")
-                            file = discord.File(fp=cover_binary, filename=f"{post['id']}.gif")
-                            
+                            cover_file = await asyncio.wait_for(task, timeout=60)
+
                             # Send embed and post in channel
                             self.log.debug("Creating embed..")
                             embed = discord.Embed(color=0xEE2222, title=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
@@ -132,7 +130,7 @@ class TikTok(commands.Cog):
                             embed.set_footer(text=f"{post['music']['title']} - {post['music']['authorName']}", icon_url='https://i.imgur.com/RziGM2t.png')
                             embed.set_thumbnail(url=post['author']['avatarMedium'])
                             embed.set_image(url=f"attachment://{post['id']}.gif")
-                            self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=file)
+                            self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=cover_file)
                             self.log.debug("Sent!")
                             # self.bot.get_channel(sub["channel"]["id"]).send(embed=embed,)
                             # Add id to published cache
