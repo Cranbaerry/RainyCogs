@@ -58,18 +58,20 @@ class TikTok(commands.Cog):
 
         self.log.debug(f"Proxy: {await self.config.proxy()}")
 
-    def get_tiktok_by_name(self, username, count, proxies = None):
+    def get_tiktok_by_name(self, username, count, proxies):
         try:
             data = self.api.byUsername(username, count=count)
             return data
         except TikTokCaptchaError:
             self.log.error("Asking captcha, need proxy")
             self._get_new_proxy(proxies, True)
-            return self.get_tiktok_by_name(username, count)
+            self.log.warning("Attempting to connect with new proxy..")
+            return self.get_tiktok_by_name(username, count, proxies)
         except ConnectionError as e:
             self.log.error("Proxy failed: " + str(e))
             self._get_new_proxy(proxies, True)
-            return self.get_tiktok_by_name(username, count)
+            self.log.warning("Attempting to connect with new proxy..")
+            return self.get_tiktok_by_name(username, count, proxies)
 
     def get_tiktok_dynamic_cover(self, post):
         image_data = self.api.getBytes(url=post['video']['dynamicCover'])
