@@ -59,12 +59,20 @@ class TikTok(commands.Cog):
             return data
         except TikTokCaptchaError:
             self.log.error("Asking captcha, need proxy")
-            self.bot.loop.create_task(self.get_new_proxy())
-            return self.get_tiktok_by_name(username, count)
+            if "you reached the maximum 50 requests for today" in str(e):
+                self.log.error("Maximum proxy requests limit reached!")
+                raise MaxRetryError()
+            else:
+                self.bot.loop.create_task(self.get_new_proxy())
+                return self.get_tiktok_by_name(username, count)
         except ConnectionError as e:
             self.log.error("Proxy failed: " + str(e))
-            self.bot.loop.create_task(self.get_new_proxy())
-            return self.get_tiktok_by_name(username, count)
+            if "you reached the maximum 50 requests for today" in str(e):
+                self.log.error("Maximum proxy requests limit reached!")
+                raise MaxRetryError()
+            else:
+                self.bot.loop.create_task(self.get_new_proxy())
+                return self.get_tiktok_by_name(username, count)
 
     def get_tikok_dynamic_cover(self, post):
         image_data = self.api.getBytes(url=post['video']['dynamicCover'])
@@ -111,6 +119,9 @@ class TikTok(commands.Cog):
                         tiktoks = await asyncio.wait_for(task, timeout=60)
                     except TimeoutError:
                         self.log.error("Takes too long")
+                        continue
+                    except MaxRetryError:
+                        self.log.error("Oh no no no")
                         continue
 
                     self.log.debug("Response: " + str(tiktoks))
