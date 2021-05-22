@@ -11,7 +11,10 @@ from redbot.core import commands, Config, checks
 from TikTokApi import TikTokApi
 from urllib3.exceptions import NewConnectionError, ProxyError, MaxRetryError
 from requests.exceptions import ConnectionError
+from asyncio.exceptions import TimeoutError
 from webdriver_manager.chrome import ChromeDriverManager
+from datetime import datetime
+from PIL import Image
 
 UNIQUE_ID = 0x696969669
 
@@ -50,6 +53,19 @@ class TikTok(commands.Cog):
     def get_tiktok_by_name(self, username, count):
         return self.api.byUsername(username, count=count)
 
+    def get_tikok_dynamic_cover(self, tiktok):
+        bytes = self.api.getBytes(url=tiktok['video']['dynamicCover'])
+        self.log.debug("Writing the video...")
+        with open("{}.webp".format(tiktok['id']), "wb") as output:
+            output.write(bytes)
+
+        im = Image.open(f"{tiktok['id']}.webp")
+        im.info.pop('background', None)
+        im.save(f"{tiktok['id']}.gif", 'gif', save_all=True)
+        self.log.debug(f"Saved {tiktok['id']}.gif")
+
+        return f"{tiktok['id']}.gif"
+
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
         self.log.debug("Running background..")
@@ -75,6 +91,9 @@ class TikTok(commands.Cog):
                     except (ConnectionError, NewConnectionError, ProxyError, MaxRetryError):
                         self.log.error("Proxy failed")
                         continue
+                    except TimeoutError:
+                        self.log.error("Takes too long")
+                        continue
 
                     self.log.debug("Response: " + str(tiktoks))
                     if not channel:
@@ -86,13 +105,22 @@ class TikTok(commands.Cog):
                         self.log.debug("Post Content: " + str(post))
                         if not post["id"] in cache:
                             self.log.debug("Sending data to channel: " + sub["channel"]["name"])
+                            task = functools.partial(self.get_tikok_dynamic_cover, tiktoks)
+                            task = self.bot.loop.run_in_executor(None, task)
+                            cover = await asyncio.wait_for(task, timeout=60)
+
                             # Send embed and post in channel
                             embed = discord.Embed(color=0xEE2222, title=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
-                            embed.description = re.sub(r'#(\w+)', r'#[\1](https://www.tiktok.com/tag/\1)', post['desc'])
-                            embed.set_image(url=post['video']['dynamicCover'])
+                            embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
+                            embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', post['desc'])
+                            #embed.set_image(url=post['video']['dynamicCover'])
                             embed.set_footer(text=f"{post['music']['title']} - {post['music']['authorName']}", icon_url='https://i.imgur.com/RziGM2t.png')
                             embed.set_thumbnail(url=post['author']['avatarMedium'])
-                            await self.bot.get_channel(sub["channel"]["id"]).send(embed=embed)
+
+                            file = discord.File(cover)
+                            embed.set_image(url=f"attachment://{cover}")
+
+                            await self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=file)
                             # Add id to published cache
                             cache.append(post["id"])
                             await self.config.guild(guild).cache.set(cache)
