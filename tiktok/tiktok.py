@@ -11,6 +11,7 @@ import requests
 from TikTokApi.exceptions import TikTokCaptchaError
 from redbot.core import commands, Config, checks
 from TikTokApi import TikTokApi
+from redbot.core.utils.chat_formatting import pagify
 from urllib3.exceptions import NewConnectionError, ProxyError, MaxRetryError
 from requests.exceptions import ConnectionError
 from asyncio.exceptions import TimeoutError
@@ -314,6 +315,55 @@ class TikTok(commands.Cog):
         Very low values will probably get you rate limited"""
         await self.config.interval.set(interval)
         await ctx.send(f"Interval set to {await self.config.interval()}")
+
+    @commands.guild_only()
+    @tiktok.command()
+    async def list(self, ctx: commands.Context):
+        """List current subscriptions"""
+        await self._showsubs(ctx, ctx.guild)
+
+    async def _showsubs(self, ctx: commands.Context, guild: discord.Guild):
+        subs = await self.conf.guild(guild).subscriptions()
+        if not len(subs):
+            await ctx.send("No subscriptions yet - try adding some!")
+            return
+        subs_by_channel = {}
+        for sub in subs:
+            # Channel entry must be max 124 chars: 103 + 2 + 18 + 1
+            channel = f'{sub["channel"]["name"][:103]} ({sub["channel"]["id"]})' # Max 124 chars
+            subs_by_channel[channel] = [
+                # Sub entry must be max 100 chars: 45 + 2 + 24 + 4 + 25 = 100
+                f"{sub.get('name', sub['id'][:45])} ({sub['id']}) - {sub.get('previous', 'Never')}",
+                # Preserve previous entries
+                *subs_by_channel.get(channel, [])
+            ]
+        if ctx.channel.permissions_for(guild.me).embed_links:
+            for channel, sub_ids in subs_by_channel.items():
+                page_count = (len(sub_ids) // 9) + 1
+                page = 1
+                while len(sub_ids) > 0:
+                    # Generate embed with max 1024 chars
+                    embed = discord.Embed()
+                    title = f"Tiktok Subscriptions for {channel}"
+                    embed.description = "\n".join(sub_ids[0:9])
+                    if page_count > 1:
+                        title += f" ({page}/{page_count})"
+                        page += 1
+                    embed.title = title
+                    await ctx.send(embed=embed)
+                    del(sub_ids[0:9])
+        else:
+            subs_string = ""
+            for channel, sub_ids in subs_by_channel.items():
+                subs_string += f"\n\n{channel}"
+                for sub in sub_ids:
+                    subs_string += f"\n{sub}"
+            pages = pagify(subs_string, delims=["\n\n"], shorten_by=12)
+            for i, page in enumerate(pages):
+                title = "**Tiktok Subscriptions**"
+                if len(pages) > 1:
+                    title += f" ({i}/{len(pages)})"
+                await ctx.send(f"{title}\n{page}")
 
     @tiktok.command()
     @checks.is_owner()
