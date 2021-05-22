@@ -1,5 +1,4 @@
 import io
-from time import sleep
 
 import aiohttp
 import discord
@@ -64,15 +63,20 @@ class TikTok(commands.Cog):
             return data
         except TikTokCaptchaError:
             self.log.error("Asking captcha, need proxy")
-            self.get_new_proxy()
+            try:
+                self.get_new_proxy()
+            except MaximumProxyRequests:
+                self.log.error("What the fuck")
+                return None
             return self.get_tiktok_by_name(username, count)
         except ConnectionError as e:
             self.log.error("Proxy failed: " + str(e))
-            self.get_new_proxy()
+            try:
+                self.get_new_proxy()
+            except MaximumProxyRequests:
+                self.log.error("What the fuck")
+                return None
             return self.get_tiktok_by_name(username, count)
-        except MaximumProxyRequests:
-            self.log.error("What the fuck")
-            return None
 
     def get_tiktok_dynamic_cover(self, post):
         image_data = self.api.getBytes(url=post['video']['dynamicCover'])
