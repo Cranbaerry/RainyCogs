@@ -65,7 +65,8 @@ class TikTok(commands.Cog):
         im.save(image_binary, 'gif', save_all=True)
         image_binary.seek(0)
 
-        self.log.debug(f"Saved {tiktok['id']}.gif")
+        self.log.debug(f"Saved: {tiktok['id']}.gif")
+        image_binary.close()
         return image_binary
 
     async def get_new_proxy(self):
@@ -118,12 +119,14 @@ class TikTok(commands.Cog):
                         self.log.debug("Post Content: " + str(post))
                         if not post["id"] in cache:
                             self.log.debug("Sending data to channel: " + sub["channel"]["name"])
-                            task = functools.partial(self.get_tikok_dynamic_cover, post)
-                            task = self.bot.loop.run_in_executor(None, task)
-                            cover_binary = await asyncio.wait_for(task, timeout=60)
-                            self.debug.log("Wee")
+                            image_data = self.api.getBytes(url=post['video']['dynamicCover'])
 
-                            #cover_binary = await self.get_tikok_dynamic_cover(post)
+                            im = Image.open(io.BytesIO(image_data))
+                            im.info.pop('background', None)
+
+                            image_binary = io.BytesIO()
+                            im.save(image_binary, 'gif', save_all=True)
+                            image_binary.seek(0)
 
                             # Send embed and post in channel
                             self.debug.log("Creating embed..")
@@ -135,12 +138,13 @@ class TikTok(commands.Cog):
                             embed.set_thumbnail(url=post['author']['avatarMedium'])
 
                             self.debug.log("Reading the file..")
-                            file = discord.File(fp=cover_binary, filename=f"{post['id']}.gif")
+                            file = discord.File(fp=image_binary, filename=f"{post['id']}.gif")
                             embed.set_image(url=f"attachment://{post['id']}.gif")
-                            self.debug.log("Image set!")
+                            self.debug.log("Image set!")    
 
                             self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=file)
                             self.debug.log("Sent!")
+                            image_binary.close()
                             # self.bot.get_channel(sub["channel"]["id"]).send(embed=embed,)
                             # Add id to published cache
                             # TODO: UNBLOCK THESE
