@@ -305,7 +305,8 @@ class TikTok(commands.Cog):
     @checks.is_owner()
     async def update(self, ctx):
         """Manually force feed update"""
-        await self.get_new_videos()
+        async with ctx.typing():
+            await self.get_new_videos()
 
     @tiktok.command()
     @checks.is_owner()
