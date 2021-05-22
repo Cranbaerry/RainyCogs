@@ -185,6 +185,7 @@ class TikTok(commands.Cog):
                                 self.log.warning("GIF processing too long..")
                             finally:
                                 color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
+                                self.log.debug("Unique color: " + str(color))
 
                                 # Send embed and post in channel
                                 embed = discord.Embed(color=color, url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
@@ -192,6 +193,7 @@ class TikTok(commands.Cog):
                                 embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', f"{post['desc']}")
                                 embed.add_field(name=f"<:music:845585013327265822> {post['music']['title']} - {post['music']['authorName']}", value=f"[Click to see full video!](https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})", inline=False)
                                 embed.set_author(name=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}", icon_url=post['author']['avatarMedium'])
+                                self.log.debug("Arranging embed..")
 
                                 if not gif:
                                     cover_file = None
@@ -200,6 +202,7 @@ class TikTok(commands.Cog):
                                 else:
                                     embed.set_image(url=f"attachment://{post['id']}.gif")
 
+                                self.log.debug("Sending to channel..")
                                 await self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=cover_file)
 
                                 # Add id to published cache
