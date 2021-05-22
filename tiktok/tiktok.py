@@ -119,6 +119,7 @@ class TikTok(commands.Cog):
                         self.log.debug("Post Content: " + str(post))
                         if not post["id"] in cache:
                             self.log.debug("Sending data to channel: " + sub["channel"]["name"])
+                            self.log.debug(f"GET: {post['video']['dynamicCover']}")
                             image_data = self.api.getBytes(url=post['video']['dynamicCover'])
 
                             self.debug.log("A")
