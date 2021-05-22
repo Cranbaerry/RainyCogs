@@ -101,7 +101,7 @@ class TikTok(commands.Cog):
         res = r.text
 
         self.log.debug(f"Cached proxies: {len(proxies['list'])}")
-        self.log.debug(f"Last update: {len(proxies['last-update'])}")
+        self.log.debug(f"Last update: {len(proxies['last-updated'])}")
         # More than 24 hours
         if len(proxies) == 0 or \
                 (datetime.now() - datetime.strptime(proxies['last-updated'], '%Y-%m-%d %H:%M:%S.%f')) > timedelta(1):
@@ -174,14 +174,17 @@ class TikTok(commands.Cog):
                     for post in tiktoks:
                         self.log.debug("Post ID: " + post["id"])
                         if not post["id"] in cache:
+                            gif = True
                             try:
                                 self.log.debug("Sending data to channel: " + sub["channel"]["name"])
                                 task = functools.partial(self.get_tiktok_dynamic_cover, post)
                                 task = self.bot.loop.run_in_executor(None, task)
                                 cover_file = await asyncio.wait_for(task, timeout=60)
+                            except TimeoutError:
+                                gif = False
+                                self.log.warning("GIF processing too long..")
+                            finally:
                                 color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
-                                #music_url = f"https://www.tiktok.com/music/{post['music']['title']}-{post['music']['id']}".replace(' ', '-')
-                                time = datetime.utcfromtimestamp(post['createTime']).strftime('%c')
 
                                 # Send embed and post in channel
                                 embed = discord.Embed(color=color, url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
@@ -189,15 +192,20 @@ class TikTok(commands.Cog):
                                 embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', f"{post['desc']}")
                                 embed.add_field(name=f"<:music:845585013327265822> {post['music']['title']} - {post['music']['authorName']}", value=f"[Click to see full video!](https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})", inline=False)
                                 embed.set_author(name=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}", icon_url=post['author']['avatarMedium'])
-                                embed.set_image(url=f"attachment://{post['id']}.gif")
+
+                                if not gif:
+                                    cover_file = None
+                                    embed.set_image(url=post['video']['cover'])
+                                    self.log.debug(f"Cover link: {post['video']['cover']}")
+                                else:
+                                    embed.set_image(url=f"attachment://{post['id']}.gif")
+
                                 await self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=cover_file)
 
                                 # Add id to published cache
                                 cache.append(post["id"])
                                 await self.config.guild(guild).cache.set(cache)
                                 self.log.debug("Saved cache data: " + str(cache))
-                            except Exception as e:
-                                self.log.error(str(e))
                         else:
                             self.log.debug("Skipping: " + post["id"])
 
