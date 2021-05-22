@@ -16,7 +16,7 @@
     "name" : "TikTok",
     "permissions" : [],
     "required_cogs" : {},
-    "requirements" : ["TikTokApi", "webdriver_manager", "Pillow"],
+    "requirements" : ["TikTokApi", "webdriver_manager", "Pillow", "aiohttp"],
     "short" : "TikTok",
     "tags" : [
         "fun"
