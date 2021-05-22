@@ -69,7 +69,7 @@ class TikTok(commands.Cog):
                 self.bot.loop.create_task(self.get_new_proxy())
                 return self.get_tiktok_by_name(username, count)
 
-    def get_tikok_dynamic_cover(self, post):
+    def get_tiktok_dynamic_cover(self, post):
         image_data = self.api.getBytes(url=post['video']['dynamicCover'])
 
         im = Image.open(io.BytesIO(image_data))
@@ -121,11 +121,14 @@ class TikTok(commands.Cog):
                         self.log.debug("Channel not found: " + sub["channel"]["name"])
                         continue
 
+                    if tiktoks is None:
+                        continue
+
                     for post in tiktoks:
                         self.log.debug("Post ID: " + post["id"])
                         if not post["id"] in cache:
                             self.log.debug("Sending data to channel: " + sub["channel"]["name"])
-                            task = functools.partial(self.get_tikok_dynamic_cover, post)
+                            task = functools.partial(self.get_tiktok_dynamic_cover, post)
                             task = self.bot.loop.run_in_executor(None, task)
                             cover_file = await asyncio.wait_for(task, timeout=60)
                             color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
