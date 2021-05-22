@@ -111,7 +111,7 @@ class TikTok(commands.Cog):
         r = requests.get(url=url)
         res = r.text
 
-        self.log.debug(f'Config Proxies: {proxies}')
+        self.log.debug(f'Config Proxies: {len(proxies)}')
         # More than 24 hours
         if len(proxies) == 0 or \
                 (datetime.now() - datetime.strptime(proxies['last-updated'], '%Y-%m-%d %H:%M:%S.%f')) > timedelta(1):
@@ -154,15 +154,17 @@ class TikTok(commands.Cog):
                 for i, sub in enumerate(subs):
                     self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
                     channel = self.bot.get_channel(int(sub["channel"]["id"]))
-
-                    try:
-                        proxies = await self.config.proxies()
-                        task = functools.partial(self.get_tiktok_by_name, sub["id"], 3, proxies)
-                        task = self.bot.loop.run_in_executor(None, task)
-                        tiktoks = await asyncio.wait_for(task, timeout=60)
-                    except TimeoutError:
-                        self.log.error("Takes too long")
-                        continue
+                    while True:
+                        try:
+                            proxies = await self.config.proxies()
+                            task = functools.partial(self.get_tiktok_by_name, sub["id"], 3, proxies)
+                            task = self.bot.loop.run_in_executor(None, task)
+                            tiktoks = await asyncio.wait_for(task, timeout=60)
+                        except TimeoutError:
+                            self.log.error("Takes too long, retrying..")
+                            continue
+                        else:
+                            break
 
                     self.log.debug("Response: " + str(tiktoks))
                     if not channel:
