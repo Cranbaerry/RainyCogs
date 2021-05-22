@@ -76,25 +76,7 @@ class TikTok(commands.Cog):
             self.log.debug(f"Saved {post['id']}.gif")
             return file
 
-    #45.184.103.113:999
-    def get_new_proxy(self):
-        url = 'http://pubproxy.com/api/proxy'
-        params = {'limit': 1, 'format': 'txt', 'type': 'http'}
-
-        self.log.debug("Attempting to get new proxy..")
-        r = requests.get(url=url, params=params)
-        proxy = r.text
-
-        self.log.debug("Response: " + proxy)
-        if "You reached the maximum 50 requests for today." in proxy:
-            raise MaximumProxyRequests(proxy)
-
-        self.api.proxy = proxy
-        self.log.debug(f"New proxy acquired: {proxy}")
-        self.bot.loop.create_task(self.config.proxy.set(self.api.proxy))
-        return proxy
-
-    async def _get_new_proxy(self, proxies, truncate=False):
+    async def get_new_proxy(self, proxies, truncate=False):
         url = 'http://pubproxy.com/api/proxy?limit=5&format=txt&type=http'
         self.log.debug("Attempting to get new proxy..")
 
@@ -140,94 +122,97 @@ class TikTok(commands.Cog):
         self.log.debug(f"New proxy acquired: {self.api.proxy}")
         await self.config.proxy.set(self.api.proxy)
 
+    async def get_new_videos(self):
+        for guild in self.bot.guilds:
+            try:
+                subs = await self.config.guild(guild).subscriptions()
+                cache = await self.config.guild(guild).cache()
+            except:
+                self.log.debug("Unable to fetch data, config is empty..")
+                return
+            for i, sub in enumerate(subs):
+                self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
+                channel = self.bot.get_channel(int(sub["channel"]["id"]))
+                while True:
+                    try:
+                        task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
+                        task = self.bot.loop.run_in_executor(None, task)
+                        tiktoks = await asyncio.wait_for(task, timeout=30)
+                    except TimeoutError:
+                        self.log.error("Takes too long, retrying..")
+                        await self.get_new_proxy(await self.config.proxies(), True)
+                        continue
+                    except TikTokCaptchaError:
+                        self.log.error("Captcha error, retrying..")
+                        await self.get_new_proxy(await self.config.proxies(), True)
+                        continue
+                    except ConnectionError as e:
+                        self.log.error(f"Connection error, retrying: {str(e)}")
+                        await self.get_new_proxy(await self.config.proxies(), True)
+                        continue
+                    else:
+                        break
+
+                self.log.debug("Response: " + str(tiktoks))
+                if not channel:
+                    self.log.debug("Channel not found: " + sub["channel"]["name"])
+                    continue
+
+                if tiktoks is None:
+                    continue
+
+                for post in tiktoks:
+                    self.log.debug("Post ID: " + post["id"])
+                    if not post["id"] in cache:
+                        gif = True
+                        try:
+                            self.log.debug("Sending data to channel: " + sub["channel"]["name"])
+                            task = functools.partial(self.get_tiktok_dynamic_cover, post)
+                            task = self.bot.loop.run_in_executor(None, task)
+                            cover_file = await asyncio.wait_for(task, timeout=60)
+                        except TimeoutError:
+                            gif = False
+                            self.log.warning("GIF processing too long..")
+                        finally:
+                            color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
+                            self.log.debug("Unique color: " + str(color))
+
+                            # Send embed and post in channel
+                            embed = discord.Embed(color=color, url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
+                            embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
+                            embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', f"{post['desc']}")
+                            embed.add_field(name=f"<:music:845585013327265822> {post['music']['title']} - {post['music']['authorName']}", value=f"[Click to see full video!](https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})", inline=False)
+                            embed.set_author(name=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}", icon_url=post['author']['avatarMedium'])
+                            self.log.debug("Arranging embed..")
+
+                            if not gif:
+                                cover_file = None
+                                embed.set_image(url=post['video']['cover'])
+                                self.log.debug(f"Cover link: {post['video']['cover']}")
+                            else:
+                                embed.set_image(url=f"attachment://{post['id']}.gif")
+
+                            self.log.debug("Sending to channel..")
+                            await self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=cover_file)
+
+                            # Add id to published cache
+                            cache.append(post["id"])
+                            await self.config.guild(guild).cache.set(cache)
+                            self.log.debug("Saved cache data: " + str(cache))
+                    else:
+                        self.log.debug("Skipping..")
+
+                self.log.debug("Sleeping 5 seconds..")
+                await asyncio.sleep(5)
+
+        interval = await self.config.interval()
+        self.log.debug(f"Sleeping {interval} seconds..")
+        await asyncio.sleep(interval)
+
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
         while True:
-            for guild in self.bot.guilds:
-                try:
-                    subs = await self.config.guild(guild).subscriptions()
-                    cache = await self.config.guild(guild).cache()
-                except:
-                    self.log.debug("Unable to fetch data, config is empty..")
-                    return
-                for i, sub in enumerate(subs):
-                    self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
-                    channel = self.bot.get_channel(int(sub["channel"]["id"]))
-                    while True:
-                        try:
-                            task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
-                            task = self.bot.loop.run_in_executor(None, task)
-                            tiktoks = await asyncio.wait_for(task, timeout=30)
-                        except TimeoutError:
-                            self.log.error("Takes too long, retrying..")
-                            await self._get_new_proxy(await self.config.proxies(), True)
-                            continue
-                        except TikTokCaptchaError:
-                            self.log.error("Captcha error, retrying..")
-                            await self._get_new_proxy(await self.config.proxies(), True)
-                            continue
-                        except ConnectionError as e:
-                            self.log.error(f"Connection error, retrying: {str(e)}")
-                            await self._get_new_proxy(await self.config.proxies(), True)
-                            continue
-                        else:
-                            break
-
-                    self.log.debug("Response: " + str(tiktoks))
-                    if not channel:
-                        self.log.debug("Channel not found: " + sub["channel"]["name"])
-                        continue
-
-                    if tiktoks is None:
-                        continue
-
-                    for post in tiktoks:
-                        self.log.debug("Post ID: " + post["id"])
-                        if not post["id"] in cache:
-                            gif = True
-                            try:
-                                self.log.debug("Sending data to channel: " + sub["channel"]["name"])
-                                task = functools.partial(self.get_tiktok_dynamic_cover, post)
-                                task = self.bot.loop.run_in_executor(None, task)
-                                cover_file = await asyncio.wait_for(task, timeout=60)
-                            except TimeoutError:
-                                gif = False
-                                self.log.warning("GIF processing too long..")
-                            finally:
-                                color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
-                                self.log.debug("Unique color: " + str(color))
-
-                                # Send embed and post in channel
-                                embed = discord.Embed(color=color, url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
-                                embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
-                                embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', f"{post['desc']}")
-                                embed.add_field(name=f"<:music:845585013327265822> {post['music']['title']} - {post['music']['authorName']}", value=f"[Click to see full video!](https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})", inline=False)
-                                embed.set_author(name=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}", icon_url=post['author']['avatarMedium'])
-                                self.log.debug("Arranging embed..")
-
-                                if not gif:
-                                    cover_file = None
-                                    embed.set_image(url=post['video']['cover'])
-                                    self.log.debug(f"Cover link: {post['video']['cover']}")
-                                else:
-                                    embed.set_image(url=f"attachment://{post['id']}.gif")
-
-                                self.log.debug("Sending to channel..")
-                                await self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=cover_file)
-
-                                # Add id to published cache
-                                cache.append(post["id"])
-                                await self.config.guild(guild).cache.set(cache)
-                                self.log.debug("Saved cache data: " + str(cache))
-                        else:
-                            self.log.debug("Skipping: " + post["id"])
-
-                    self.log.debug("Sleeping 5 seconds..")
-                    await asyncio.sleep(5)
-
-            interval = await self.config.interval()
-            self.log.debug(f"Sleeping {interval} seconds..")
-            await asyncio.sleep(interval)
+            await self.get_new_videos()
 
     def cog_unload(self):
         self.log.debug("Shutting down TikTok service..")
@@ -243,6 +228,7 @@ class TikTok(commands.Cog):
         pass
 
     @tiktok.command()
+    @commands.guild_only()
     @checks.admin_or_permissions(manage_guild=True)
     async def add(self, ctx, tiktokId, channelDiscord: discord.TextChannel = None):
         """Subscribe a Discord channel to a TikTok Channel
@@ -265,9 +251,9 @@ class TikTok(commands.Cog):
         embed.description = f'TikTok feeds of user [{tiktokId}](https://www.tiktok.com/@{tiktokId}) added to <#{channelDiscord.id}>.'
         await ctx.send(embed=embed)
 
-    @checks.admin_or_permissions(manage_guild=True)
-    @commands.guild_only()
     @tiktok.command()
+    @commands.guild_only()
+    @checks.admin_or_permissions(manage_guild=True)
     async def remove(self, ctx: commands.Context, tiktokId, channelDiscord: discord.TextChannel = None):
         """Unsubscribe a Discord channel from a TikTok channel
 
@@ -302,20 +288,25 @@ class TikTok(commands.Cog):
         await ctx.send(embed=embed)
 
     @tiktok.command()
-    @checks.admin_or_permissions(manage_guild=True)
-    async def update(self, ctx):
-        """Manually force update"""
-        await self.background_get_new_videos()
+    @checks.is_owner()
+    async def resetproxy(self, ctx):
+        """Clear proxies database"""
+        await self.config.proxies.set([])
+        await ctx.send("Proxy database cleared!")
 
     @tiktok.command()
     @checks.is_owner()
-    async def clear(self, ctx):
-        """Clear cache"""
-        for guild in self.bot.guilds:
-            await self.config.guild(guild).cache.set([])
+    async def update(self, ctx):
+        """Manually force feed update"""
+        await self.get_new_videos()
+        await ctx.send("Cache database cleared!")
 
-        await self.config.proxies.set([])
-        await ctx.send("Cache cleared!")
+    @tiktok.command()
+    @checks.admin_or_permissions(manage_guild=True)
+    @commands.guild_only()
+    async def clear(self, ctx):
+        """Clear cached tiktok posts"""
+        await self.config.guild(ctx.guild).cache.set([])
 
     @tiktok.command()
     @checks.is_owner()
