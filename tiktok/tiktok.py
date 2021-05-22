@@ -9,6 +9,7 @@ import asyncio
 import functools
 import re
 
+import requests
 from TikTokApi.exceptions import TikTokCaptchaError
 from redbot.core import commands, Config, checks
 from TikTokApi import TikTokApi
@@ -64,11 +65,11 @@ class TikTok(commands.Cog):
             return data
         except TikTokCaptchaError:
             self.log.error("Asking captcha, need proxy")
-            self.bot.loop.create_task(self.get_new_proxy())
+            self.get_new_proxy()
             return self.get_tiktok_by_name(username, count)
         except ConnectionError as e:
             self.log.error("Proxy failed: " + str(e))
-            self.bot.loop.create_task(self.get_new_proxy())
+            self.get_new_proxy()
             return self.get_tiktok_by_name(username, count)
         except MaximumProxyRequests:
             self.log.error("What the fuck")
@@ -89,7 +90,7 @@ class TikTok(commands.Cog):
             return file
 
     #45.184.103.113:999
-    async def get_new_proxy(self):
+    async def get_new_proxy2(self):
         url = 'http://pubproxy.com/api/proxy?limit=1&format=txt&type=http'
         hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}
         async with aiohttp.ClientSession() as session:
@@ -101,6 +102,19 @@ class TikTok(commands.Cog):
                 self.api.proxy = data
                 await self.config.proxy.set(self.api.proxy)
                 self.log.debug(f"New proxy acquired: {self.api.proxy}")
+
+    def get_new_proxy(self):
+        url = 'http://pubproxy.com/api/proxy?limit=1&format=txt&type=http'
+        hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}
+        params = {'limit': 1, 'format': 'txt', 'type': 'http'}
+
+        r = requests.get(url=url, params=params)
+        data = r.text()
+
+        if "You reached the maximum 50 requests for today." in data:
+            raise MaximumProxyRequests(data)
+
+        return r.text()
 
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
