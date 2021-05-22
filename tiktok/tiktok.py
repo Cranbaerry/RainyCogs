@@ -110,6 +110,8 @@ class TikTok(commands.Cog):
         r = requests.get(url=url)
         res = r.text
 
+        self.log.debug(f"Response: {res}")
+
         url_time = r.headers['last-modified']
         url_date = parsedate(url_time)
         if url_date > proxies['last-modified']:
