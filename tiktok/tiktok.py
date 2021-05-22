@@ -115,7 +115,8 @@ class TikTok(commands.Cog):
         self.log.debug(f'Proxies: {proxies}')
 
         # More than 24 hours
-        if len(proxies) == 0 or (datetime.utcnow() - proxies['last-updated']) > timedelta(1):
+        if len(proxies) == 0 or \
+                (datetime.now() - datetime.strptime(proxies['last-updated'], '%Y-%m-%d %H:%M:%S.%f')) > timedelta(1):
             self.log.debug(f'Updating proxy list..')
             proxies_list = []
             for lines in res.split('\n'):
@@ -123,7 +124,7 @@ class TikTok(commands.Cog):
                 proxies_list.append(proxy)
 
             self.log.debug(f'Arranging proxy list..')
-            proxies = {'last-updated': datetime.utcnow(), 'list': proxies_list}
+            proxies = {'last-updated': str(datetime.now()), 'list': proxies_list}
             self.log.debug(f'Proxies {proxies}')
 
             self.bot.loop.create_task(self.config.proxies.set(proxies))
