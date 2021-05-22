@@ -197,7 +197,7 @@ class TikTok(commands.Cog):
                                 cache.append(post["id"])
                                 await self.config.guild(guild).cache.set(cache)
                                 self.log.debug("Saved cache data: " + str(cache))
-                            except as e:
+                            except Exception as e:
                                 self.log.error(str(e))
                         else:
                             self.log.debug("Skipping: " + post["id"])
