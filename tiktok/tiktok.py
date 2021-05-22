@@ -112,6 +112,7 @@ class TikTok(commands.Cog):
 
         self.log.debug(f"Response: {res}")
         self.log.debug(f'Headers: {r.headers}')
+        self.log.debug(f'Proxies: {proxies}')
 
         # More than 24 hours
         if (datetime.utcnow() - proxies['last-updated']) > timedelta(1):
