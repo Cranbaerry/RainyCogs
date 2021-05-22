@@ -64,7 +64,7 @@ class TikTok(commands.Cog):
         except ConnectionError as e:
             self.log.error("Proxy failed: " + str(e))
             if "you reached the maximum 50 requests for today" in str(e):
-                raise MaxRetryError('Maximum proxy requests limit reached!')
+                return None
             else:
                 self.bot.loop.create_task(self.get_new_proxy())
                 return self.get_tiktok_by_name(username, count)
@@ -114,9 +114,6 @@ class TikTok(commands.Cog):
                         tiktoks = await asyncio.wait_for(task, timeout=60)
                     except TimeoutError:
                         self.log.error("Takes too long")
-                        continue
-                    except MaxRetryError:
-                        self.log.error("Oh no no no")
                         continue
 
                     self.log.debug("Response: " + str(tiktoks))
