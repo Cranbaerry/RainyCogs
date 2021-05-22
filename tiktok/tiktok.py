@@ -123,13 +123,14 @@ class TikTok(commands.Cog):
                             task = self.bot.loop.run_in_executor(None, task)
                             cover_file = await asyncio.wait_for(task, timeout=60)
                             color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
+                            music_url = f"https://www.tiktok.com/music/{post['music']['title']}-{post['music']['id']}".replace(' ', '-')
 
                             # Send embed and post in channel
                             embed = discord.Embed(color=color, url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
-                            embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
+                            #embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
                             embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', f"{post['desc']}\n[Click to see full video!](https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})")
                             embed.set_author(name=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}", icon_url=post['author']['avatarMedium'])
-                            embed.set_footer(text=f"{post['music']['title']} - {post['music']['authorName']}", icon_url='https://i.imgur.com/RziGM2t.png')
+                            embed.set_footer(text=f"[{post['music']['title']} - {post['music']['authorName']}]({music_url})", icon_url='https://i.imgur.com/RziGM2t.png')
                             #embed.set_thumbnail(url=post['author']['avatarMedium'])
                             embed.set_image(url=f"attachment://{post['id']}.gif")
                             await self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=cover_file)
