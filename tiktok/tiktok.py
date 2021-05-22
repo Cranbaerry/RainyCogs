@@ -97,6 +97,7 @@ class TikTok(commands.Cog):
                         tiktoks = await asyncio.wait_for(task, timeout=60)
                     except TikTokCaptchaError:
                         self.log.error("Asking captcha, need proxy")
+                        await self.get_new_proxy()
                         continue
                     except ConnectionError as e:
                         self.log.error("Proxy failed: " + str(e))
