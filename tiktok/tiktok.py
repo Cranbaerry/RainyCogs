@@ -23,6 +23,10 @@ from colorhash import ColorHash
 UNIQUE_ID = 0x696969669
 
 
+class MaximumProxyRequests(Exception):
+    pass
+
+
 class TikTok(commands.Cog):
     def __init__(self, bot, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -66,7 +70,7 @@ class TikTok(commands.Cog):
             self.log.error("Proxy failed: " + str(e))
             self.bot.loop.create_task(self.get_new_proxy())
             return self.get_tiktok_by_name(username, count)
-        except MaxRetryError:
+        except MaximumProxyRequests:
             self.log.error("What the fuck")
             return None
 
@@ -92,7 +96,7 @@ class TikTok(commands.Cog):
             async with session.get(url, headers=hdr) as resp:
                 data = await resp.text()
                 if "You reached the maximum 50 requests for today." in data:
-                    raise MaxRetryError(data)
+                    raise MaximumProxyRequests(data)
 
                 self.api.proxy = data
                 await self.config.proxy.set(self.api.proxy)
