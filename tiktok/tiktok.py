@@ -18,6 +18,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime
 from PIL import Image
 from colorhash import ColorHash
+from dateutil.parser import parse as parsedate
 
 UNIQUE_ID = 0x696969669
 
@@ -38,7 +39,7 @@ class TikTok(commands.Cog):
 
         self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
         self.config.register_guild(subscriptions=[], cache=[])
-        self.config.register_global(interval=300, cache_size=500, proxy=[])
+        self.config.register_global(interval=300, cache_size=500, proxy=[], proxies=[])
         self.main_task = self.bot.loop.create_task(self.initialize())
         self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
 
@@ -57,25 +58,17 @@ class TikTok(commands.Cog):
 
         self.log.debug(f"Proxy: {await self.config.proxy()}")
 
-    def get_tiktok_by_name(self, username, count):
+    def get_tiktok_by_name(self, username, count, proxies = None):
         try:
             data = self.api.byUsername(username, count=count)
             return data
         except TikTokCaptchaError:
             self.log.error("Asking captcha, need proxy")
-            try:
-                self.get_new_proxy()
-            except MaximumProxyRequests as x:
-                self.log.error("New Proxy Error: " + str(x))
-                return None
+            self._get_new_proxy(proxies, True)
             return self.get_tiktok_by_name(username, count)
         except ConnectionError as e:
             self.log.error("Proxy failed: " + str(e))
-            try:
-                self.get_new_proxy()
-            except MaximumProxyRequests as x:
-                self.log.error("New Proxy Error: " + str(x))
-                return None
+            self._get_new_proxy(proxies, True)
             return self.get_tiktok_by_name(username, count)
 
     def get_tiktok_dynamic_cover(self, post):
@@ -110,6 +103,36 @@ class TikTok(commands.Cog):
         self.bot.loop.create_task(self.config.proxy.set(self.api.proxy))
         return proxy
 
+    def _get_new_proxy(self, proxies, truncate = False):
+        url = 'https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt'
+
+        self.log.debug("Attempting to get new proxy..")
+        r = requests.get(url=url)
+        res = r.text
+
+        url_time = r.headers['last-modified']
+        url_date = parsedate(url_time)
+        if url_date > proxies['last-modified']:
+            proxies_list = []
+            for lines in res.text.split('\n'):
+                proxy = ''.join(lines)
+                proxies_list.append(proxy)
+
+            proxies = {'last-modified': url_time,
+                    'list': proxies_list}
+
+            self.config.proxies.set(proxies)
+            self.log.debug(f"Proxies list updated: {proxies_list}")
+
+        if truncate:
+            proxies['list'].pop(self.api.proxy)
+            self.config.proxies.set(proxies)
+            self.log.debug(f"Removed from proxies list: {self.api.proxy}")
+
+        self.api.proxy = next(iter(proxies['list']))
+        self.log.debug(f"New proxy acquired: {self.api.proxy}")
+        self.config.proxy.set(self.api.proxy)
+
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
         self.log.debug("Running background..")
@@ -126,7 +149,8 @@ class TikTok(commands.Cog):
                     channel = self.bot.get_channel(int(sub["channel"]["id"]))
 
                     try:
-                        task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
+                        proxies = await self.config.proxies()
+                        task = functools.partial(self.get_tiktok_by_name, sub["id"], 3, proxies)
                         task = self.bot.loop.run_in_executor(None, task)
                         tiktoks = await asyncio.wait_for(task, timeout=60)
                     except TimeoutError:
