@@ -73,6 +73,7 @@ class TikTok(commands.Cog):
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=hdr) as resp:
                 self.api.proxy = await resp.text()
+                await self.config.proxy.set(self.api.proxy)
                 self.log.debug(f"New proxy acquired: {self.api.proxy}")
 
     async def background_get_new_videos(self):
