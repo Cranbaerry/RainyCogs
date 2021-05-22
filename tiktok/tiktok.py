@@ -122,10 +122,10 @@ class TikTok(commands.Cog):
                             task = functools.partial(self.get_tikok_dynamic_cover, post)
                             task = self.bot.loop.run_in_executor(None, task)
                             cover_file = await asyncio.wait_for(task, timeout=60)
-                            color = int(hex(int(ColorHash(post["id"]).hex.replace("#", ""), 16)), 0)
+                            color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
 
                             # Send embed and post in channel
-                            embed = discord.Embed(color=color, title=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
+                            embed = discord.Embed(color=color, url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
                             embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
                             embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', post['desc'])
                             embed.set_author(name=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}", icon_url=post['author']['avatarMedium'])
