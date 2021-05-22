@@ -131,7 +131,6 @@ class TikTok(commands.Cog):
 
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
-        self.log.debug("Running background..")
         while True:
             for guild in self.bot.guilds:
                 try:
@@ -150,14 +149,14 @@ class TikTok(commands.Cog):
                             tiktoks = await asyncio.wait_for(task, timeout=60)
                         except TimeoutError:
                             self.log.error("Takes too long, retrying..")
-                            self._get_new_proxy(await self.config.proxies(), True)
+                            await self._get_new_proxy(await self.config.proxies(), True)
                             continue
                         except TikTokCaptchaError:
                             self.log.error("Captcha error, retrying..")
-                            self._get_new_proxy(await self.config.proxies(), True)
+                            await self._get_new_proxy(await self.config.proxies(), True)
                             continue
                         except ConnectionError:
-                            self._get_new_proxy(await self.config.proxies(), True)
+                            await self._get_new_proxy(await self.config.proxies(), True)
                             self.log.error("Connection error, retrying..")
                             continue
                         else:
