@@ -1,5 +1,4 @@
 import io
-import sys
 from time import sleep
 
 import aiohttp
@@ -109,7 +108,7 @@ class TikTok(commands.Cog):
 
         self.log.debug("Attempting to get new proxy..")
         r = requests.get(url=url, params=params)
-        proxy = r.text()
+        proxy = r.text
 
         self.log.debug("Response: " + proxy)
         if "You reached the maximum 50 requests for today." in proxy:
@@ -234,7 +233,7 @@ class TikTok(commands.Cog):
             newSub = {'id': channelYouTube,
                       'channel': {"name": channelDiscord.name,
                                   "id": channelDiscord.id}}
-            newSub['uid'] = self.sub_uid(newSub)
+
             for i, sub in enumerate(subs):
                 if sub['uid'] == newSub['uid']:
                     unsubbed.append(subs.pop(i))
@@ -256,7 +255,7 @@ class TikTok(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     async def update(self, ctx):
         """Manually force update"""
-        self.background_get_new_videos()
+        await self.background_get_new_videos()
 
     @tiktok.command()
     @checks.is_owner()
