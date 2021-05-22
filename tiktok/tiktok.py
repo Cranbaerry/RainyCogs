@@ -1,5 +1,6 @@
 import io
 import sys
+from time import sleep
 
 import aiohttp
 import discord
@@ -66,8 +67,12 @@ class TikTok(commands.Cog):
             if "you reached the maximum 50 requests for today" in str(e):
                 return None
             else:
+                sleep(1)
                 self.bot.loop.create_task(self.get_new_proxy())
                 return self.get_tiktok_by_name(username, count)
+        except MaxRetryError:
+            self.log.error("What the fuck")
+            return None
 
     def get_tiktok_dynamic_cover(self, post):
         image_data = self.api.getBytes(url=post['video']['dynamicCover'])
@@ -89,7 +94,11 @@ class TikTok(commands.Cog):
         hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=hdr) as resp:
-                self.api.proxy = await resp.text()
+                data = await resp.text()
+                if "you reached the maximum 50 requests for today" in data:
+                    raise MaxRetryError(data)
+
+                self.api.proxy = data
                 await self.config.proxy.set(self.api.proxy)
                 self.log.debug(f"New proxy acquired: {self.api.proxy}")
 
