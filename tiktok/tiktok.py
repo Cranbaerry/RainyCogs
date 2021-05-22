@@ -15,7 +15,7 @@ from urllib3.exceptions import NewConnectionError, ProxyError, MaxRetryError
 from requests.exceptions import ConnectionError
 from asyncio.exceptions import TimeoutError
 from webdriver_manager.chrome import ChromeDriverManager
-from datetime import datetime
+from datetime import datetime, timedelta
 from PIL import Image
 from colorhash import ColorHash
 from dateutil.parser import parse as parsedate
@@ -113,16 +113,14 @@ class TikTok(commands.Cog):
         self.log.debug(f"Response: {res}")
         self.log.debug(f'Headers: {r.headers}')
 
-        url_time = r.headers['last-modified']
-        url_date = parsedate(url_time)
-        if url_date > proxies['last-modified']:
+        # More than 24 hours
+        if (datetime.utcnow() - proxies['last-updated']) > timedelta(1):
             proxies_list = []
             for lines in res.text.split('\n'):
                 proxy = ''.join(lines)
                 proxies_list.append(proxy)
 
-            proxies = {'last-modified': url_time,
-                    'list': proxies_list}
+            proxies = {'last-updated': datetime.utcnow(), 'list': proxies_list}
 
             self.config.proxies.set(proxies)
             self.log.debug(f"Proxies list updated: {proxies_list}")
