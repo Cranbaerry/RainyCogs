@@ -129,14 +129,14 @@ class TikTok(commands.Cog):
                             self.log.debug("What")
                             im = Image.open(io.BytesIO(image_data))
                             im.info.pop('background', None)
-
+                            self.log.debug("is")
                             with io.BytesIO() as image_binary:
                                 im.save(image_binary, 'gif', save_all=True)
                                 image_binary.seek(0)
+                                file = discord.File(fp=image_binary, filename=f"{post['id']}.gif")
+                                self.log.debug(f"Saved {post['id']}.gif")
 
-                                self.log.debug(f"Saved {tiktok['id']}.gif")
-                                return image_binary
-
+                            self.log.debug("going on")
                             # Send embed and post in channel
                             self.debug.log("Creating embed..")
                             embed = discord.Embed(color=0xEE2222, title=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
@@ -147,7 +147,7 @@ class TikTok(commands.Cog):
                             embed.set_thumbnail(url=post['author']['avatarMedium'])
 
                             self.debug.log("Reading the file..")
-                            file = discord.File(fp=cover_binary, filename=f"{post['id']}.gif")
+
                             embed.set_image(url=f"attachment://{post['id']}.gif")
                             self.debug.log("Image set!")
 
