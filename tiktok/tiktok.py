@@ -128,10 +128,11 @@ class TikTok(commands.Cog):
 
                             # Send embed and post in channel
                             embed = discord.Embed(color=color, url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
-                            #embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
-                            embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', f"{post['desc']}\n\n[{time}](https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})")
+                            embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
+                            #embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', f"{post['desc']}\n\n[{time}](https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})")
+                            embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', f"{post['desc']}\n\n♫ {post['music']['title']} - {post['music']['authorName']}")
                             embed.set_author(name=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}", icon_url=post['author']['avatarMedium'])
-                            embed.set_footer(text=f"{post['music']['title']} - {post['music']['authorName']}", icon_url='https://i.imgur.com/RziGM2t.png')
+                            #embed.set_footer(text=f"{post['music']['title']} - {post['music']['authorName']}", icon_url='https://i.imgur.com/RziGM2t.png')
                             #embed.set_thumbnail(url=post['author']['avatarMedium'])
                             embed.set_image(url=f"attachment://{post['id']}.gif")
                             await self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=cover_file)
