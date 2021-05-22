@@ -110,10 +110,7 @@ class TikTok(commands.Cog):
         r = requests.get(url=url)
         res = r.text
 
-        self.log.debug(f"Response: {res}")
-        self.log.debug(f'Headers: {r.headers}')
         self.log.debug(f'Proxies: {proxies}')
-
         # More than 24 hours
         if len(proxies) == 0 or \
                 (datetime.now() - datetime.strptime(proxies['last-updated'], '%Y-%m-%d %H:%M:%S.%f')) > timedelta(1):
@@ -127,7 +124,9 @@ class TikTok(commands.Cog):
             proxies = {'last-updated': str(datetime.now()), 'list': proxies_list}
             self.log.debug(f'Proxies {proxies}')
 
+            self.log.debug(f"Idk?")
             self.config.proxies.set(proxies)
+            self.log.debug(f"Maybe?")
             self.log.debug(f"Proxies list updated: {proxies_list}")
 
         if truncate:
