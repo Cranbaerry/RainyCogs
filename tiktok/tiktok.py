@@ -17,6 +17,7 @@ from asyncio.exceptions import TimeoutError
 from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime
 from PIL import Image
+from colorhash import ColorHash
 
 UNIQUE_ID = 0x696969669
 
@@ -116,29 +117,26 @@ class TikTok(commands.Cog):
                     self.log.debug("Items: " + str(cache))
                     for post in tiktoks:
                         self.log.debug("Post ID: " + post["id"])
-                        self.log.debug("Post Content: " + str(post))
                         if not post["id"] in cache:
                             self.log.debug("Sending data to channel: " + sub["channel"]["name"])
                             task = functools.partial(self.get_tikok_dynamic_cover, post)
                             task = self.bot.loop.run_in_executor(None, task)
                             cover_file = await asyncio.wait_for(task, timeout=60)
+                            color = int(hex(int(ColorHash(post["id"]).hex.replace("#", ""), 16)), 0)
 
                             # Send embed and post in channel
-                            self.log.debug("Creating embed..")
-                            embed = discord.Embed(color=0xEE2222, title=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
+                            embed = discord.Embed(color=color, title=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
                             embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
                             embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', post['desc'])
                             embed.set_footer(text=f"{post['music']['title']} - {post['music']['authorName']}", icon_url='https://i.imgur.com/RziGM2t.png')
                             embed.set_thumbnail(url=post['author']['avatarMedium'])
                             embed.set_image(url=f"attachment://{post['id']}.gif")
                             await self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=cover_file)
-                            self.log.debug("Sent!")
-                            # self.bot.get_channel(sub["channel"]["id"]).send(embed=embed,)
+
                             # Add id to published cache
-                            # TODO: UNBLOCK THESE
-                            # cache.append(post["id"])
-                            # await self.config.guild(guild).cache.set(cache)
-                            # self.log.debug("Saved cache data: " + str(cache))
+                            cache.append(post["id"])
+                            await self.config.guild(guild).cache.set(cache)
+                            self.log.debug("Saved cache data: " + str(cache))
                         else:
                             self.log.debug("Skipping: " + post["id"])
 
