@@ -115,7 +115,8 @@ class TikTok(commands.Cog):
         self.log.debug(f'Proxies: {proxies}')
 
         # More than 24 hours
-        if (datetime.utcnow() - proxies['last-updated']) > timedelta(1):
+        if (len(proxies) == 0 or datetime.utcnow() - proxies['last-updated']) > timedelta(1):
+            self.log.debug(f'Updating proxy list..')
             proxies_list = []
             for lines in res.text.split('\n'):
                 proxy = ''.join(lines)
@@ -272,12 +273,6 @@ class TikTok(commands.Cog):
     async def update(self, ctx):
         """Manually force update"""
         await self.background_get_new_videos()
-
-    @tiktok.command()
-    @checks.is_owner()
-    async def stop(self, ctx):
-        """Manually stop background process to check videos"""
-        self.background_get_new_videos().cancel()
 
     @tiktok.command()
     @checks.is_owner()
