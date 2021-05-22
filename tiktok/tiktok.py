@@ -125,8 +125,9 @@ class TikTok(commands.Cog):
                             cover_binary = self.get_tikok_dynamic_cover(post)
 
                             # Send embed and post in channel
+                            self.debug.log("Creating embed..")
                             embed = discord.Embed(color=0xEE2222, title=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
-                            embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
+                            #embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
                             embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', post['desc'])
                             #embed.set_image(url=post['video']['dynamicCover'])
                             embed.set_footer(text=f"{post['music']['title']} - {post['music']['authorName']}", icon_url='https://i.imgur.com/RziGM2t.png')
