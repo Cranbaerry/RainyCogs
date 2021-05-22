@@ -65,8 +65,8 @@ class TikTok(commands.Cog):
             im.save(image_binary, 'gif', save_all=True)
             image_binary.seek(0)
 
-        self.log.debug(f"Saved {tiktok['id']}.gif")
-        return image_binary
+            self.log.debug(f"Saved {tiktok['id']}.gif")
+            return image_binary
 
     async def get_new_proxy(self):
         url = 'http://pubproxy.com/api/proxy?limit=1&format=txt&type=http'
