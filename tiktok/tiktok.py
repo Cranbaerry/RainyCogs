@@ -259,19 +259,23 @@ class TikTok(commands.Cog):
 
         subs.append(newSub)
         await self.config.guild(ctx.guild).subscriptions.set(subs)
-        await ctx.send(f"TikTok feeds of user [{tiktokId}](http://google.com) added to <#{channelDiscord.id}>")
+
+        color = int(hex(int(ColorHash(tiktokId).hex.replace("#", ""), 16)), 0)
+        embed = discord.Embed(color=color)
+        embed.description = f'TikTok feeds of user [{tiktokId}](https://www.tiktok.com/@{tiktokId}) added to <#{channelDiscord.id}>.'
+        await ctx.send(embed=embed)
 
     @checks.admin_or_permissions(manage_guild=True)
     @commands.guild_only()
     @tiktok.command()
-    async def remove(self, ctx: commands.Context, channelYouTube, channelDiscord: discord.TextChannel = None):
+    async def remove(self, ctx: commands.Context, tiktokId, channelDiscord: discord.TextChannel = None):
         """Unsubscribe a Discord channel from a TikTok channel
 
         If no Discord channel is specified, the subscription will be removed from all channels"""
         subs = await self.config.guild(ctx.guild).subscriptions()
         unsubbed = []
         if channelDiscord:
-            newSub = {'id': channelYouTube,
+            newSub = {'id': tiktokId,
                       'channel': {"name": channelDiscord.name,
                                   "id": channelDiscord.id}}
 
@@ -284,13 +288,17 @@ class TikTok(commands.Cog):
                 return
         else:
             for i, sub in enumerate(subs):
-                if sub['id'] == channelYouTube:
+                if sub['id'] == tiktokId:
                     unsubbed.append(subs.pop(i))
             if not len(unsubbed):
                 await ctx.send("Subscription not found")
                 return
         await self.config.guild(ctx.guild).subscriptions.set(subs)
-        await ctx.send(f"Subscription(s) removed: {unsubbed}")
+
+        color = int(hex(int(ColorHash(tiktokId).hex.replace("#", ""), 16)), 0)
+        embed = discord.Embed(color=color)
+        embed.description = f'TikTok feeds of user [{tiktokId}](https://www.tiktok.com/@{tiktokId}) no longer be subscriped.'
+        await ctx.send(embed=embed)
 
     @tiktok.command()
     @checks.admin_or_permissions(manage_guild=True)
