@@ -131,6 +131,7 @@ class TikTok(commands.Cog):
                 self.log.debug(f"Popping {self.api.proxy}")
                 self.log.debug(f"This: {proxies}")
                 proxies['list'].pop(str(self.api.proxy))
+                self.log.debug(f"That: {proxies}")
                 self.bot.loop.create_task(self.config.proxies.set(proxies))
                 self.log.debug(f"Removed from proxies list: {self.api.proxy}")
             except Exception as e:
