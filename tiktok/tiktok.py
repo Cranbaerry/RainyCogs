@@ -1,5 +1,6 @@
 import sys
 
+import aiohttp
 import discord
 import logging
 import asyncio
@@ -66,6 +67,14 @@ class TikTok(commands.Cog):
 
         return f"{tiktok['id']}.gif"
 
+    def get_new_proxy(self):
+        url = 'http://pubproxy.com/api/proxy?limit=1&format=txt&type=http'
+        hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=hdr) as resp:
+                self.api.proxy = await resp.text()
+                self.log.debug(f"New proxy acquired: {self.api.proxy}")
+
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
         self.log.debug("Running background..")
@@ -90,6 +99,7 @@ class TikTok(commands.Cog):
                         continue
                     except (ConnectionError, NewConnectionError, ProxyError, MaxRetryError):
                         self.log.error("Proxy failed")
+                        self.get_new_proxy()
                         continue
                     except TimeoutError:
                         self.log.error("Takes too long")
