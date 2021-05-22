@@ -94,22 +94,29 @@ class TikTok(commands.Cog):
         self.bot.loop.create_task(self.config.proxy.set(self.api.proxy))
         return proxy
 
-    async def _get_new_proxy(self, proxies, truncate = False):
-        url = 'https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt'
-
+    async def _get_new_proxy(self, proxies, truncate=False):
+        url = 'http://pubproxy.com/api/proxy?limit=5&format=txt&type=http'
         self.log.debug("Attempting to get new proxy..")
-        r = requests.get(url=url)
-        res = r.text
 
         if len(proxies) > 0:
             self.log.debug(f"Cached proxies: {len(proxies['list'])}")
-            self.log.debug(f"Last update: {len(proxies['last-updated'])}")
+            self.log.debug(f"Last update: {proxies['last-updated']}")
 
-        # More than 24 hours
+        # More than 24 hours or empty
         if len(proxies) == 0 or \
                 (datetime.now() - datetime.strptime(proxies['last-updated'], '%Y-%m-%d %H:%M:%S.%f')) > timedelta(1):
             self.log.debug(f'Updating proxy list..')
             proxies_list = []
+            r = requests.get(url=url)
+            res = r.text
+
+            if 'You reached the maximum 50 requests for today.' in res:
+                url = 'https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt'
+                self.log.debug(f'Switched proxy database to {url}')
+
+                r = requests.get(url=url)
+                res = r.text
+
             for lines in res.split('\n'):
                 proxy = ''.join(lines)
                 proxies_list.append(proxy)
@@ -150,7 +157,7 @@ class TikTok(commands.Cog):
                         try:
                             task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
                             task = self.bot.loop.run_in_executor(None, task)
-                            tiktoks = await asyncio.wait_for(task, timeout=60)
+                            tiktoks = await asyncio.wait_for(task, timeout=30)
                         except TimeoutError:
                             self.log.error("Takes too long, retrying..")
                             await self._get_new_proxy(await self.config.proxies(), True)
@@ -159,8 +166,8 @@ class TikTok(commands.Cog):
                             self.log.error("Captcha error, retrying..")
                             await self._get_new_proxy(await self.config.proxies(), True)
                             continue
-                        except ConnectionError:
-                            self.log.error("Connection error, retrying..")
+                        except ConnectionError as e:
+                            self.log.error(f"Connection error, retrying: {str(e)}")
                             await self._get_new_proxy(await self.config.proxies(), True)
                             continue
                         else:
