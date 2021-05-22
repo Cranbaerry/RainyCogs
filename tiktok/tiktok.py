@@ -55,19 +55,18 @@ class TikTok(commands.Cog):
     def get_tiktok_by_name(self, username, count):
         return self.api.byUsername(username, count=count)
 
-    def get_tikok_dynamic_cover(self, tiktok):
+    async def get_tikok_dynamic_cover(self, tiktok):
         image_data = self.api.getBytes(url=tiktok['video']['dynamicCover'])
 
         im = Image.open(io.BytesIO(image_data))
         im.info.pop('background', None)
 
-        image_binary = io.BytesIO()
-        im.save(image_binary, 'gif', save_all=True)
-        image_binary.seek(0)
+        with io.BytesIO() as image_binary:
+            im.save(image_binary, 'gif', save_all=True)
+            image_binary.seek(0)
 
-        self.log.debug(f"Saved: {tiktok['id']}.gif")
-        image_binary.close()
-        return image_binary
+            self.log.debug(f"Saved {tiktok['id']}.gif")
+            return image_binary
 
     async def get_new_proxy(self):
         url = 'http://pubproxy.com/api/proxy?limit=1&format=txt&type=http'
@@ -119,19 +118,11 @@ class TikTok(commands.Cog):
                         self.log.debug("Post Content: " + str(post))
                         if not post["id"] in cache:
                             self.log.debug("Sending data to channel: " + sub["channel"]["name"])
-                            self.log.debug(f"GET: {post['video']['dynamicCover']}")
-                            image_data = self.api.getBytes(url=post['video']['dynamicCover'])
+                            #task = functools.partial(self.get_tikok_dynamic_cover, tiktoks)
+                            #task = self.bot.loop.run_in_executor(None, task)
+                            #cover = await asyncio.wait_for(task, timeout=60)
 
-                            self.debug.log("A")
-
-                            im = Image.open(io.BytesIO(image_data))
-                            im.info.pop('background', None)
-
-                            self.debug.log("B")
-                            image_binary = io.BytesIO()
-                            im.save(image_binary, 'gif', save_all=True)
-                            image_binary.seek(0)
-                            self.debug.log("C")
+                            cover_binary = await self.get_tikok_dynamic_cover(post)
 
                             # Send embed and post in channel
                             self.debug.log("Creating embed..")
@@ -143,13 +134,12 @@ class TikTok(commands.Cog):
                             embed.set_thumbnail(url=post['author']['avatarMedium'])
 
                             self.debug.log("Reading the file..")
-                            file = discord.File(fp=image_binary, filename=f"{post['id']}.gif")
+                            file = discord.File(fp=cover_binary, filename=f"{post['id']}.gif")
                             embed.set_image(url=f"attachment://{post['id']}.gif")
                             self.debug.log("Image set!")
 
                             self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=file)
                             self.debug.log("Sent!")
-                            image_binary.close()
                             # self.bot.get_channel(sub["channel"]["id"]).send(embed=embed,)
                             # Add id to published cache
                             # TODO: UNBLOCK THESE
