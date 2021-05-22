@@ -118,7 +118,7 @@ class TikTok(commands.Cog):
                         self.log.debug("Post Content: " + str(post))
                         if not post["id"] in cache:
                             self.log.debug("Sending data to channel: " + sub["channel"]["name"])
-                            task = functools.partial(self.get_tikok_dynamic_cover, tiktoks)
+                            task = functools.partial(self.get_tikok_dynamic_cover, post)
                             task = self.bot.loop.run_in_executor(None, task)
                             cover_binary = await asyncio.wait_for(task, timeout=60)
                             file = discord.File(fp=cover_binary, filename=f"{post['id']}.gif")
