@@ -63,7 +63,7 @@ class TikTok(commands.Cog):
 
         with io.BytesIO() as image_binary:
             im.save(image_binary, 'gif', save_all=True)
-            im.save("{post['id']}.gif", 'gif', save_all=True)
+            im.save(f"{post['id']}.gif", 'gif', save_all=True)
             image_binary.seek(0)
             file = discord.File(fp=image_binary, filename=f"{post['id']}.gif")
             self.log.debug(f"Saved {post['id']}.gif")
@@ -131,7 +131,7 @@ class TikTok(commands.Cog):
                             embed.set_footer(text=f"{post['music']['title']} - {post['music']['authorName']}", icon_url='https://i.imgur.com/RziGM2t.png')
                             embed.set_thumbnail(url=post['author']['avatarMedium'])
                             embed.set_image(url=f"attachment://{post['id']}.gif")
-                            self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=cover_file)
+                            await self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=cover_file)
                             self.log.debug("Sent!")
                             # self.bot.get_channel(sub["channel"]["id"]).send(embed=embed,)
                             # Add id to published cache
