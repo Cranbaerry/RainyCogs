@@ -64,12 +64,8 @@ class TikTok(commands.Cog):
             return self.get_tiktok_by_name(username, count)
         except ConnectionError as e:
             self.log.error("Proxy failed: " + str(e))
-            if "you reached the maximum 50 requests for today" in str(e):
-                return None
-            else:
-                sleep(1)
-                self.bot.loop.create_task(self.get_new_proxy())
-                return self.get_tiktok_by_name(username, count)
+            self.bot.loop.create_task(self.get_new_proxy())
+            return self.get_tiktok_by_name(username, count)
         except MaxRetryError:
             self.log.error("What the fuck")
             return None
