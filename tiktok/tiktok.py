@@ -129,7 +129,7 @@ class TikTok(commands.Cog):
         if truncate:
             try:
                 self.log.debug(f"Popping {self.api.proxy}")
-                proxies['list'].pop(self.api.proxy)
+                proxies['list'].pop(str(self.api.proxy))
                 self.bot.loop.create_task(self.config.proxies.set(proxies))
                 self.log.debug(f"Removed from proxies list: {self.api.proxy}")
             except Exception as e:
