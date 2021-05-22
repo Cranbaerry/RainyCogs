@@ -79,7 +79,6 @@ class TikTok(commands.Cog):
 
         with io.BytesIO() as image_binary:
             im.save(image_binary, 'gif', save_all=True)
-            #im.save(f"{post['id']}.gif", 'gif', save_all=True)
             image_binary.seek(0)
             file = discord.File(fp=image_binary, filename=f"{post['id']}.gif")
             self.log.debug(f"Saved {post['id']}.gif")
@@ -110,7 +109,7 @@ class TikTok(commands.Cog):
         r = requests.get(url=url)
         res = r.text
 
-        self.log.debug(f'Proxies: {proxies}')
+        self.log.debug(f'Config Proxies: {proxies}')
         # More than 24 hours
         if len(proxies) == 0 or \
                 (datetime.now() - datetime.strptime(proxies['last-updated'], '%Y-%m-%d %H:%M:%S.%f')) > timedelta(1):
@@ -120,13 +119,9 @@ class TikTok(commands.Cog):
                 proxy = ''.join(lines)
                 proxies_list.append(proxy)
 
-            self.log.debug(f'Arranging proxy list..')
             proxies = {'last-updated': str(datetime.now()), 'list': proxies_list}
-            self.log.debug(f'Proxies {proxies}')
 
-            self.log.debug(f"Idk?")
             self.config.proxies.set(proxies)
-            self.log.debug(f"Maybe?")
             self.log.debug(f"Proxies list updated: {proxies_list}")
 
         if truncate:
@@ -280,7 +275,10 @@ class TikTok(commands.Cog):
     @checks.is_owner()
     async def clear(self, ctx):
         """Clear cache"""
-        await self.config.guild(ctx.guild).cache.set([])
+        for guild in self.bot.guilds:
+            await self.config.guild(guild).cache.set([])
+
+        self.config.proxies.set([])
         await ctx.send("Cache cleared!")
 
     @tiktok.command()
