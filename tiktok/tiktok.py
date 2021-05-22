@@ -323,7 +323,7 @@ class TikTok(commands.Cog):
         await self._showsubs(ctx, ctx.guild)
 
     async def _showsubs(self, ctx: commands.Context, guild: discord.Guild):
-        subs = await self.conf.guild(guild).subscriptions()
+        subs = await self.config.guild(guild).subscriptions()
         if not len(subs):
             await ctx.send("No subscriptions yet - try adding some!")
             return
