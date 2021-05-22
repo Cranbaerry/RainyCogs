@@ -126,7 +126,7 @@ class TikTok(commands.Cog):
                             #image_data = self.api.getBytes(url=tiktok['video']['dynamicCover'])
 
                             image_data = self.api.getBytes(url=tiktok['video']['dynamicCover'])
-                            self.debug("What")
+                            self.log.debug("What")
                             im = Image.open(io.BytesIO(image_data))
                             im.info.pop('background', None)
 
