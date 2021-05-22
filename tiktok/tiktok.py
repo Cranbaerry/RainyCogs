@@ -121,8 +121,9 @@ class TikTok(commands.Cog):
                             task = functools.partial(self.get_tikok_dynamic_cover, post)
                             task = self.bot.loop.run_in_executor(None, task)
                             cover_binary = await asyncio.wait_for(task, timeout=60)
+                            self.log.debug("Converted")
                             file = discord.File(fp=cover_binary, filename=f"{post['id']}.gif")
-
+                            
                             # Send embed and post in channel
                             self.log.debug("Creating embed..")
                             embed = discord.Embed(color=0xEE2222, title=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
