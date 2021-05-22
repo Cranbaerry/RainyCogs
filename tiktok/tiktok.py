@@ -118,39 +118,21 @@ class TikTok(commands.Cog):
                         self.log.debug("Post Content: " + str(post))
                         if not post["id"] in cache:
                             self.log.debug("Sending data to channel: " + sub["channel"]["name"])
-                            #task = functools.partial(self.get_tikok_dynamic_cover, tiktoks)
-                            #task = self.bot.loop.run_in_executor(None, task)
-                            #cover = await asyncio.wait_for(task, timeout=60)
+                            task = functools.partial(self.get_tikok_dynamic_cover, tiktoks)
+                            task = self.bot.loop.run_in_executor(None, task)
+                            cover = await asyncio.wait_for(task, timeout=60)
 
-                            #cover_binary = await self.get_tikok_dynamic_cover(post)
-                            #image_data = self.api.getBytes(url=tiktok['video']['dynamicCover'])
-                            self.log.debug(f"GET: {post['video']['dynamicCover']}")
-                            image_data = self.api.getBytes(url=post['video']['dynamicCover'])
-                            self.log.debug("What")
-                            im = Image.open(io.BytesIO(image_data))
-                            im.info.pop('background', None)
-                            self.log.debug("is")
-                            with io.BytesIO() as image_binary:
-                                im.save(image_binary, 'gif', save_all=True)
-                                image_binary.seek(0)
-                                file = discord.File(fp=image_binary, filename=f"{post['id']}.gif")
-                                self.log.debug(f"Saved {post['id']}.gif")
+                            cover_binary = await self.get_tikok_dynamic_cover(post)
+                            file = discord.File(fp=cover_binary, filename=f"{post['id']}.gif")
 
-                            self.log.debug("going on")
                             # Send embed and post in channel
                             self.log.debug("Creating embed..")
                             embed = discord.Embed(color=0xEE2222, title=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
                             embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
                             embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', post['desc'])
-                            #embed.set_image(url=post['video']['dynamicCover'])
                             embed.set_footer(text=f"{post['music']['title']} - {post['music']['authorName']}", icon_url='https://i.imgur.com/RziGM2t.png')
                             embed.set_thumbnail(url=post['author']['avatarMedium'])
-
-                            self.log.debug("Reading the file..")
-
                             embed.set_image(url=f"attachment://{post['id']}.gif")
-                            self.log.debug("Image set!")
-
                             self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=file)
                             self.log.debug("Sent!")
                             # self.bot.get_channel(sub["channel"]["id"]).send(embed=embed,)
