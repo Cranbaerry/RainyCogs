@@ -4,6 +4,7 @@ import discord
 import logging
 import asyncio
 import functools
+import re
 
 from TikTokApi.exceptions import TikTokCaptchaError
 from redbot.core import commands, Config, checks
@@ -87,9 +88,10 @@ class TikTok(commands.Cog):
                             self.log.debug("Sending data to channel: " + sub["channel"]["name"])
                             # Send embed and post in channel
                             embed = discord.Embed(color=0xEE2222, title=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
-                            embed.description = post['desc']
+                            embed.description = re.sub(r'#(\w+)', r'#[\1](https://www.tiktok.com/tag/\1)', post['desc'])
                             embed.set_image(url=post['video']['dynamicCover'])
                             embed.set_footer(text=f"{post['music']['title']} - {post['music']['authorName']}", icon_url='https://i.imgur.com/RziGM2t.png')
+                            embed.set_thumbnail(url=post['author']['avatarMedium'])
                             await self.bot.get_channel(sub["channel"]["id"]).send(embed=embed)
                             # Add id to published cache
                             cache.append(post["id"])
@@ -185,6 +187,7 @@ class TikTok(commands.Cog):
     async def clear(self, ctx):
         """Clear cache"""
         await self.config.guild(ctx.guild).cache.set([])
+        await ctx.send("Cache cleared!")
 
     @tiktok.command()
     @checks.is_owner()
