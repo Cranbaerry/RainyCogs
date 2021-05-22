@@ -109,12 +109,15 @@ class TikTok(commands.Cog):
         params = {'limit': 1, 'format': 'txt', 'type': 'http'}
 
         r = requests.get(url=url, params=params)
-        data = r.text()
+        proxy = r.text()
 
-        if "You reached the maximum 50 requests for today." in data:
-            raise MaximumProxyRequests(data)
+        if "You reached the maximum 50 requests for today." in proxy:
+            raise MaximumProxyRequests(proxy)
 
-        return r.text()
+        self.api.proxy = proxy
+        self.log.debug(f"New proxy acquired: {proxy}")
+        await self.config.proxy.set(self.api.proxy)
+        return proxy
 
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
