@@ -295,9 +295,10 @@ class TikTok(commands.Cog):
                 return
         await self.config.guild(ctx.guild).subscriptions.set(subs)
 
+        channels = f'<#{channelDiscord.id}>' if channelDiscord else 'all channels'
         color = int(hex(int(ColorHash(tiktokId).hex.replace("#", ""), 16)), 0)
         embed = discord.Embed(color=color)
-        embed.description = f'TikTok feeds of user [{tiktokId}](https://www.tiktok.com/@{tiktokId}) no longer be subscriped.'
+        embed.description = f'TikTok feeds of user [{tiktokId}](https://www.tiktok.com/@{tiktokId}) no longer be subscriped to {channels}'
         await ctx.send(embed=embed)
 
     @tiktok.command()
