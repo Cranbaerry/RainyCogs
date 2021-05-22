@@ -59,17 +59,12 @@ class TikTok(commands.Cog):
             return data
         except TikTokCaptchaError:
             self.log.error("Asking captcha, need proxy")
-            if "you reached the maximum 50 requests for today" in str(e):
-                self.log.error("Maximum proxy requests limit reached!")
-                raise MaxRetryError()
-            else:
-                self.bot.loop.create_task(self.get_new_proxy())
-                return self.get_tiktok_by_name(username, count)
+            self.bot.loop.create_task(self.get_new_proxy())
+            return self.get_tiktok_by_name(username, count)
         except ConnectionError as e:
             self.log.error("Proxy failed: " + str(e))
             if "you reached the maximum 50 requests for today" in str(e):
-                self.log.error("Maximum proxy requests limit reached!")
-                raise MaxRetryError()
+                raise MaxRetryError('Maximum proxy requests limit reached!')
             else:
                 self.bot.loop.create_task(self.get_new_proxy())
                 return self.get_tiktok_by_name(username, count)
