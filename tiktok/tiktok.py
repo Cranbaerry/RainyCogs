@@ -104,14 +104,16 @@ class TikTok(commands.Cog):
                 self.log.debug(f"New proxy acquired: {self.api.proxy}")
 
     def get_new_proxy(self):
-        url = 'http://pubproxy.com/api/proxy?limit=1&format=txt&type=http'
-        hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}
+        url = 'http://pubproxy.com/api/proxy'
         params = {'limit': 1, 'format': 'txt', 'type': 'http'}
 
+        self.log.debug("Attempting to get new proxy..")
         r = requests.get(url=url, params=params)
         proxy = r.text()
 
+        self.log.debug("Response: " + proxy)
         if "You reached the maximum 50 requests for today." in proxy:
+            self.log.error("New Proxy Error: " + proxy)
             raise MaximumProxyRequests(proxy)
 
         self.api.proxy = proxy
