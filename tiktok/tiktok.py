@@ -57,12 +57,16 @@ class TikTok(commands.Cog):
 
     def get_tikok_dynamic_cover(self, tiktok):
         image_data = self.api.getBytes(url=tiktok['video']['dynamicCover'])
+
         im = Image.open(io.BytesIO(image_data))
         im.info.pop('background', None)
-        im.save(f"{tiktok['id']}.gif", 'gif', save_all=True)
-        self.log.debug(f"Saved {tiktok['id']}.gif")
 
-        return f"{tiktok['id']}.gif"
+        with io.BytesIO() as image_binary:
+            im.save(image_binary, 'gif', save_all=True)
+            image_binary.seek(0)
+
+        self.log.debug(f"Saved {tiktok['id']}.gif")
+        return image_binary
 
     async def get_new_proxy(self):
         url = 'http://pubproxy.com/api/proxy?limit=1&format=txt&type=http'
@@ -118,7 +122,7 @@ class TikTok(commands.Cog):
                             #task = self.bot.loop.run_in_executor(None, task)
                             #cover = await asyncio.wait_for(task, timeout=60)
 
-                            cover = self.get_tikok_dynamic_cover(post)
+                            cover_binary = self.get_tikok_dynamic_cover(post)
 
                             # Send embed and post in channel
                             embed = discord.Embed(color=0xEE2222, title=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
@@ -128,8 +132,8 @@ class TikTok(commands.Cog):
                             embed.set_footer(text=f"{post['music']['title']} - {post['music']['authorName']}", icon_url='https://i.imgur.com/RziGM2t.png')
                             embed.set_thumbnail(url=post['author']['avatarMedium'])
 
-                            file = discord.File(cover)
-                            embed.set_image(url=f"attachment://{cover}")
+                            file = discord.File(fp=cover_binary, filename=f"{post['id']}.gif")
+                            embed.set_image(url=f"attachment://{post['id']}.gif")
 
                             self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=file)
                             # self.bot.get_channel(sub["channel"]["id"]).send(embed=embed,)
