@@ -58,20 +58,9 @@ class TikTok(commands.Cog):
 
         self.log.debug(f"Proxy: {await self.config.proxy()}")
 
-    def get_tiktok_by_name(self, username, count, proxies):
-        try:
-            data = self.api.byUsername(username, count=count)
-            return data
-        except TikTokCaptchaError:
-            self.log.error("Asking captcha, need proxy")
-            self._get_new_proxy(proxies, True)
-            self.log.warning("Attempting to connect with new proxy..")
-            return self.get_tiktok_by_name(username, count, proxies)
-        except ConnectionError as e:
-            self.log.error("Proxy failed: " + str(e))
-            self._get_new_proxy(proxies, True)
-            self.log.warning("Attempting to connect with new proxy..")
-            return self.get_tiktok_by_name(username, count, proxies)
+    def get_tiktok_by_name(self, username, count):
+        data = self.api.byUsername(username, count=count)
+        return data
 
     def get_tiktok_dynamic_cover(self, post):
         image_data = self.api.getBytes(url=post['video']['dynamicCover'])
@@ -104,7 +93,7 @@ class TikTok(commands.Cog):
         self.bot.loop.create_task(self.config.proxy.set(self.api.proxy))
         return proxy
 
-    def _get_new_proxy(self, proxies, truncate = False):
+    async def _get_new_proxy(self, proxies, truncate = False):
         url = 'https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt'
 
         self.log.debug("Attempting to get new proxy..")
@@ -123,7 +112,7 @@ class TikTok(commands.Cog):
 
             proxies = {'last-updated': str(datetime.now()), 'list': proxies_list}
 
-            self.bot.loop.create_task(self.config.proxies.set(proxies))
+            await self.config.proxies.set(proxies)
             self.log.debug(f"Proxies list updated: {proxies_list}")
         else:
             self.log.debug(f"Proxies list update skipped..")
@@ -131,14 +120,14 @@ class TikTok(commands.Cog):
         if truncate:
             try:
                 proxies['list'].remove(self.api.proxy)
-                self.bot.loop.create_task(self.config.proxies.set(proxies))
+                await self.config.proxies.set(proxies)
                 self.log.debug(f"Removed from proxies list: {self.api.proxy}")
             except ValueError:
                 pass
 
         self.api.proxy = next(iter(proxies['list']))
         self.log.debug(f"New proxy acquired: {self.api.proxy}")
-        self.bot.loop.create_task(self.config.proxy.set(self.api.proxy))
+        await self.config.proxy.set(self.api.proxy)
 
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
@@ -156,12 +145,20 @@ class TikTok(commands.Cog):
                     channel = self.bot.get_channel(int(sub["channel"]["id"]))
                     while True:
                         try:
-                            proxies = await self.config.proxies()
-                            task = functools.partial(self.get_tiktok_by_name, sub["id"], 3, proxies)
+                            task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
                             task = self.bot.loop.run_in_executor(None, task)
                             tiktoks = await asyncio.wait_for(task, timeout=60)
                         except TimeoutError:
                             self.log.error("Takes too long, retrying..")
+                            self._get_new_proxy(await self.config.proxies(), True)
+                            continue
+                        except TikTokCaptchaError:
+                            self.log.error("Captcha error, retrying..")
+                            self._get_new_proxy(await self.config.proxies(), True)
+                            continue
+                        except ConnectionError:
+                            self._get_new_proxy(await self.config.proxies(), True)
+                            self.log.error("Connection error, retrying..")
                             continue
                         else:
                             break
