@@ -122,7 +122,9 @@ class TikTok(commands.Cog):
                 proxy = ''.join(lines)
                 proxies_list.append(proxy)
 
+            self.log.debug(f'Arranging proxy list..')
             proxies = {'last-updated': datetime.utcnow(), 'list': proxies_list}
+            self.log.debug(f'Proxies {proxies}')
 
             self.bot.loop.create_task(self.config.proxies.set(proxies))
             self.log.debug(f"Proxies list updated: {proxies_list}")
