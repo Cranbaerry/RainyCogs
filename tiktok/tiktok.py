@@ -138,7 +138,7 @@ class TikTok(commands.Cog):
 
                             self.log.debug("going on")
                             # Send embed and post in channel
-                            self.debug.log("Creating embed..")
+                            self.log.debug("Creating embed..")
                             embed = discord.Embed(color=0xEE2222, title=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
                             embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
                             embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', post['desc'])
@@ -146,13 +146,13 @@ class TikTok(commands.Cog):
                             embed.set_footer(text=f"{post['music']['title']} - {post['music']['authorName']}", icon_url='https://i.imgur.com/RziGM2t.png')
                             embed.set_thumbnail(url=post['author']['avatarMedium'])
 
-                            self.debug.log("Reading the file..")
+                            self.log.debug("Reading the file..")
 
                             embed.set_image(url=f"attachment://{post['id']}.gif")
-                            self.debug.log("Image set!")
+                            self.log.debug("Image set!")
 
                             self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=file)
-                            self.debug.log("Sent!")
+                            self.log.debug("Sent!")
                             # self.bot.get_channel(sub["channel"]["id"]).send(embed=embed,)
                             # Add id to published cache
                             # TODO: UNBLOCK THESE
