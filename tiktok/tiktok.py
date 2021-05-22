@@ -236,3 +236,4 @@ class TikTok(commands.Cog):
 
         await self.config.proxy.set(proxy)
         await ctx.send(f"Proxy set to {await self.config.proxy()}")
+        self.log.debug(f"Proxy set to {await self.config.proxy()}")
