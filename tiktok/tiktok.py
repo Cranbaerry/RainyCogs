@@ -54,7 +54,17 @@ class TikTok(commands.Cog):
         self.log.debug(f"Proxy: {await self.config.proxy()}")
 
     def get_tiktok_by_name(self, username, count):
-        return self.api.byUsername(username, count=count)
+        try:
+            data = self.api.byUsername(username, count=count)
+            return data
+        except TikTokCaptchaError:
+            self.log.error("Asking captcha, need proxy")
+            await self.get_new_proxy()
+            return self.get_tiktok_by_name(username, count)
+        except ConnectionError as e:
+            self.log.error("Proxy failed: " + str(e))
+            await self.get_new_proxy()
+            return self.get_tiktok_by_name(username, count)
 
     def get_tikok_dynamic_cover(self, post):
         image_data = self.api.getBytes(url=post['video']['dynamicCover'])
@@ -98,14 +108,6 @@ class TikTok(commands.Cog):
                         task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
                         task = self.bot.loop.run_in_executor(None, task)
                         tiktoks = await asyncio.wait_for(task, timeout=60)
-                    except TikTokCaptchaError:
-                        self.log.error("Asking captcha, need proxy")
-                        await self.get_new_proxy()
-                        continue
-                    except ConnectionError as e:
-                        self.log.error("Proxy failed: " + str(e))
-                        await self.get_new_proxy()
-                        continue
                     except TimeoutError:
                         self.log.error("Takes too long")
                         continue
