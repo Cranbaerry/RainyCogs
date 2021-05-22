@@ -100,7 +100,7 @@ class TikTok(commands.Cog):
         r = requests.get(url=url)
         res = r.text
 
-        self.log.debug(f'Config Proxies: {len(proxies)}')
+        self.log.debug(f"Cached Proxies: {len(proxies['list'])}")
         # More than 24 hours
         if len(proxies) == 0 or \
                 (datetime.now() - datetime.strptime(proxies['last-updated'], '%Y-%m-%d %H:%M:%S.%f')) > timedelta(1):
