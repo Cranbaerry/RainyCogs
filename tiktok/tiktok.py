@@ -55,8 +55,9 @@ class TikTok(commands.Cog):
         return self.api.byUsername(username, count=count)
 
     def get_tikok_dynamic_cover(self, tiktok):
-        self.log.debug("Writing the video...")
+        self.log.debug(f"Writing the video: {tiktok['video']['dynamicCover']}")
         bytes = self.api.getBytes(url=tiktok['video']['dynamicCover'])
+        self.log.debug("Bytes getto!")
         with open("{}.webp".format(tiktok['id']), "wb") as output:
             output.write(bytes)
 
@@ -123,7 +124,7 @@ class TikTok(commands.Cog):
                             #task = self.bot.loop.run_in_executor(None, task)
                             #cover = await asyncio.wait_for(task, timeout=60)
 
-                            cover = await self.get_tikok_dynamic_cover(tiktoks)
+                            cover = self.get_tikok_dynamic_cover(tiktoks)
 
                             # Send embed and post in channel
                             embed = discord.Embed(color=0xEE2222, title=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
