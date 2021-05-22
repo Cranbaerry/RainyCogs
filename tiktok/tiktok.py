@@ -162,7 +162,6 @@ class TikTok(commands.Cog):
                     continue
 
                 for post in tiktoks:
-                    self.log.debug("Post ID: " + post["id"])
                     if not post["id"] in cache:
                         gif = True
                         try:
@@ -195,10 +194,6 @@ class TikTok(commands.Cog):
                             cache.append(post["id"])
                             await self.config.guild(guild).cache.set(cache)
                             self.log.debug("Saved cache data: " + str(cache))
-                    else:
-                        self.log.debug("Skipping..")
-
-                self.log.debug("Sleeping 5 seconds..")
                 await asyncio.sleep(5)
 
     async def background_get_new_videos(self):
