@@ -59,11 +59,11 @@ class TikTok(commands.Cog):
             return data
         except TikTokCaptchaError:
             self.log.error("Asking captcha, need proxy")
-            await self.get_new_proxy()
+            self.get_new_proxy()
             return self.get_tiktok_by_name(username, count)
         except ConnectionError as e:
             self.log.error("Proxy failed: " + str(e))
-            await self.get_new_proxy()
+            self.get_new_proxy()
             return self.get_tiktok_by_name(username, count)
 
     def get_tikok_dynamic_cover(self, post):
@@ -80,7 +80,8 @@ class TikTok(commands.Cog):
             self.log.debug(f"Saved {post['id']}.gif")
             return file
 
-    async def get_new_proxy(self):
+    #45.184.103.113:999
+    def get_new_proxy(self):
         url = 'http://pubproxy.com/api/proxy?limit=1&format=txt&type=http'
         hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}
         async with aiohttp.ClientSession() as session:
