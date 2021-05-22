@@ -288,6 +288,13 @@ class TikTok(commands.Cog):
         await ctx.send(embed=embed)
 
     @tiktok.command()
+    @checks.admin_or_permissions(manage_guild=True)
+    @commands.guild_only()
+    async def clear(self, ctx):
+        """Clear cached tiktok posts"""
+        await self.config.guild(ctx.guild).cache.set([])
+
+    @tiktok.command()
     @checks.is_owner()
     async def resetproxy(self, ctx):
         """Clear proxies database"""
@@ -302,27 +309,18 @@ class TikTok(commands.Cog):
         await ctx.send("Cache database cleared!")
 
     @tiktok.command()
-    @checks.admin_or_permissions(manage_guild=True)
-    @commands.guild_only()
-    async def clear(self, ctx):
-        """Clear cached tiktok posts"""
-        await self.config.guild(ctx.guild).cache.set([])
-
-    @tiktok.command()
     @checks.is_owner()
     async def setinterval(self, ctx: commands.Context, interval: int):
         """Set the interval in seconds at which to check for updates
 
-        Very low values will probably get you rate limited
-
-        Default is 300 seconds (5 minutes)"""
+        Very low values will probably get you rate limited"""
         await self.config.interval.set(interval)
         await ctx.send(f"Interval set to {await self.config.interval()}")
 
     @tiktok.command()
     @checks.is_owner()
     async def setproxy(self, ctx: commands.Context, proxy):
-        """Set HTTP proxy address"""
+        """Manually set HTTP proxy address"""
         self.api.proxy = proxy
 
         await self.config.proxy.set(proxy)
