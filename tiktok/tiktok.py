@@ -127,10 +127,13 @@ class TikTok(commands.Cog):
             self.log.debug(f"Proxies list update skipped..")
 
         if truncate:
-            self.log.debug(f"Popping {self.api.proxy}")
-            proxies['list'].pop(self.api.proxy)
-            self.bot.loop.create_task(self.config.proxies.set(proxies))
-            self.log.debug(f"Removed from proxies list: {self.api.proxy}")
+            try:
+                self.log.debug(f"Popping {self.api.proxy}")
+                proxies['list'].pop(self.api.proxy)
+                self.bot.loop.create_task(self.config.proxies.set(proxies))
+                self.log.debug(f"Removed from proxies list: {self.api.proxy}")
+            except KeyError:
+                pass
 
         self.api.proxy = next(iter(proxies['list']))
         self.log.debug(f"New proxy acquired: {self.api.proxy}")
