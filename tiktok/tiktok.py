@@ -1,6 +1,5 @@
 import io
 
-import aiohttp
 import discord
 import logging
 import asyncio
@@ -12,14 +11,12 @@ from TikTokApi.exceptions import TikTokCaptchaError
 from redbot.core import commands, Config, checks
 from TikTokApi import TikTokApi
 from redbot.core.utils.chat_formatting import pagify
-from urllib3.exceptions import NewConnectionError, ProxyError, MaxRetryError
 from requests.exceptions import ConnectionError
 from asyncio.exceptions import TimeoutError
 from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime, timedelta
 from PIL import Image
 from colorhash import ColorHash
-from dateutil.parser import parse as parsedate
 
 UNIQUE_ID = 0x696969669
 
@@ -57,7 +54,7 @@ class TikTok(commands.Cog):
                                           logging_level=logging.DEBUG, executablePath=ChromeDriverManager().install(),
                                           proxy=self.proxy)
 
-        self.log.debug(f"Proxy: {await self.config.proxy()}")
+        self.log.info(f"Proxy: {await self.config.proxy()}")
 
     def get_tiktok_by_name(self, username, count):
         data = self.api.byUsername(username, count=count)
@@ -71,10 +68,10 @@ class TikTok(commands.Cog):
 
         with io.BytesIO() as image_binary:
             im.save(image_binary, 'gif', save_all=True)
-            im.save(f"{post['id']}.gif", 'gif', save_all=True)
+            # im.save(f"{post['id']}.gif", 'gif', save_all=True)
             image_binary.seek(0)
             file = discord.File(fp=image_binary, filename=f"{post['id']}.gif")
-            self.log.debug(f"Saved {post['id']}.gif")
+            self.log.info(f"Saved {post['id']}.gif")
             return file
 
     async def get_new_proxy(self, proxies, truncate=False):
@@ -82,20 +79,19 @@ class TikTok(commands.Cog):
         self.log.debug("Attempting to get new proxy..")
 
         if len(proxies) > 0:
-            self.log.debug(f"Cached proxies: {len(proxies['list'])}")
-            self.log.debug(f"Last update: {proxies['last-updated']}")
+            self.log.info(f"Cached proxies: {len(proxies['list'])}")
+            self.log.info(f"Last update: {proxies['last-updated']}")
 
         # More than 24 hours or empty
         if len(proxies) == 0 or \
                 (datetime.now() - datetime.strptime(proxies['last-updated'], '%Y-%m-%d %H:%M:%S.%f')) > timedelta(1):
-            self.log.debug(f'Updating proxy list..')
             proxies_list = []
             r = requests.get(url=url)
             res = r.text
 
             if 'You reached the maximum 50 requests for today.' in res:
                 url = 'https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt'
-                self.log.debug(f'Switched proxy database to {url}')
+                self.log.info(f'Switched proxy database to {url}')
 
                 r = requests.get(url=url)
                 res = r.text
@@ -107,32 +103,30 @@ class TikTok(commands.Cog):
             proxies = {'last-updated': str(datetime.now()), 'list': proxies_list}
 
             await self.config.proxies.set(proxies)
-            self.log.debug(f"Proxies list updated: {proxies_list}")
-        else:
-            self.log.debug(f"Proxies list update skipped..")
+            self.log.info(f"Proxies list updated: {proxies_list}")
 
         if truncate:
             try:
                 proxies['list'].remove(self.api.proxy)
                 await self.config.proxies.set(proxies)
-                self.log.debug(f"Removed from proxies list: {self.api.proxy}")
             except ValueError:
                 pass
 
         self.api.proxy = next(iter(proxies['list']))
-        self.log.debug(f"New proxy acquired: {self.api.proxy}")
+        self.log.info(f"New proxy acquired: {self.api.proxy}")
         await self.config.proxy.set(self.api.proxy)
 
     async def get_new_videos(self):
+        tiktoks = cover_file = None
         for guild in self.bot.guilds:
             try:
                 subs = await self.config.guild(guild).subscriptions()
                 cache = await self.config.guild(guild).cache()
             except:
-                self.log.debug("Unable to fetch data, config is empty..")
+                self.log.warning("Unable to fetch data, config is empty..")
                 return
             for i, sub in enumerate(subs):
-                self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
+                #self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 while True:
                     try:
@@ -140,15 +134,15 @@ class TikTok(commands.Cog):
                         task = self.bot.loop.run_in_executor(None, task)
                         tiktoks = await asyncio.wait_for(task, timeout=30)
                     except TimeoutError:
-                        self.log.error("Takes too long, retrying..")
+                        self.log.warning("Takes too long, retrying..")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
                     except TikTokCaptchaError:
-                        self.log.error("Captcha error, retrying..")
+                        self.log.warning("Captcha error, retrying..")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
                     except ConnectionError as e:
-                        self.log.error(f"Connection error, retrying: {str(e)}")
+                        self.log.warning(f"Connection error, retrying: {str(e)}")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
                     else:
@@ -158,42 +152,43 @@ class TikTok(commands.Cog):
                     continue
 
                 if tiktoks is None or len(tiktoks) == 0:
-                    self.log.warning("Channel not found: " + sub["channel"]["name"])
+                    self.log.warning("Channel not found: " + sub["id"])
                     continue
 
                 for post in tiktoks:
                     if not post["id"] in cache:
-                        gif = True
+                        color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
+
+                        # Send embed and post in channel
+                        embed = discord.Embed(color=color,
+                                              url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
+                        embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
+                        embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)',
+                                                   f"{post['desc']}")
+                        embed.add_field(
+                            name=f"<:music:845585013327265822> {post['music']['title']} - {post['music']['authorName']}",
+                            value=f"[Click to see full video!](https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})",
+                            inline=False)
+                        embed.set_author(name=post['author']['nickname'],
+                                         url=f"https://www.tiktok.com/@{post['author']['uniqueId']}",
+                                         icon_url=post['author']['avatarMedium'])
+
                         try:
                             self.log.debug("Sending data to channel: " + sub["channel"]["name"])
                             task = functools.partial(self.get_tiktok_dynamic_cover, post)
                             task = self.bot.loop.run_in_executor(None, task)
                             cover_file = await asyncio.wait_for(task, timeout=60)
+                            embed.set_image(url=f"attachment://{post['id']}.gif")
                         except TimeoutError:
-                            gif = False
+                            embed.set_image(url=post['video']['cover'])
                             self.log.warning("GIF processing too long..")
                         finally:
-                            color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
-
-                            # Send embed and post in channel
-                            embed = discord.Embed(color=color, url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
-                            embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
-                            embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', f"{post['desc']}")
-                            embed.add_field(name=f"<:music:845585013327265822> {post['music']['title']} - {post['music']['authorName']}", value=f"[Click to see full video!](https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})", inline=False)
-                            embed.set_author(name=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}", icon_url=post['author']['avatarMedium'])
-
-                            if not gif:
-                                cover_file = None
-                                embed.set_image(url=post['video']['cover'])
-                            else:
-                                embed.set_image(url=f"attachment://{post['id']}.gif")
-
                             await self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=cover_file)
 
                             # Add id to published cache
                             cache.append(post["id"])
                             await self.config.guild(guild).cache.set(cache)
-                            self.log.debug("Saved cache data: " + str(cache))
+                            self.log.info("Saved cache data: " + str(cache))
                 await asyncio.sleep(5)
 
     async def background_get_new_videos(self):
@@ -201,7 +196,6 @@ class TikTok(commands.Cog):
         while True:
             await self.get_new_videos()
             interval = await self.config.interval()
-            self.log.debug(f"Sleeping {interval} seconds..")
             await asyncio.sleep(interval)
 
     def cog_unload(self):
@@ -274,7 +268,8 @@ class TikTok(commands.Cog):
         channels = f'<#{channelDiscord.id}>' if channelDiscord else 'all channels'
         color = int(hex(int(ColorHash(tiktokId).hex.replace("#", ""), 16)), 0)
         embed = discord.Embed(color=color)
-        embed.description = f'TikTok feeds of user [{tiktokId}](https://www.tiktok.com/@{tiktokId}) no longer be subscriped to {channels}'
+        embed.description = f'TikTok feeds of user [{tiktokId}](https://www.tiktok.com/@{tiktokId}) no longer be ' \
+                            f'subscriped to {channels} '
         await ctx.send(embed=embed)
 
     @tiktok.command()
@@ -321,7 +316,7 @@ class TikTok(commands.Cog):
         subs_by_channel = {}
         for sub in subs:
             # Channel entry must be max 124 chars: 103 + 2 + 18 + 1
-            channel = f'{sub["channel"]["name"][:103]} ({sub["channel"]["id"]})' # Max 124 chars
+            channel = f'{sub["channel"]["name"][:103]} ({sub["channel"]["id"]})'
             subs_by_channel[channel] = [
                 # Sub entry must be max 100 chars: 45 + 2 + 24 + 4 + 25 = 100
                 f"{sub.get('name', sub['id'][:45])}",
@@ -334,7 +329,7 @@ class TikTok(commands.Cog):
                 page = 1
                 while len(sub_ids) > 0:
                     # Generate embed with max 1024 chars
-                    embed = discord.Embed()
+                    embed = discord.Embed(color=0xEE2222)
                     title = f"Subscriptions for {channel}"
                     embed.description = "\n".join(sub_ids[0:9])
                     if page_count > 1:
@@ -342,7 +337,7 @@ class TikTok(commands.Cog):
                         page += 1
                     embed.title = title
                     await ctx.send(embed=embed)
-                    del(sub_ids[0:9])
+                    del (sub_ids[0:9])
         else:
             subs_string = ""
             for channel, sub_ids in subs_by_channel.items():
@@ -364,4 +359,4 @@ class TikTok(commands.Cog):
 
         await self.config.proxy.set(proxy)
         await ctx.send(f"Proxy set to {await self.config.proxy()}")
-        self.log.debug(f"Proxy set to {await self.config.proxy()}")
+        self.log.info(f"Proxy set to {await self.config.proxy()}")
