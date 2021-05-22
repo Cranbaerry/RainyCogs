@@ -116,7 +116,7 @@ class TikTok(commands.Cog):
 
         self.api.proxy = proxy
         self.log.debug(f"New proxy acquired: {proxy}")
-        await self.config.proxy.set(self.api.proxy)
+        self.bot.loop.create_task(self.config.proxy.set(self.api.proxy))
         return proxy
 
     async def background_get_new_videos(self):
