@@ -99,7 +99,7 @@ class TikTok(commands.Cog):
                         continue
                     except (ConnectionError, NewConnectionError, ProxyError, MaxRetryError):
                         self.log.error("Proxy failed")
-                        self.get_new_proxy()
+                        await self.get_new_proxy()
                         continue
                     except TimeoutError:
                         self.log.error("Takes too long")
