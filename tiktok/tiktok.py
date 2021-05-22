@@ -259,7 +259,7 @@ class TikTok(commands.Cog):
 
         subs.append(newSub)
         await self.config.guild(ctx.guild).subscriptions.set(subs)
-        await ctx.send(f"Subscription added: {newSub}")
+        await ctx.send(f"TikTok feeds of user [{tiktokId}](http://google.com) added to <#{channelDiscord.id}>")
 
     @checks.admin_or_permissions(manage_guild=True)
     @commands.guild_only()
