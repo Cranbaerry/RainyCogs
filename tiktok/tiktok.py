@@ -278,7 +278,7 @@ class TikTok(commands.Cog):
         for guild in self.bot.guilds:
             await self.config.guild(guild).cache.set([])
 
-        self.config.proxies.set([])
+        await self.config.proxies.set([])
         await ctx.send("Cache cleared!")
 
     @tiktok.command()
