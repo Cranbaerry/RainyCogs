@@ -133,6 +133,10 @@ class TikTok(commands.Cog):
                 self.bot.loop.create_task(self.config.proxies.set(proxies))
                 self.log.debug(f"Removed from proxies list: {self.api.proxy}")
             except KeyError:
+                self.log.warning(f"Not found: {self.api.proxy}")
+                pass
+            except:
+                self.log.debug("IDK")
                 pass
 
         self.api.proxy = next(iter(proxies['list']))
