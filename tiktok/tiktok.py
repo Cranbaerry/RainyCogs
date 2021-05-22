@@ -157,8 +157,8 @@ class TikTok(commands.Cog):
                             await self._get_new_proxy(await self.config.proxies(), True)
                             continue
                         except ConnectionError:
-                            await self._get_new_proxy(await self.config.proxies(), True)
                             self.log.error("Connection error, retrying..")
+                            await self._get_new_proxy(await self.config.proxies(), True)
                             continue
                         else:
                             break
