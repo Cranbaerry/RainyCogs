@@ -1,3 +1,4 @@
+import io
 import sys
 
 import aiohttp
@@ -55,15 +56,8 @@ class TikTok(commands.Cog):
         return self.api.byUsername(username, count=count)
 
     def get_tikok_dynamic_cover(self, tiktok):
-        self.log.debug(f"Writing the video: {tiktok['video']['dynamicCover']}")
-        bytes = self.api.getBytes(url=tiktok['video']['dynamicCover'])
-        self.log.debug("Bytes getto!")
-        with open("{}.webp".format(tiktok['id']), "wb") as output:
-            output.write(bytes)
-
-        self.log.debug(f"Processing  {tiktok['id']}.gif")
-
-        im = Image.open(f"{tiktok['id']}.webp")
+        image_data = self.api.getBytes(url=tiktok['video']['dynamicCover'])
+        im = Image.open(io.BytesIO(image_data))
         im.info.pop('background', None)
         im.save(f"{tiktok['id']}.gif", 'gif', save_all=True)
         self.log.debug(f"Saved {tiktok['id']}.gif")
