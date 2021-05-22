@@ -132,10 +132,13 @@ class TikTok(commands.Cog):
                             embed.set_footer(text=f"{post['music']['title']} - {post['music']['authorName']}", icon_url='https://i.imgur.com/RziGM2t.png')
                             embed.set_thumbnail(url=post['author']['avatarMedium'])
 
+                            self.debug.log("Reading the file..")
                             file = discord.File(fp=cover_binary, filename=f"{post['id']}.gif")
                             embed.set_image(url=f"attachment://{post['id']}.gif")
+                            self.debug.log("Image set!")
 
                             self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=file)
+                            self.debug.log("Sent!")
                             # self.bot.get_channel(sub["channel"]["id"]).send(embed=embed,)
                             # Add id to published cache
                             # TODO: UNBLOCK THESE
