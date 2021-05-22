@@ -55,7 +55,7 @@ class TikTok(commands.Cog):
     def get_tiktok_by_name(self, username, count):
         return self.api.byUsername(username, count=count)
 
-    def get_tikok_dynamic_cover(self, tiktok):
+    async def get_tikok_dynamic_cover(self, tiktok):
         image_data = self.api.getBytes(url=tiktok['video']['dynamicCover'])
 
         im = Image.open(io.BytesIO(image_data))
@@ -122,7 +122,7 @@ class TikTok(commands.Cog):
                             #task = self.bot.loop.run_in_executor(None, task)
                             #cover = await asyncio.wait_for(task, timeout=60)
 
-                            cover_binary = self.get_tikok_dynamic_cover(post)
+                            cover_binary = await self.get_tikok_dynamic_cover(post)
 
                             # Send embed and post in channel
                             self.debug.log("Creating embed..")
