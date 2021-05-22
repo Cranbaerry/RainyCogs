@@ -124,17 +124,17 @@ class TikTok(commands.Cog):
 
             proxies = {'last-updated': datetime.utcnow(), 'list': proxies_list}
 
-            self.config.proxies.set(proxies)
+            self.bot.loop.create_task(self.config.proxies.set(proxies))
             self.log.debug(f"Proxies list updated: {proxies_list}")
 
         if truncate:
             proxies['list'].pop(self.api.proxy)
-            self.config.proxies.set(proxies)
+            self.bot.loop.create_task(self.config.proxies.set(proxies))
             self.log.debug(f"Removed from proxies list: {self.api.proxy}")
 
         self.api.proxy = next(iter(proxies['list']))
         self.log.debug(f"New proxy acquired: {self.api.proxy}")
-        self.config.proxy.set(self.api.proxy)
+        self.bot.loop.create_task(self.config.proxy.set(self.api.proxy))
 
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
