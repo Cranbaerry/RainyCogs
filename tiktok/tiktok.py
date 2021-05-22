@@ -57,7 +57,7 @@ class TikTok(commands.Cog):
     def get_tikok_dynamic_cover(self, tiktok):
         self.log.debug(f"Writing the video: {tiktok['video']['dynamicCover']}")
         bytes = self.api.getBytes(url=tiktok['video']['dynamicCover'])
-        '''self.log.debug("Bytes getto!")
+        self.log.debug("Bytes getto!")
         with open("{}.webp".format(tiktok['id']), "wb") as output:
             output.write(bytes)
 
@@ -66,7 +66,7 @@ class TikTok(commands.Cog):
         im = Image.open(f"{tiktok['id']}.webp")
         im.info.pop('background', None)
         im.save(f"{tiktok['id']}.gif", 'gif', save_all=True)
-        self.log.debug(f"Saved {tiktok['id']}.gif")'''
+        self.log.debug(f"Saved {tiktok['id']}.gif")
 
         return f"{tiktok['id']}.gif"
 
@@ -124,7 +124,7 @@ class TikTok(commands.Cog):
                             #task = self.bot.loop.run_in_executor(None, task)
                             #cover = await asyncio.wait_for(task, timeout=60)
 
-                            cover = self.get_tikok_dynamic_cover(tiktoks)
+                            cover = self.get_tikok_dynamic_cover(post)
 
                             # Send embed and post in channel
                             embed = discord.Embed(color=0xEE2222, title=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
@@ -134,11 +134,11 @@ class TikTok(commands.Cog):
                             embed.set_footer(text=f"{post['music']['title']} - {post['music']['authorName']}", icon_url='https://i.imgur.com/RziGM2t.png')
                             embed.set_thumbnail(url=post['author']['avatarMedium'])
 
-                            #file = discord.File(cover)
-                            #embed.set_image(url=f"attachment://{cover}")
+                            file = discord.File(cover)
+                            embed.set_image(url=f"attachment://{cover}")
 
-                            # self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=file)
-                            self.bot.get_channel(sub["channel"]["id"]).send(embed=embed,)
+                            self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=file)
+                            # self.bot.get_channel(sub["channel"]["id"]).send(embed=embed,)
                             # Add id to published cache
                             # TODO: UNBLOCK THESE
                             # cache.append(post["id"])
