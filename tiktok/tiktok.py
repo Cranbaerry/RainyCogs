@@ -98,8 +98,8 @@ class TikTok(commands.Cog):
                     except TikTokCaptchaError:
                         self.log.error("Asking captcha, need proxy")
                         continue
-                    except ConnectionError:
-                        self.log.error("Proxy failed")
+                    except ConnectionError as e:
+                        self.log.error("Proxy failed: " + str(e))
                         await self.get_new_proxy()
                         continue
                     except TimeoutError:
