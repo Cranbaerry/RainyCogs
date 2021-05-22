@@ -93,6 +93,8 @@ class TikTok(commands.Cog):
                 data = await resp.text()
                 if "you reached the maximum 50 requests for today" in data:
                     raise MaxRetryError(data)
+                    sys.exit(-1)
+
 
                 self.api.proxy = data
                 await self.config.proxy.set(self.api.proxy)
