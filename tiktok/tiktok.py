@@ -154,12 +154,11 @@ class TikTok(commands.Cog):
                     else:
                         break
 
-                self.log.debug("Response: " + str(tiktoks))
                 if not channel:
-                    self.log.debug("Channel not found: " + sub["channel"]["name"])
                     continue
 
-                if tiktoks is None:
+                if tiktoks is None or len(tiktoks) == 0:
+                    self.log.warning("Channel not found: " + sub["channel"]["name"])
                     continue
 
                 for post in tiktoks:
@@ -176,7 +175,6 @@ class TikTok(commands.Cog):
                             self.log.warning("GIF processing too long..")
                         finally:
                             color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
-                            self.log.debug("Unique color: " + str(color))
 
                             # Send embed and post in channel
                             embed = discord.Embed(color=color, url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
@@ -184,16 +182,13 @@ class TikTok(commands.Cog):
                             embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', f"{post['desc']}")
                             embed.add_field(name=f"<:music:845585013327265822> {post['music']['title']} - {post['music']['authorName']}", value=f"[Click to see full video!](https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})", inline=False)
                             embed.set_author(name=post['author']['nickname'], url=f"https://www.tiktok.com/@{post['author']['uniqueId']}", icon_url=post['author']['avatarMedium'])
-                            self.log.debug("Arranging embed..")
 
                             if not gif:
                                 cover_file = None
                                 embed.set_image(url=post['video']['cover'])
-                                self.log.debug(f"Cover link: {post['video']['cover']}")
                             else:
                                 embed.set_image(url=f"attachment://{post['id']}.gif")
 
-                            self.log.debug("Sending to channel..")
                             await self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=cover_file)
 
                             # Add id to published cache
@@ -334,7 +329,7 @@ class TikTok(commands.Cog):
             channel = f'{sub["channel"]["name"][:103]} ({sub["channel"]["id"]})' # Max 124 chars
             subs_by_channel[channel] = [
                 # Sub entry must be max 100 chars: 45 + 2 + 24 + 4 + 25 = 100
-                f"{sub.get('name', sub['id'][:45])} ({sub['id']}) - {sub.get('previous', 'Never')}",
+                f"{sub.get('name', sub['id'][:45])}",
                 # Preserve previous entries
                 *subs_by_channel.get(channel, [])
             ]
@@ -345,7 +340,7 @@ class TikTok(commands.Cog):
                 while len(sub_ids) > 0:
                     # Generate embed with max 1024 chars
                     embed = discord.Embed()
-                    title = f"Tiktok Subscriptions for {channel}"
+                    title = f"Subscriptions for {channel}"
                     embed.description = "\n".join(sub_ids[0:9])
                     if page_count > 1:
                         title += f" ({page}/{page_count})"
@@ -361,7 +356,7 @@ class TikTok(commands.Cog):
                     subs_string += f"\n{sub}"
             pages = pagify(subs_string, delims=["\n\n"], shorten_by=12)
             for i, page in enumerate(pages):
-                title = "**Tiktok Subscriptions**"
+                title = "**Subscriptions**"
                 if len(pages) > 1:
                     title += f" ({i}/{len(pages)})"
                 await ctx.send(f"{title}\n{page}")
