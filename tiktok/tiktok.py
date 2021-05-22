@@ -74,7 +74,7 @@ class TikTok(commands.Cog):
 
         with io.BytesIO() as image_binary:
             im.save(image_binary, 'gif', save_all=True)
-            im.save(f"{post['id']}.gif", 'gif', save_all=True)
+            #im.save(f"{post['id']}.gif", 'gif', save_all=True)
             image_binary.seek(0)
             file = discord.File(fp=image_binary, filename=f"{post['id']}.gif")
             self.log.debug(f"Saved {post['id']}.gif")
