@@ -120,9 +120,7 @@ class TikTok(commands.Cog):
                             self.log.debug("Sending data to channel: " + sub["channel"]["name"])
                             task = functools.partial(self.get_tikok_dynamic_cover, tiktoks)
                             task = self.bot.loop.run_in_executor(None, task)
-                            cover = await asyncio.wait_for(task, timeout=60)
-
-                            cover_binary = await self.get_tikok_dynamic_cover(post)
+                            cover_binary = await asyncio.wait_for(task, timeout=60)
                             file = discord.File(fp=cover_binary, filename=f"{post['id']}.gif")
 
                             # Send embed and post in channel
