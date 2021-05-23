@@ -13,6 +13,7 @@ import requests
 from TikTokApi.exceptions import TikTokCaptchaError
 from redbot.core import commands, Config, checks
 from TikTokApi import TikTokApi
+from redbot.core.data_manager import bundled_data_path
 from requests.exceptions import ConnectionError
 from asyncio.exceptions import TimeoutError
 # from webdriver_manager.chrome import ChromeDriverManager
@@ -60,10 +61,10 @@ class TikTok(commands.Cog):
 
         if platform.system() == 'Windows':
             self.log.info(f"x")
-            self.driver = os.getcwd() + r'\driver\chromedriver_win'
+            self.driver = bundled_data_path + r'\hromedriver_win'
         elif platform.system() == 'Linux':
             self.log.info(f"y")
-            self.driver = os.getcwd() + r'\driver\chromedriver'
+            self.driver = bundled_data_path + r'\chromedriver'
 
         self.log.info(f"B")
 
