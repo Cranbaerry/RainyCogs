@@ -157,7 +157,7 @@ class TikTok(commands.Cog):
                 proxies_list.append(proxy)
 
             proxies = {'last-updated': str(datetime.now()), 'list': proxies_list}
-            self.bot.loop.create_task(await self.config.proxies.set(proxies))
+            self.bot.loop.create_task(self.config.proxies.set(proxies))
             self.log.info(f"Proxies list updated: {proxies_list}")
         else:
             self.log.debug("Skipped proxy database update")
@@ -166,7 +166,7 @@ class TikTok(commands.Cog):
             try:
                 self.log.debug(f"Removing {self.api.proxy} from database")
                 proxies['list'].remove(self.api.proxy)
-                self.bot.loop.create_task(await self.config.proxies.set(proxies))
+                self.bot.loop.create_task(self.config.proxies.set(proxies))
             except ValueError:
                 pass
 
@@ -176,7 +176,7 @@ class TikTok(commands.Cog):
 
         self.api.proxy = next(iter(proxies['list']))
         self.log.info(f"New proxy acquired: {self.api.proxy}")
-        self.bot.loop.create_task(await self.config.proxy.set(self.api.proxy))
+        self.bot.loop.create_task(self.config.proxy.set(self.api.proxy))
 
     async def get_new_videos(self):
         tiktoks = cover_file = None
