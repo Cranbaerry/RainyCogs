@@ -96,7 +96,6 @@ class TikTok(commands.Cog):
         try:
             data = self.api.byUsername(username, count=count)
         except TikTokCaptchaError:
-            # self.log.warning(("This is supposed to show up"))
             data = TikTokCaptchaError
 
         return data
@@ -166,7 +165,8 @@ class TikTok(commands.Cog):
             if 'We have to temporarily stop you.' in res:
                 self.log.warning("Too fast, something went wrong..")
                 self.log.info(f'Switched proxy database to {url}')
-                url = 'https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt'
+                #url = 'https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt'
+                url = 'https://raw.githubusercontent.com/shiftytr/proxy-list/master/proxy.txt'
 
                 r = requests.get(url=url)
                 res = r.text
