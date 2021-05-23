@@ -237,6 +237,7 @@ class TikTok(commands.Cog):
                                f"from {sub['id']} for {sub['channel']['name']} ({sub['channel']['id']})")
 
                 for post in tiktoks:
+                    cache = await self.config.guild(guild).cache()
                     if not post["id"] in cache:
                         self.log.debug(f"Posting {post['id']} to the channel")
                         color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
