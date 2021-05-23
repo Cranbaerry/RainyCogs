@@ -102,7 +102,6 @@ class TikTok(commands.Cog):
         from selenium.webdriver.common.by import By
         from selenium.common.exceptions import TimeoutException
 
-        self.driver = ChromeDriverManager().install()
         options = webdriver.ChromeOptions()
         options.add_argument('--ignore-certificate-errors')
         options.add_argument("--test-type")
@@ -189,7 +188,7 @@ class TikTok(commands.Cog):
                 self.log.warning("Unable to fetch data, config is empty..")
                 return
             for i, sub in enumerate(subs):
-                #self.log.debug(f"Retrieving data of {sub['id']} from guild channel: {sub['channel']['name']}")
+                # self.log.debug(f"Retrieving data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 while True:
                     try:
