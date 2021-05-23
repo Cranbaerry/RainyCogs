@@ -74,6 +74,7 @@ class TikTok(commands.Cog):
         try:
             data = self.api.byUsername(username, count=count)
         except TikTokCaptchaError:
+            self.log.warning(("This is supposed to show up"))
             data = TikTokCaptchaError
 
         return data
@@ -195,7 +196,7 @@ class TikTok(commands.Cog):
             for i, sub in enumerate(subs):
                 # self.log.debug(f"Retrieving data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
-                num = 1
+                num = 0
                 while True:
                     try:
                         self.log.debug(f"Recursive no: [{i}][{num}]")
