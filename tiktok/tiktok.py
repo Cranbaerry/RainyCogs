@@ -68,7 +68,7 @@ class TikTok(commands.Cog):
                                           proxy=self.proxy)
 
         self.log.info(f"Proxy: {self.proxy}")
-        self.bot.loop.create_task(self.background_get_new_videos())
+        self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
 
     def get_tiktok_by_name(self, username, count):
         try:
@@ -278,6 +278,7 @@ class TikTok(commands.Cog):
     def cog_unload(self):
         self.log.debug("Shutting down TikTok service..")
         self.main_task.cancel()
+        self.background_task.cancel()
 
     @commands.group()
     @commands.guild_only()
