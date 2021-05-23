@@ -40,7 +40,7 @@ class TikTok(commands.Cog):
 
         self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
         self.config.register_guild(subscriptions=[], cache=[])
-        self.config.register_global(interval=300, global_cache_size=500, global_cache=[], proxy=[], proxies=[], verifyFp=[])
+        self.config.register_global(interval=300, global_cache_size=500, global_cache={}, proxy=[], proxies=[], verifyFp=[])
         self.main_task = self.bot.loop.create_task(self.initialize())
 
     async def initialize(self):
@@ -291,7 +291,7 @@ class TikTok(commands.Cog):
         await self.config.guild(guild).cache.set(cache)
 
         # Add post to global cache
-        await self.config.guild(guild).cache.set(global_cache)
+        await self.config.global_cache.set(global_cache)
 
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
