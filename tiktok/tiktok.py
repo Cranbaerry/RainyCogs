@@ -405,16 +405,24 @@ class TikTok(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.guild_only()
     async def clear(self, ctx):
-        """Clear cached tiktok posts"""
+        """Clear cached tiktok posts in the server"""
         await self.config.guild(ctx.guild).cache.set([])
         await ctx.send("Cache cleared!")
 
     @tiktok.command()
     @checks.is_owner()
-    async def resetproxy(self, ctx):
+    async def clearproxy(self, ctx):
         """Clear proxies database"""
         await self.config.proxies.set([])
         await ctx.send("Proxy database cleared!")
+
+    @tiktok.command()
+    @checks.is_owner()
+    async def clearglobal(self, ctx):
+        """Clear global cache database"""
+        await self.config.global_cache.set([])
+        await ctx.send("Posts database cleared!")
+
 
     @tiktok.command()
     @checks.is_owner()
