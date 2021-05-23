@@ -63,9 +63,10 @@ class TikTok(commands.Cog):
     def get_tiktok_by_name(self, username, count):
         try:
             data = self.api.byUsername(username, count=count)
-            return data
         except TikTokCaptchaError:
-            self.log.error("WAD")
+            data = 0
+
+        return data
 
     def get_tiktok_dynamic_cover(self, post):
         image_data = self.api.getBytes(url=post['video']['dynamicCover'], proxy=None)
@@ -150,12 +151,13 @@ class TikTok(commands.Cog):
                         task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
                         task = self.bot.loop.run_in_executor(None, task)
                         tiktoks = await asyncio.wait_for(task, timeout=30)
+
+                        if tiktoks == 0:
+                            self.log.warning("Captcha error, retrying..")
+                            await self.get_new_proxy(await self.config.proxies(), True)
+                            continue
                     except TimeoutError:
                         self.log.warning("Takes too long, retrying..")
-                        await self.get_new_proxy(await self.config.proxies(), True)
-                        continue
-                    except TikTokCaptchaError:
-                        self.log.warning("Captcha error, retrying..")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
                     except ConnectionError as e:
