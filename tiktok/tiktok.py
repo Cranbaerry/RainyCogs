@@ -69,6 +69,7 @@ class TikTok(commands.Cog):
 
         verifyFp = await self.config.verifyFp()
         self.log.info(f"C")
+        self.log.info(f"Driver: {self.driver}")
         try:
             task = self.bot.loop.run_in_executor(None, self.get_tiktok_cookie)
             verifyFp = await asyncio.wait_for(task, timeout=30)
@@ -77,7 +78,7 @@ class TikTok(commands.Cog):
         except TimeoutError:
             self.log.error("Could not fetch new verifyFP cookie")
 
-        self.log.info(f"Driver: {self.driver}")
+        #self.log.info(f"Driver: {self.driver}")
         self.log.info(f"VerifyFp: {verifyFp}")
         self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True,
                                           custom_verifyFp=verifyFp,
