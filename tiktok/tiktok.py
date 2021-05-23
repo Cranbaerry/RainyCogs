@@ -207,8 +207,8 @@ class TikTok(commands.Cog):
                 # post cached videos
                 for post in global_cache:
                     if post['post']['author']['uniqueId'].lower() == sub['id'].lower():
-                        if (datetime.now() - datetime.strptime(post['last-updated'], '%Y-%m-%d %H:%M:%S.%f')) > timedelta(seconds=interval):
-                            updateSub = False
+                        updateSub = True if (datetime.now() - datetime.strptime(post['last-updated'], '%Y-%m-%d %H:%M:%S.%f')) > timedelta(seconds=interval) \
+                            else False
 
                         if post['id'] not in cache:
                             self.log.debug(f"Retrieved cached post {post['id']}")
@@ -376,7 +376,7 @@ class TikTok(commands.Cog):
         profileLink = re.search(r'https://www.tiktok.com/@([^/?]+)', tiktokId)
         if profileLink is not None:
             tiktokId = profileLink.group(1)
-        
+
         subs = await self.config.guild(ctx.guild).subscriptions()
         unsubbed = []
         if channelDiscord:
