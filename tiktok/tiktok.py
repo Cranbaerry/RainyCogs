@@ -130,7 +130,7 @@ class TikTok(commands.Cog):
         if len(proxies) > 0:
             self.log.info(f"Cached proxies: {len(proxies['list'])}")
             self.log.info(f"Last update: {proxies['last-updated']}")
-            self.log.info(f"Cached: {proxies['list']}")
+            #self.log.info(f"Cached: {proxies['list']}")
 
         # More than 24 hours or empty
         if len(proxies) == 0 or \
@@ -198,7 +198,7 @@ class TikTok(commands.Cog):
                 while True:
                     num = 1
                     try:
-                        self.log.debug(f"Recursive no: [{num}]")
+                        self.log.debug(f"Recursive no: [{i}][{num}]")
                         task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
                         task = self.bot.loop.run_in_executor(None, task)
                         tiktoks = await asyncio.wait_for(task, timeout=30)
@@ -206,12 +206,12 @@ class TikTok(commands.Cog):
                         if tiktoks is TikTokCaptchaError:
                             raise TikTokCaptchaError()
                     except TimeoutError:
-                        self.log.warning(f"Takes too long, retrying.. [{num}]")
+                        self.log.warning(f"Takes too long, retrying.. [{i}][{num}]")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         num += 1
                         continue
                     except TikTokCaptchaError:
-                        self.log.warning("Captcha error, retrying..  [{num}]")
+                        self.log.warning("Captcha error, retrying..  [{i}][{num}]")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         num += 1
                         continue
