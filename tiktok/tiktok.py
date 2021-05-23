@@ -406,10 +406,18 @@ class TikTok(commands.Cog):
     @tiktok.command()
     @checks.admin_or_permissions(manage_guild=True)
     @commands.guild_only()
-    async def clear(self, ctx):
+    async def clearcache(self, ctx):
         """Clear cached tiktok posts in the server"""
         await self.config.guild(ctx.guild).cache.set([])
         await ctx.send("Cache cleared!")
+
+    @tiktok.command()
+    @checks.admin_or_permissions(manage_guild=True)
+    @commands.guild_only()
+    async def clearsub(self, ctx):
+        """Remove all subscriptions in the server"""
+        await self.config.guild(ctx.guild).subscriptions.set([])
+        await ctx.send("Subscriptions cleared!")
 
     @tiktok.command()
     @checks.is_owner()
