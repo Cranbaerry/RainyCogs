@@ -118,9 +118,13 @@ class TikTok(commands.Cog):
             except ValueError:
                 pass
 
-        self.api.proxy = next(iter(proxies['list']))
-        self.log.info(f"New proxy acquired: {self.api.proxy}")
-        await self.config.proxy.set(self.api.proxy)
+        if 'list' in proxies and len(proxies['list']) == 0:
+            self.log.warning("Proxy database is empty, re-fetching..")
+            await self.get_new_proxy(proxies, truncate)
+        else:
+            self.api.proxy = next(iter(proxies['list']))
+            self.log.info(f"New proxy acquired: {self.api.proxy}")
+            await self.config.proxy.set(self.api.proxy)
 
     async def get_new_videos(self):
         tiktoks = cover_file = None
