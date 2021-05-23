@@ -196,7 +196,9 @@ class TikTok(commands.Cog):
                 # self.log.debug(f"Retrieving data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 while True:
+                    num = 1
                     try:
+                        self.log.debug(f"Recursive no: [{num}]")
                         task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
                         task = self.bot.loop.run_in_executor(None, task)
                         tiktoks = await asyncio.wait_for(task, timeout=30)
@@ -204,16 +206,19 @@ class TikTok(commands.Cog):
                         if tiktoks is TikTokCaptchaError:
                             raise TikTokCaptchaError()
                     except TimeoutError:
-                        self.log.warning("Takes too long, retrying..")
-                        # await self.get_new_proxy(await self.config.proxies(), True)
+                        self.log.warning(f"Takes too long, retrying.. [{num}]")
+                        await self.get_new_proxy(await self.config.proxies(), True)
+                        num += 1
                         continue
                     except TikTokCaptchaError:
-                        self.log.warning("Captcha error, retrying..")
+                        self.log.warning("Captcha error, retrying..  [{num}]")
                         await self.get_new_proxy(await self.config.proxies(), True)
+                        num += 1
                         continue
                     except ConnectionError as e:
-                        self.log.warning(f"Connection error, retrying: {str(e)}")
+                        self.log.warning(f"Connection error, retrying [{num}]: {str(e)}")
                         await self.get_new_proxy(await self.config.proxies(), True)
+                        num += 1
                         continue
                     else:
                         break
