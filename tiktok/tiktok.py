@@ -41,7 +41,7 @@ class TikTok(commands.Cog):
         self.log.setLevel(logging.DEBUG)
         self.proxy = None
         self.api = None
-        self.driver = none
+        self.driver = None
 
         self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
         self.config.register_guild(subscriptions=[], cache=[])
