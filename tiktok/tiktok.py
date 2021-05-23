@@ -84,6 +84,7 @@ class TikTok(commands.Cog):
 
         # More than 24 hours or empty
         if len(proxies) == 0 or \
+                ('list' in proxies and len(proxies['list']) == 0) or \
                 (datetime.now() - datetime.strptime(proxies['last-updated'], '%Y-%m-%d %H:%M:%S.%f')) > timedelta(1):
             proxies_list = []
             r = requests.get(url=url)
@@ -126,7 +127,7 @@ class TikTok(commands.Cog):
                 self.log.warning("Unable to fetch data, config is empty..")
                 return
             for i, sub in enumerate(subs):
-                #self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
+                self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 while True:
                     try:
@@ -323,33 +324,21 @@ class TikTok(commands.Cog):
                 # Preserve previous entries
                 *subs_by_channel.get(channel, [])
             ]
-        if ctx.channel.permissions_for(guild.me).embed_links:
-            for channel, sub_ids in subs_by_channel.items():
-                page_count = (len(sub_ids) // 9) + 1
-                page = 1
-                while len(sub_ids) > 0:
-                    # Generate embed with max 1024 chars
-                    embed = discord.Embed(color=0xEE2222)
-                    title = f"Subscriptions for {channel}"
-                    embed.description = "\n".join(sub_ids[0:9])
-                    if page_count > 1:
-                        title += f" ({page}/{page_count})"
-                        page += 1
-                    embed.title = title
-                    await ctx.send(embed=embed)
-                    del (sub_ids[0:9])
-        else:
-            subs_string = ""
-            for channel, sub_ids in subs_by_channel.items():
-                subs_string += f"\n\n{channel}"
-                for sub in sub_ids:
-                    subs_string += f"\n{sub}"
-            pages = pagify(subs_string, delims=["\n\n"], shorten_by=12)
-            for i, page in enumerate(pages):
-                title = "**Subscriptions**"
-                if len(pages) > 1:
-                    title += f" ({i}/{len(pages)})"
-                await ctx.send(f"{title}\n{page}")
+
+        for channel, sub_ids in subs_by_channel.items():
+            page_count = (len(sub_ids) // 9) + 1
+            page = 1
+            while len(sub_ids) > 0:
+                # Generate embed with max 1024 chars
+                embed = discord.Embed(color=0xEE2222)
+                title = f"Subscriptions for {channel}"
+                embed.description = "\n".join(sub_ids[0:9])
+                if page_count > 1:
+                    title += f" ({page}/{page_count})"
+                    page += 1
+                embed.title = title
+                await ctx.send(embed=embed)
+                del (sub_ids[0:9])
 
     @tiktok.command()
     @checks.is_owner()
