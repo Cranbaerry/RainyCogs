@@ -1,5 +1,6 @@
-new_cache = {'test': {1: 'hi', 2: 'wat'}}
-new_cache['test']['new_post_id2'] = 'post'
+from TikTokApi import TikTokApi
 
-
-print (new_cache['test2'].get('new_post_id', 'wat'))
+t = TikTokApi()
+t.proxy = "192.168.1.1"
+t.proxy = None
+t.getBytes(url='https://www.tiktok.com/', proxy='wat')

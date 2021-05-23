@@ -1,4 +1,5 @@
 import io
+
 import time
 import discord
 import logging
@@ -15,6 +16,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime, timedelta
 from PIL import Image
 from colorhash import ColorHash
+from socket import timeout
 
 UNIQUE_ID = 0x696969669
 
@@ -80,7 +82,11 @@ class TikTok(commands.Cog):
         return data
 
     def get_tiktok_dynamic_cover(self, post):
+        # temporarily disable proxy
+        temp = self.api.proxy
+        self.api.proxy = None
         image_data = self.api.getBytes(url=post['video']['dynamicCover'], proxy=None)
+        self.api.proxy = temp
 
         im = Image.open(io.BytesIO(image_data))
         im.info.pop('background', None)
@@ -186,7 +192,6 @@ class TikTok(commands.Cog):
 
     async def get_new_videos(self):
         posts = cover_file = None
-        self.log.debug("wtf")
         for guild in self.bot.guilds:
             self.log.debug(guild.name)
             try:
@@ -197,14 +202,13 @@ class TikTok(commands.Cog):
             except:
                 self.log.error("Configuration error..")
                 return
-            self.log.debug("eeee")
+
             for i, sub in enumerate(subs):
                 self.log.debug(f"Retrieving data of {sub['id']} from channel{sub['channel']['name']} in {guild.name}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 updateSub = True
                 num = 0
 
-                self.log.debug("A")
                 # post cached videos
                 for post in global_cache:
                     if post['post']['author']['uniqueId'].lower() == sub['id'].lower():
@@ -216,7 +220,6 @@ class TikTok(commands.Cog):
                             self.log.debug(f"Retrieved cached post {post['id']}")
                             await self.post_videos([post['post']], sub['channel'], guild)
 
-                self.log.debug("b")
                 if not updateSub:
                     continue
 
@@ -296,7 +299,7 @@ class TikTok(commands.Cog):
                 task = self.bot.loop.run_in_executor(None, task)
                 cover_file = await asyncio.wait_for(task, timeout=60)
                 embed.set_image(url=f"attachment://{post['id']}.gif")
-            except TimeoutError:
+            except (TimeoutError, requests.exceptions.Timeout, timeout):
                 embed.set_image(url=post['video']['cover'])
                 self.log.warning("GIF processing too long..")
             finally:
@@ -314,7 +317,7 @@ class TikTok(commands.Cog):
 
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
-        self.log.debug("Running background")
+        self.log.debug("Running background task")
         while True:
             await self.get_new_videos()
             interval = await self.config.interval()
