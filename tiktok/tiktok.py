@@ -369,6 +369,7 @@ class TikTok(commands.Cog):
     async def clear(self, ctx):
         """Clear cached tiktok posts"""
         await self.config.guild(ctx.guild).cache.set([])
+        await ctx.send("Cache cleared!")
 
     @tiktok.command()
     @checks.is_owner()
