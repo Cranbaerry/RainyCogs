@@ -1,6 +1,9 @@
 import io
+import os
 
 import time
+from sys import platform
+
 import discord
 import logging
 import asyncio
@@ -12,7 +15,7 @@ from redbot.core import commands, Config, checks
 from TikTokApi import TikTokApi
 from requests.exceptions import ConnectionError
 from asyncio.exceptions import TimeoutError
-from webdriver_manager.chrome import ChromeDriverManager
+# from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime, timedelta
 from PIL import Image
 from colorhash import ColorHash
@@ -38,7 +41,7 @@ class TikTok(commands.Cog):
         self.log.setLevel(logging.DEBUG)
         self.proxy = None
         self.api = None
-        self.driver = None
+        self.driver = none
 
         self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
         self.config.register_guild(subscriptions=[], cache=[])
@@ -53,9 +56,12 @@ class TikTok(commands.Cog):
             self.proxy = None
             pass
 
-        self.driver = ChromeDriverManager().install()
-        verifyFp = await self.config.verifyFp()
+        if platform.system() == 'Windows':
+            self.driver = os.getcwd() + r'\driver\chromedriver_win'
+        elif platform.system() == 'Linux':
+            self.driver = os.getcwd() + r'\driver\chromedriver'
 
+        verifyFp = await self.config.verifyFp()
         try:
             task = self.bot.loop.run_in_executor(None, self.get_tiktok_cookie)
             verifyFp = await asyncio.wait_for(task, timeout=30)
@@ -63,6 +69,7 @@ class TikTok(commands.Cog):
         except TimeoutError:
             self.log.error("Could not fetch new verifyFP cookie")
 
+        self.log.info(f"Driver: {self.driver}")
         self.log.info(f"VerifyFp: {verifyFp}")
         self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True,
                                           custom_verifyFp=verifyFp,
@@ -71,6 +78,7 @@ class TikTok(commands.Cog):
 
         self.log.info(f"Proxy: {self.proxy}")
         self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
+
 
     def get_tiktok_by_name(self, username, count):
         try:
