@@ -386,12 +386,9 @@ class TikTok(commands.Cog):
             return
         subs_by_channel = {}
         for sub in subs:
-            # Channel entry must be max 124 chars: 103 + 2 + 18 + 1
-            channel = f'{sub["channel"]["name"][:103]} ({sub["channel"]["id"]})'
+            channel = f'[{sub["channel"]["name"]}]](https://www.tiktok.com/@{sub["channel"]["name"]})'
             subs_by_channel[channel] = [
-                # Sub entry must be max 100 chars: 45 + 2 + 24 + 4 + 25 = 100
-                f"{sub.get('name', sub['id'][:45])}",
-                # Preserve previous entries
+                f"{sub.get('name', sub['id'])}",
                 *subs_by_channel.get(channel, [])
             ]
 
