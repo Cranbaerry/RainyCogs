@@ -1,17 +1,14 @@
 import io
 import time
-
 import discord
 import logging
 import asyncio
 import functools
 import re
-
 import requests
 from TikTokApi.exceptions import TikTokCaptchaError
 from redbot.core import commands, Config, checks
 from TikTokApi import TikTokApi
-from redbot.core.utils.chat_formatting import pagify
 from requests.exceptions import ConnectionError
 from asyncio.exceptions import TimeoutError
 from webdriver_manager.chrome import ChromeDriverManager
@@ -321,7 +318,7 @@ class TikTok(commands.Cog):
                                   "id": channelDiscord.id}}
 
             for i, sub in enumerate(subs):
-                if sub['uid'] == newSub['uid']:
+                if sub['id'] == newSub['id']:
                     unsubbed.append(subs.pop(i))
                     break
             else:
@@ -386,7 +383,7 @@ class TikTok(commands.Cog):
             return
         subs_by_channel = {}
         for sub in subs:
-            channel = f'[{sub["channel"]["name"]}]](https://www.tiktok.com/@{sub["channel"]["name"]})'
+            channel = f'[{sub["channel"]["name"]}](https://www.tiktok.com/@{sub["channel"]["name"]})'
             subs_by_channel[channel] = [
                 f"{sub.get('name', sub['id'])}",
                 *subs_by_channel.get(channel, [])
