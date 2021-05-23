@@ -56,16 +56,22 @@ class TikTok(commands.Cog):
             self.proxy = None
             pass
 
+        self.log.info(f"A")
+
         if platform.system() == 'Windows':
             self.driver = os.getcwd() + r'\driver\chromedriver_win'
         elif platform.system() == 'Linux':
             self.driver = os.getcwd() + r'\driver\chromedriver'
 
+        self.log.info(f"B")
+
         verifyFp = await self.config.verifyFp()
+        self.log.info(f"C")
         try:
             task = self.bot.loop.run_in_executor(None, self.get_tiktok_cookie)
             verifyFp = await asyncio.wait_for(task, timeout=30)
             await self.config.verifyFp.set(verifyFp)
+            self.log.info(f"D")
         except TimeoutError:
             self.log.error("Could not fetch new verifyFP cookie")
 
