@@ -2,7 +2,7 @@ import io
 import os
 
 import time
-from sys import platform
+import platform
 
 import discord
 import logging
