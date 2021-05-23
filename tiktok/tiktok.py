@@ -222,9 +222,9 @@ class TikTok(commands.Cog):
                     self.log.warning("TikTok channel not found: " + sub["id"])
                     continue
 
-                self.log.debug("A")
-                self.log.debug(f"Retrieved {len([x for x in tiktoks if not x in cache])} video posts from {sub['id']} for {sub['channel']['name']} ({sub['channel']['id']})")
-                self.log.debug("B")
+                self.log.debug(f"Retrieved {len([post for post in tiktoks if not post['id'] in cache])} video posts "
+                               f"from {sub['id']} for {sub['channel']['name']} ({sub['channel']['id']})")
+
                 for post in tiktoks:
                     if not post["id"] in cache:
                         self.log.debug(f"Posting {post['id']} to the channel")
