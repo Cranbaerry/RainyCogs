@@ -195,16 +195,16 @@ class TikTok(commands.Cog):
                 self.log.warning("Unable to fetch data, config is empty..")
                 return
 
-            if len(global_cache) > 0:
-                for id, post in global_cache.items():
-                    if id not in cache:
-                        self.log.debug(f"Found new posts from cache {id}")
-                        await self.post_videos([post], sub['channel']['id'], guild)
-
             for i, sub in enumerate(subs):
                 # self.log.debug(f"Retrieving data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 num = 0
+
+                # post cached videos
+                for post in global_cache:
+                    if post['id'] not in cache:
+                        self.log.debug(f"Found new posts from cache {post['id']}")
+                        await self.post_videos([post], sub['channel']['id'], guild)                
                 while True:
                     try:
                         #self.log.debug(f"Recursive no: [{i}][{num}]")
@@ -286,7 +286,7 @@ class TikTok(commands.Cog):
             finally:
                 await self.bot.get_channel(channelId).send(embed=embed, file=cover_file)
                 cache.append(post["id"])
-                global_cache[channelId][post["id"]] = post
+                global_cache.append({'id': post['id'], 'post': post})
 
         # Add id to published cache
         await self.config.guild(guild).cache.set(cache)
