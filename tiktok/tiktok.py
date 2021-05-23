@@ -186,7 +186,9 @@ class TikTok(commands.Cog):
 
     async def get_new_videos(self):
         posts = cover_file = None
+        self.log.debug("wtf")
         for guild in self.bot.guilds:
+            self.log.debug(guild.name)
             try:
                 subs = await self.config.guild(guild).subscriptions()
                 cache = await self.config.guild(guild).cache()
@@ -195,7 +197,7 @@ class TikTok(commands.Cog):
             except:
                 self.log.error("Configuration error..")
                 return
-
+            self.log.debug("eeee")
             for i, sub in enumerate(subs):
                 self.log.debug(f"Retrieving data of {sub['id']} from channel{sub['channel']['name']} in {guild.name}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
