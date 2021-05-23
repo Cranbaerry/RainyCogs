@@ -197,7 +197,7 @@ class TikTok(commands.Cog):
                                          url=f"https://www.tiktok.com/@{post['author']['uniqueId']}",
                                          icon_url=post['author']['avatarMedium'])
 
-                        embed.set_footer(icon_url='https://i.imgur.com/xtvjGGD.png')
+                        embed.set_footer(text='\u200b', icon_url='https://i.imgur.com/xtvjGGD.png')
 
                         try:
                             self.log.debug("Converting webp thumbnail to GIF..")
@@ -214,8 +214,6 @@ class TikTok(commands.Cog):
                             # Add id to published cache
                             cache.append(post["id"])
                             await self.config.guild(guild).cache.set(cache)
-                            self.log.info("Saved cache data: " + str(cache))
-                await asyncio.sleep(5)
 
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
