@@ -196,14 +196,14 @@ class TikTok(commands.Cog):
                 return
 
             for i, sub in enumerate(subs):
-                # self.log.debug(f"Retrieving data of {sub['id']} from guild channel: {sub['channel']['name']}")
+                self.log.debug(f"Retrieving data of {sub['id']} from channel{sub['channel']['name']} in {guild.name}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 num = 0
 
                 # post cached videos
                 for post in global_cache:
                     if post['id'] not in cache and post['post']['author']['uniqueId'].lower() == sub['id'].lower():
-                        self.log.debug(f"Found new posts from cache {post['id']} for channel {sub['channel']['name']}({sub['channel']['id']})")
+                        self.log.debug(f"Retrieved cached post {post['id']} for channel {sub['channel']['name']}({sub['channel']['id']})")
                         await self.post_videos([post['post']], sub['channel']['id'], guild)
 
                 while True:
