@@ -61,10 +61,10 @@ class TikTok(commands.Cog):
 
         if platform.system() == 'Windows':
             self.log.info(f"x")
-            self.driver = bundled_data_path + r'\hromedriver_win'
+            self.driver = bundled_data_path.__str__() + r'\hromedriver_win'
         elif platform.system() == 'Linux':
             self.log.info(f"y")
-            self.driver = bundled_data_path + r'\chromedriver'
+            self.driver = bundled_data_path.__str__() + r'\chromedriver'
 
         self.log.info(f"B")
 
