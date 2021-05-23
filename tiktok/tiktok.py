@@ -123,7 +123,7 @@ class TikTok(commands.Cog):
         driver.quit()
         return cookie
 
-    def get_new_proxy(self, proxies, truncate=False):
+    async def get_new_proxy(self, proxies, truncate=False):
         url = 'http://pubproxy.com/api/proxy?limit=5&format=txt&type=http'
         self.log.debug("Attempting to get new proxy..")
 
@@ -143,7 +143,7 @@ class TikTok(commands.Cog):
 
             if 'We have to temporarily stop you.' in res:
                 self.log.warning("Too fast, something went wrong..")
-                asyncio.sleep(10)
+                await asyncio.sleep(10)
 
             if 'You reached the maximum 50 requests for today.' in res:
                 url = 'https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt'
@@ -157,7 +157,8 @@ class TikTok(commands.Cog):
                 proxies_list.append(proxy)
 
             proxies = {'last-updated': str(datetime.now()), 'list': proxies_list}
-            self.bot.loop.create_task(self.config.proxies.set(proxies))
+
+            await self.config.proxies.set(proxies)
             self.log.info(f"Proxies list updated: {proxies_list}")
         else:
             self.log.debug("Skipped proxy database update")
@@ -166,7 +167,7 @@ class TikTok(commands.Cog):
             try:
                 self.log.debug(f"Removing {self.api.proxy} from database")
                 proxies['list'].remove(self.api.proxy)
-                self.bot.loop.create_task(self.config.proxies.set(proxies))
+                await self.config.proxies.set(proxies)
             except ValueError:
                 pass
 
@@ -176,7 +177,7 @@ class TikTok(commands.Cog):
 
         self.api.proxy = next(iter(proxies['list']))
         self.log.info(f"New proxy acquired: {self.api.proxy}")
-        self.bot.loop.create_task(self.config.proxy.set(self.api.proxy))
+        await self.config.proxy.set(self.api.proxy)
 
     async def get_new_videos(self):
         tiktoks = cover_file = None
@@ -204,11 +205,11 @@ class TikTok(commands.Cog):
                         continue
                     except TikTokCaptchaError:
                         self.log.warning("Captcha error, retrying..")
-                        self.get_new_proxy(await self.config.proxies(), True)
+                        await self.get_new_proxy(await self.config.proxies(), True)
                         continue
                     except ConnectionError as e:
                         self.log.warning(f"Connection error, retrying: {str(e)}")
-                        self.get_new_proxy(await self.config.proxies(), True)
+                        await self.get_new_proxy(await self.config.proxies(), True)
                         continue
                     else:
                         break
