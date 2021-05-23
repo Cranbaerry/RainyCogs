@@ -40,7 +40,7 @@ class TikTok(commands.Cog):
 
         self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
         self.config.register_guild(subscriptions=[], cache=[])
-        self.config.register_global(interval=300, global_cache_size=500, global_cache={}, proxy=[], proxies=[], verifyFp=[])
+        self.config.register_global(interval=300, global_cache_size=500, global_cache=[], proxy=[], proxies=[], verifyFp=[])
         self.main_task = self.bot.loop.create_task(self.initialize())
 
     async def initialize(self):
@@ -195,10 +195,11 @@ class TikTok(commands.Cog):
                 self.log.warning("Unable to fetch data, config is empty..")
                 return
 
-            for id, post in global_cache.items():
-                if id not in cache:
-                    self.log.debug(f"Found new posts from cache {id}")
-                    await self.post_videos([post], sub['channel']['id'], guild)
+            if len(global_cache) > 0:
+                for id, post in global_cache.items():
+                    if id not in cache:
+                        self.log.debug(f"Found new posts from cache {id}")
+                        await self.post_videos([post], sub['channel']['id'], guild)
 
             for i, sub in enumerate(subs):
                 # self.log.debug(f"Retrieving data of {sub['id']} from guild channel: {sub['channel']['name']}")
