@@ -45,7 +45,6 @@ class TikTok(commands.Cog):
         self.config.register_guild(subscriptions=[], cache=[])
         self.config.register_global(interval=300, cache_size=500, proxy=[], proxies=[], verifyFp=[])
         self.main_task = self.bot.loop.create_task(self.initialize())
-        self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
 
     async def initialize(self):
         await self.bot.wait_until_red_ready()
@@ -72,6 +71,7 @@ class TikTok(commands.Cog):
                                           proxy=self.proxy)
 
         self.log.info(f"Proxy: {self.proxy}")
+        self.bot.loop.create_task(self.background_get_new_videos())
 
     def get_tiktok_by_name(self, username, count):
         try:
@@ -273,7 +273,6 @@ class TikTok(commands.Cog):
 
     def cog_unload(self):
         self.log.debug("Shutting down TikTok service..")
-        self.background_task.cancel()
         self.main_task.cancel()
 
     @commands.group()
