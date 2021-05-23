@@ -199,7 +199,7 @@ class TikTok(commands.Cog):
                 num = 0
                 while True:
                     try:
-                        self.log.debug(f"Recursive no: [{i}][{num}]")
+                        #self.log.debug(f"Recursive no: [{i}][{num}]")
                         task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
                         task = self.bot.loop.run_in_executor(None, task)
                         tiktoks = await asyncio.wait_for(task, timeout=30)
@@ -217,7 +217,7 @@ class TikTok(commands.Cog):
                         num += 1
                         continue
                     except ConnectionError as e:
-                        self.log.warning(f"Connection error, retrying [{num}]: {str(e)}")
+                        self.log.warning(f"Connection error, retrying [{i}][{num}]: {str(e)}")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         num += 1
                         continue
@@ -304,6 +304,10 @@ class TikTok(commands.Cog):
 
         If no discord channel is specified, the current channel will be subscribed
         """
+        profileLink = re.search(r'https://www.tiktok.com/@([^/?]+)', tiktokId)
+        if profileLink is not None:
+            tiktokId = profileLink.group(1)
+
         if not channelDiscord:
             channelDiscord = ctx.channel
 
