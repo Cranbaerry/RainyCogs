@@ -59,8 +59,10 @@ class TikTok(commands.Cog):
         self.log.info(f"A")
 
         if platform.system() == 'Windows':
+            self.log.info(f"x")
             self.driver = os.getcwd() + r'\driver\chromedriver_win'
         elif platform.system() == 'Linux':
+            self.log.info(f"y")
             self.driver = os.getcwd() + r'\driver\chromedriver'
 
         self.log.info(f"B")
