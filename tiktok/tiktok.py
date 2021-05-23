@@ -196,19 +196,19 @@ class TikTok(commands.Cog):
                 return
 
             for i, sub in enumerate(subs):
-                #self.log.debug(f"Retrieving data of {sub['id']} from guild channel: {sub['channel']['name']}")
+                # self.log.debug(f"Retrieving data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 num = 0
 
                 # post cached videos
                 for post in global_cache:
-                    if post['id'] not in cache:
+                    if post['id'] not in cache and post['post']['author']['uniqueId'].lower() == sub['id'].lower():
                         self.log.debug(f"Found new posts from cache {post['id']} for channel {sub['channel']['name']}({sub['channel']['id']})")
                         await self.post_videos([post['post']], sub['channel']['id'], guild)
 
                 while True:
                     try:
-                        #self.log.debug(f"Recursive no: [{i}][{num}]")
+                        # self.log.debug(f"Recursive no: [{i}][{num}]")
                         task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
                         task = self.bot.loop.run_in_executor(None, task)
                         posts = await asyncio.wait_for(task, timeout=30)
