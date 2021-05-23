@@ -155,14 +155,16 @@ class TikTok(commands.Cog):
                         break
 
                 if not channel:
+                    self.log.warning("Guild channel not found: " + sub["channel"]['name'])
                     continue
 
                 if tiktoks is None or len(tiktoks) == 0:
-                    self.log.warning("Channel not found: " + sub["id"])
+                    self.log.warning("TikTok channel not found: " + sub["id"])
                     continue
 
                 for post in tiktoks:
                     if not post["id"] in cache:
+                        self.log.debug(f"Sending data {post['id']} to channel: {sub['channel']['name']}")
                         color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
 
                         # Send embed and post in channel
@@ -182,7 +184,7 @@ class TikTok(commands.Cog):
                         embed.set_footer(icon_url='https://i.imgur.com/xtvjGGD.png')
 
                         try:
-                            self.log.debug("Sending data to channel: " + sub["channel"]["name"])
+                            self.debug("Converting webp thumbnail to GIF..")
                             task = functools.partial(self.get_tiktok_dynamic_cover, post)
                             task = self.bot.loop.run_in_executor(None, task)
                             cover_file = await asyncio.wait_for(task, timeout=60)
