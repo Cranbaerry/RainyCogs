@@ -200,7 +200,7 @@ class TikTok(commands.Cog):
                 return
 
             for i, sub in enumerate(subs):
-                self.log.debug(f"Retrieving data of {sub['id']} from channel{sub['channel']['name']} in {guild.name}")
+                self.log.debug(f"Retrieving data of {sub['id']} from channel #{sub['channel']['name']} in {guild.name}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 updateSub = True
                 num = 0
