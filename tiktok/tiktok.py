@@ -215,7 +215,7 @@ class TikTok(commands.Cog):
             for i, sub in enumerate(subs):
                 global_cache = await self.config.global_cache()
 
-                self.log.debug(f"Retrieving data of {sub['id']} from channel #{sub['channel']['name']} in {guild.name}")
+                self.log.debug(f"Found {sub['id']} from channel #{sub['channel']['name']} in {guild.name}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 updateSub = True
                 posts = None
@@ -236,6 +236,7 @@ class TikTok(commands.Cog):
 
                 while True:
                     try:
+                        self.log.debug("Fetching data from tiktok.com..")
                         task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
                         task = self.bot.loop.run_in_executor(None, task)
                         posts = await asyncio.wait_for(task, timeout=30)
@@ -257,6 +258,8 @@ class TikTok(commands.Cog):
                     except TikTokNotFoundError:
                         self.log.warning("TikTok channel not found: " + sub["id"])
                         break
+                    except Exception as e:
+                       self.log.error(f"[{type(e).__name__}] {str(e)}")
                     else:
                         # print(f"Response: {posts}")
                         break
