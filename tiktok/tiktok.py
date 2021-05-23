@@ -373,6 +373,10 @@ class TikTok(commands.Cog):
         """Unsubscribe a Discord channel from a TikTok channel
 
         If no Discord channel is specified, the subscription will be removed from all channels"""
+        profileLink = re.search(r'https://www.tiktok.com/@([^/?]+)', tiktokId)
+        if profileLink is not None:
+            tiktokId = profileLink.group(1)
+        
         subs = await self.config.guild(ctx.guild).subscriptions()
         unsubbed = []
         if channelDiscord:
