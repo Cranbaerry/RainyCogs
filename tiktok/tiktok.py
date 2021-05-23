@@ -177,7 +177,7 @@ class TikTok(commands.Cog):
                     self.log.warning("TikTok channel not found: " + sub["id"])
                     continue
 
-                self.log.debug(f"Retrieved {len(tiktoks)} video posts from {sub['id']} for {sub['channel']['name']} ({sub['channel']['id']})")
+                self.log.debug(f"Retrieved {len([x for x in tiktoks if not x in cache])} video posts from {sub['id']} for {sub['channel']['name']} ({sub['channel']['id']})")
                 for post in tiktoks:
                     if not post["id"] in cache:
                         self.log.debug(f"Posting {post['id']} to the channel")
@@ -197,8 +197,9 @@ class TikTok(commands.Cog):
                                          url=f"https://www.tiktok.com/@{post['author']['uniqueId']}",
                                          icon_url=post['author']['avatarMedium'])
 
-                        embed.set_thumbnail(url='https://i.imgur.com/xtvjGGD.png')
-                        #embed.set_footer(text='\u200b', icon_url='https://i.imgur.com/xtvjGGD.png')
+                        # embed.set_thumbnail(url='https://i.imgur.com/xtvjGGD.png')
+                        embed.set_thumbnail(url='https://i.imgur.com/ivShgrg.png')
+                        # embed.set_footer(text='\u200b', icon_url='https://i.imgur.com/xtvjGGD.png')
 
                         try:
                             self.log.debug("Converting webp thumbnail to GIF..")
