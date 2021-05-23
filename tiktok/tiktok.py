@@ -81,6 +81,7 @@ class TikTok(commands.Cog):
         if len(proxies) > 0:
             self.log.info(f"Cached proxies: {len(proxies['list'])}")
             self.log.info(f"Last update: {proxies['last-updated']}")
+            self.log.info(f"Cached: {proxies['list']}")
 
         # More than 24 hours or empty
         if len(proxies) == 0 or \
@@ -104,14 +105,14 @@ class TikTok(commands.Cog):
 
             proxies = {'last-updated': str(datetime.now()), 'list': proxies_list}
 
-
             await self.config.proxies.set(proxies)
             self.log.info(f"Proxies list updated: {proxies_list}")
         else:
-            self.log.debug("No update")
+            self.log.debug("Skipped proxy database update")
 
         if truncate:
             try:
+                self.log.debug(f"Removing {self.api.proxy} from database")
                 proxies['list'].remove(self.api.proxy)
                 await self.config.proxies.set(proxies)
             except ValueError:
