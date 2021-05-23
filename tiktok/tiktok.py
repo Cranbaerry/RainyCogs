@@ -101,10 +101,6 @@ class TikTok(commands.Cog):
 
     def get_tiktok_cookie(self):
         from selenium import webdriver
-        from selenium.webdriver.support.ui import WebDriverWait
-        from selenium.webdriver.support import expected_conditions as EC
-        from selenium.webdriver.common.by import By
-        from selenium.common.exceptions import TimeoutException
 
         options = webdriver.ChromeOptions()
         options.add_argument('--ignore-certificate-errors')
@@ -214,16 +210,15 @@ class TikTok(commands.Cog):
                     if post['post']['author']['uniqueId'].lower() == sub['id'].lower():
                         if (datetime.now() - datetime.strptime(post['last-updated'], '%Y-%m-%d %H:%M:%S.%f')) > timedelta(seconds=interval):
                             updateSub = False
-                            self.log.debug(f"Skipping update feed for {sub['id']}")
 
                         if post['id'] not in cache:
                             self.log.debug(f"Retrieved cached post {post['id']}")
                             await self.post_videos([post['post']], sub['channel'], guild)
 
                 if not updateSub:
+                    self.log.debug(f"Skipping update feed for {sub['id']}")
                     continue
 
-                # 45.184.103.113:999
                 while True:
                     try:
                         # self.log.debug(f"Recursive no: [{i}][{num}]")
@@ -321,7 +316,7 @@ class TikTok(commands.Cog):
         while True:
             await self.get_new_videos()
             interval = await self.config.interval()
-            self.debug(f"Sleeping {interval} seconds..")
+            self.log.debug(f"Sleeping {interval} seconds..")
             await asyncio.sleep(interval)
 
     def cog_unload(self):
