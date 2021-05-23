@@ -1,4 +1,5 @@
 import io
+import time
 
 import discord
 import logging
@@ -38,10 +39,11 @@ class TikTok(commands.Cog):
         self.log.setLevel(logging.DEBUG)
         self.proxy = None
         self.api = None
+        self.driver = None
 
         self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
         self.config.register_guild(subscriptions=[], cache=[])
-        self.config.register_global(interval=300, cache_size=500, proxy=[], proxies=[])
+        self.config.register_global(interval=300, cache_size=500, proxy=[], proxies=[], verifyFp=[])
         self.main_task = self.bot.loop.create_task(self.initialize())
         self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
 
@@ -53,9 +55,20 @@ class TikTok(commands.Cog):
             self.proxy = None
             pass
 
+        self.driver = ChromeDriverManager().install()
+        verifyFp = await self.config.verifyFp()
+
+        try:
+            task = self.bot.loop.run_in_executor(None, self.get_tiktok_cookie)
+            verifyFp = await asyncio.wait_for(task, timeout=30)
+            await self.config.verifyFp.set(verifyFp)
+        except TimeoutError:
+            self.log.error("Could not fetch new verifyFP cookie")
+
+        self.log.info(f"VerifyFp: {verifyFp}")
         self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True,
-                                          custom_verifyFp="verify_kox6wops_bqKwq1Wc_OhSG_4O03_9CG2_t8CvbVmI3gZn",
-                                          logging_level=logging.DEBUG, executablePath=ChromeDriverManager().install(),
+                                          custom_verifyFp=verifyFp,
+                                          logging_level=logging.DEBUG, executablePath=self.driver,
                                           proxy=self.proxy)
 
         self.log.info(f"Proxy: {await self.config.proxy()}")
@@ -81,6 +94,37 @@ class TikTok(commands.Cog):
             file = discord.File(fp=image_binary, filename=f"{post['id']}.gif")
             self.log.info(f"Saved {post['id']}.gif")
             return file
+
+    def get_tiktok_cookie(self):
+        from selenium import webdriver
+        from selenium.webdriver.support.ui import WebDriverWait
+        from selenium.webdriver.support import expected_conditions as EC
+        from selenium.webdriver.common.by import By
+        from selenium.common.exceptions import TimeoutException
+
+        self.driver = ChromeDriverManager().install()
+        options = webdriver.ChromeOptions()
+        options.add_argument('--ignore-certificate-errors')
+        options.add_argument("--test-type")
+        options.add_argument("--headless")
+        options.add_argument("--test-type")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36")
+
+        driver = webdriver.Chrome(executable_path=self.driver, options=options)
+        url = 'https://www.tiktok.com/'
+        driver.get(url)
+
+        while True:
+            try:
+                cookie = driver.get_cookie('s_v_web_id').get('value')
+            except AttributeError:
+                time.sleep(1)
+                continue
+            else:
+                break
+
+        return driver.get_cookie('s_v_web_id').get('value')
 
     async def get_new_proxy(self, proxies, truncate=False):
         url = 'http://pubproxy.com/api/proxy?limit=5&format=txt&type=http'
@@ -374,3 +418,17 @@ class TikTok(commands.Cog):
         await self.config.proxy.set(proxy)
         await ctx.send(f"Proxy set to {await self.config.proxy()}")
         self.log.info(f"Proxy set to {await self.config.proxy()}")
+
+    @tiktok.command()
+    @checks.is_owner()
+    async def setverify(self, ctx: commands.Context, txt):
+        """Manually set verifyFp cookie value"""
+        self.api.custom_verifyFp = txt
+
+        await self.config.verifyFp.set(txt)
+        await ctx.send(f"VerifyFp set to {await self.config.verifyFp()}")
+        self.log.info(f"VerifyFp set to {await self.config.verifyFp()}")
+
+
+test = TikTok(None)
+test.get_tiktok_cookie()
