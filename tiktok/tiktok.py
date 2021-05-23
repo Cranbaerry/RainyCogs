@@ -25,6 +25,10 @@ class MaximumProxyRequests(Exception):
     pass
 
 
+class ProxyDatabaseEmpty(Exception):
+    pass
+
+
 class TikTok(commands.Cog):
     def __init__(self, bot, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -119,8 +123,7 @@ class TikTok(commands.Cog):
                 pass
 
         if 'list' in proxies and len(proxies['list']) == 0:
-            self.log.warning("Proxy database is empty, re-fetching..")
-            await self.get_new_proxy(proxies, truncate)
+            self.log.warning("Proxy database is empty..")
         else:
             self.api.proxy = next(iter(proxies['list']))
             self.log.info(f"New proxy acquired: {self.api.proxy}")
