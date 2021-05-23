@@ -191,21 +191,32 @@ class TikTok(commands.Cog):
                 subs = await self.config.guild(guild).subscriptions()
                 cache = await self.config.guild(guild).cache()
                 global_cache = await self.config.global_cache()
+                interval = await self.config.interval()
             except:
-                self.log.warning("Unable to fetch data, config is empty..")
+                self.log.error("Configuration error..")
                 return
 
             for i, sub in enumerate(subs):
                 # self.log.debug(f"Retrieving data of {sub['id']} from channel{sub['channel']['name']} in {guild.name}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
+                updateSub = True
                 num = 0
 
                 # post cached videos
                 for post in global_cache:
-                    if post['id'] not in cache and post['post']['author']['uniqueId'].lower() == sub['id'].lower():
-                        self.log.debug(f"Retrieved cached post {post['id']} for channel {sub['channel']['name']}({sub['channel']['id']})")
-                        await self.post_videos([post['post']], sub['channel']['id'], guild)
+                    if post['post']['author']['uniqueId'].lower() == sub['id'].lower():
+                        if (datetime.now() - datetime.strptime(post['last-updated'], '%Y-%m-%d %H:%M:%S.%f')) > timedelta(seconds=interval):
+                            updateSub = False
+                            self.log.debug(f"Skipping update feed for {sub['id']}")
 
+                        if post['id'] not in cache:
+                            self.log.debug(f"Retrieved cached post {post['id']}")
+                            await self.post_videos([post['post']], sub['channel'], guild)
+
+                if not updateSub:
+                    continue
+
+                # 45.184.103.113:999
                 while True:
                     try:
                         # self.log.debug(f"Recursive no: [{i}][{num}]")
@@ -245,16 +256,16 @@ class TikTok(commands.Cog):
                 self.log.debug(f"Retrieved {len([post for post in posts if not post['id'] in cache])} new video posts "
                                f"from {sub['id']} for {sub['channel']['name']} ({sub['channel']['id']})")
 
-                await self.post_videos(posts, sub['channel']['id'], guild)
+                await self.post_videos(posts, sub['channel'], guild)
 
-    async def post_videos(self, posts, channelId, guild):
+    async def post_videos(self, posts, channel, guild):
         cache = await self.config.guild(guild).cache()
         global_cache = await self.config.global_cache()
         for post in posts:
             if post["id"] in cache:
                 continue
 
-            self.log.debug(f"Posting {post['id']} to the channel")
+            self.log.debug(f"Posting {post['id']} to the channel #{channel['name']} ({channel['id']})")
             color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
 
             # Send embed and post in channel
@@ -285,9 +296,9 @@ class TikTok(commands.Cog):
                 embed.set_image(url=post['video']['cover'])
                 self.log.warning("GIF processing too long..")
             finally:
-                await self.bot.get_channel(channelId).send(embed=embed, file=cover_file)
+                await self.bot.get_channel(channel['id']).send(embed=embed, file=cover_file)
                 cache.append(post["id"])
-                new_post = {'id': post['id'], 'post': post}
+                new_post = {'id': post['id'], 'last-updated': str(datetime.now()), 'post': post}
                 if new_post not in global_cache:
                     global_cache.append(new_post)
 
@@ -302,6 +313,7 @@ class TikTok(commands.Cog):
         while True:
             await self.get_new_videos()
             interval = await self.config.interval()
+            self.debug(f"Sleeping {interval} seconds..")
             await asyncio.sleep(interval)
 
     def cog_unload(self):
