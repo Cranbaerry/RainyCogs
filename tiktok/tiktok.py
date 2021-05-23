@@ -383,9 +383,9 @@ class TikTok(commands.Cog):
             return
         subs_by_channel = {}
         for sub in subs:
-            channel = f'[{sub["channel"]["name"]}](https://www.tiktok.com/@{sub["channel"]["name"]})'
+            channel = f'{sub["channel"]["name"]}'
             subs_by_channel[channel] = [
-                f"{sub.get('name', sub['id'])}",
+                f"<:PinkDot:838164789741617182> [{sub.get('name', sub['id'])}](https://www.tiktok.com/@{sub.get('name', sub['id'])})",
                 *subs_by_channel.get(channel, [])
             ]
 
