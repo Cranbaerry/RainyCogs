@@ -59,13 +59,15 @@ class TikTok(commands.Cog):
 
         self.log.info(f"A")
 
-        if platform.system() == 'Windows':
-            self.log.info(f"x")
-            self.driver = bundled_data_path + r'\hromedriver_win'
-        elif platform.system() == 'Linux':
-            self.log.info(f"y")
-            self.driver = bundled_data_path + r'\chromedriver'
-
+        try:
+            if platform.system() == 'Windows':
+                self.log.info(f"x")
+                self.driver = bundled_data_path + r'\hromedriver_win'
+            elif platform.system() == 'Linux':
+                self.log.info(f"y")
+                self.driver = bundled_data_path + r'\chromedriver'
+        except Exception as e:
+            print(str(e))
         self.log.info(f"B")
 
         verifyFp = await self.config.verifyFp()
