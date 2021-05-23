@@ -5,6 +5,8 @@ import logging
 import platform
 import re
 import time
+import traceback
+
 import discord
 import requests
 
@@ -260,6 +262,7 @@ class TikTok(commands.Cog):
                         break
                     except Exception as e:
                        self.log.error(f"[{type(e).__name__}] {str(e)}")
+                       traceback.print_exc()
                     else:
                         # print(f"Response: {posts}")
                         break
