@@ -40,7 +40,7 @@ class TikTok(commands.Cog):
 
         self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
         self.config.register_guild(subscriptions=[], cache=[])
-        self.config.register_global(interval=300, global_cache_size=500, global_cache=[], proxy=[], proxies=[], verifyFp=[])
+        self.config.register_global(interval=300, global_cache_size=500, global_cache={}, proxy=[], proxies=[], verifyFp=[])
         self.main_task = self.bot.loop.create_task(self.initialize())
 
     async def initialize(self):
@@ -442,7 +442,7 @@ class TikTok(commands.Cog):
             while len(sub_ids) > 0:
                 # Generate embed with max 1024 chars
                 embed = discord.Embed(color=0xEE2222)
-                title = f"Subscriptions for {channel}"
+                title = f"Subscriptions on {channel}"
                 embed.description = "\n".join(sub_ids[0:9])
                 if page_count > 1:
                     title += f" ({page}/{page_count})"
