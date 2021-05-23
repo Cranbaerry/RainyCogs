@@ -89,7 +89,7 @@ class TikTok(commands.Cog):
             traceback.print_exc()
 
         self.log.info(f"Proxy: {self.proxy}")
-        self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
+        #self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
 
 
     def get_tiktok_by_name(self, username, count):
