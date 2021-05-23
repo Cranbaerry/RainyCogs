@@ -290,16 +290,23 @@ class TikTok(commands.Cog):
         if not channelDiscord:
             channelDiscord = ctx.channel
 
+        color = int(hex(int(ColorHash(tiktokId).hex.replace("#", ""), 16)), 0)
+        embed = discord.Embed(color=color)
+
         subs = await self.config.guild(ctx.guild).subscriptions()
+
+        for i, sub in enumerate(subs):
+            if sub['id'] == tiktokId:
+                embed.description = f"[{tiktokId}](https://www.tiktok.com/@{tiktokId}) has already been subscribed to <#{sub['channel']['id']}>."
+                await ctx.send(embed=embed)
+                return
+
         newSub = {'id': tiktokId,
                   'channel': {"name": channelDiscord.name,
                               "id": channelDiscord.id}}
 
         subs.append(newSub)
         await self.config.guild(ctx.guild).subscriptions.set(subs)
-
-        color = int(hex(int(ColorHash(tiktokId).hex.replace("#", ""), 16)), 0)
-        embed = discord.Embed(color=color)
         embed.description = f'TikTok feeds of user [{tiktokId}](https://www.tiktok.com/@{tiktokId}) added to <#{channelDiscord.id}>.'
         await ctx.send(embed=embed)
 
