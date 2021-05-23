@@ -200,7 +200,7 @@ class TikTok(commands.Cog):
                         embed.set_footer(icon_url='https://i.imgur.com/xtvjGGD.png')
 
                         try:
-                            self.debug("Converting webp thumbnail to GIF..")
+                            self.log.debug("Converting webp thumbnail to GIF..")
                             task = functools.partial(self.get_tiktok_dynamic_cover, post)
                             task = self.bot.loop.run_in_executor(None, task)
                             cover_file = await asyncio.wait_for(task, timeout=60)
