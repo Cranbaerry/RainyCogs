@@ -78,12 +78,15 @@ class TikTok(commands.Cog):
             if 'wrong permissions' in str(e):
                 self.log.error(f"Please add executable permission to the following path: {self.driver}")
 
-        self.log.info(f"Driver: {self.driver}")
-        self.log.info(f"VerifyFp: {verifyFp}")
-        self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True,
-                                          custom_verifyFp=verifyFp,
-                                          logging_level=logging.DEBUG, executablePath=self.driver,
-                                          proxy=self.proxy)
+        try:
+            self.log.info(f"Driver: {self.driver}")
+            self.log.info(f"VerifyFp: {verifyFp}")
+            self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True,
+                                              custom_verifyFp=verifyFp,
+                                              logging_level=logging.DEBUG, executablePath=self.driver,
+                                              proxy=self.proxy)
+        except:
+            traceback.print_exc()
 
         self.log.info(f"Proxy: {self.proxy}")
         self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
