@@ -248,7 +248,7 @@ class TikTok(commands.Cog):
                         embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)',
                                                    f"{post['desc']}")
                         embed.add_field(
-                            name=f"<:music:845585013327265822> {post['music']['title']} - {post['music']['authorName']}",
+                            name=f"♫ {post['music']['title']} - {post['music']['authorName']}",
                             value=f"[Click to see full video!](https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})",
                             inline=False)
                         embed.set_author(name=post['author']['nickname'],
@@ -409,7 +409,7 @@ class TikTok(commands.Cog):
         for sub in subs:
             channel = f'{sub["channel"]["name"]}'
             subs_by_channel[channel] = [
-                f"<:PinkDot:838164789741617182> [{sub.get('name', sub['id'])}](https://www.tiktok.com/@{sub.get('name', sub['id'])})",
+                f"○ [{sub.get('name', sub['id'])}](https://www.tiktok.com/@{sub.get('name', sub['id'])})",
                 *subs_by_channel.get(channel, [])
             ]
 
