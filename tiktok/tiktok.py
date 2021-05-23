@@ -123,7 +123,7 @@ class TikTok(commands.Cog):
         driver.quit()
         return cookie
 
-    async def get_new_proxy(self, proxies, truncate=False):
+    def get_new_proxy(self, proxies, truncate=False):
         url = 'http://pubproxy.com/api/proxy?limit=5&format=txt&type=http'
         self.log.debug("Attempting to get new proxy..")
 
@@ -157,8 +157,7 @@ class TikTok(commands.Cog):
                 proxies_list.append(proxy)
 
             proxies = {'last-updated': str(datetime.now()), 'list': proxies_list}
-
-            await self.config.proxies.set(proxies)
+            self.bot.loop.create_task(await self.config.proxies.set(proxies))
             self.log.info(f"Proxies list updated: {proxies_list}")
         else:
             self.log.debug("Skipped proxy database update")
@@ -167,7 +166,7 @@ class TikTok(commands.Cog):
             try:
                 self.log.debug(f"Removing {self.api.proxy} from database")
                 proxies['list'].remove(self.api.proxy)
-                await self.config.proxies.set(proxies)
+                self.bot.loop.create_task(await self.config.proxies.set(proxies))
             except ValueError:
                 pass
 
@@ -177,7 +176,7 @@ class TikTok(commands.Cog):
 
         self.api.proxy = next(iter(proxies['list']))
         self.log.info(f"New proxy acquired: {self.api.proxy}")
-        await self.config.proxy.set(self.api.proxy)
+        self.bot.loop.create_task(await self.config.proxy.set(self.api.proxy))
 
     async def get_new_videos(self):
         tiktoks = cover_file = None
@@ -205,11 +204,11 @@ class TikTok(commands.Cog):
                         continue
                     except TikTokCaptchaError:
                         self.log.warning("Captcha error, retrying..")
-                        await self.get_new_proxy(await self.config.proxies(), True)
+                        self.get_new_proxy(await self.config.proxies(), True)
                         continue
                     except ConnectionError as e:
                         self.log.warning(f"Connection error, retrying: {str(e)}")
-                        await self.get_new_proxy(await self.config.proxies(), True)
+                        self.get_new_proxy(await self.config.proxies(), True)
                         continue
                     else:
                         break
