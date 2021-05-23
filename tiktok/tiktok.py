@@ -141,6 +141,10 @@ class TikTok(commands.Cog):
             r = requests.get(url=url)
             res = r.text
 
+            if 'We have to temporarily stop you.' in res:
+                self.log.warning("Too fast, something went wrong..")
+                asyncio.sleep(10)
+
             if 'You reached the maximum 50 requests for today.' in res:
                 url = 'https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt'
                 self.log.info(f'Switched proxy database to {url}')
