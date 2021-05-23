@@ -86,6 +86,7 @@ class TikTok(commands.Cog):
         if len(proxies) == 0 or \
                 ('list' in proxies and len(proxies['list']) == 0) or \
                 (datetime.now() - datetime.strptime(proxies['last-updated'], '%Y-%m-%d %H:%M:%S.%f')) > timedelta(1):
+            self.log.debug("Updating proxy database..")
             proxies_list = []
             r = requests.get(url=url)
             res = r.text
@@ -103,8 +104,11 @@ class TikTok(commands.Cog):
 
             proxies = {'last-updated': str(datetime.now()), 'list': proxies_list}
 
+
             await self.config.proxies.set(proxies)
             self.log.info(f"Proxies list updated: {proxies_list}")
+        else:
+            self.log.debug("No update")
 
         if truncate:
             try:
