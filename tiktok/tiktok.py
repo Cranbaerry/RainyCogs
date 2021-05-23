@@ -1,27 +1,23 @@
-import io
-import os
-
-import time
-import platform
-
-import discord
-import logging
 import asyncio
 import functools
+import io
+import logging
+import platform
 import re
+import time
+import discord
 import requests
-from TikTokApi.exceptions import TikTokCaptchaError
-from redbot.core import commands, Config, checks
+
+from datetime import datetime, timedelta
+from socket import timeout
+from PIL import Image
 from TikTokApi import TikTokApi
+from TikTokApi.exceptions import TikTokCaptchaError
+from colorhash import ColorHash
+from redbot.core import commands, Config, checks
 from redbot.core.data_manager import bundled_data_path
 from requests.exceptions import ConnectionError
 from asyncio.exceptions import TimeoutError
-# from webdriver_manager.chrome import ChromeDriverManager
-from datetime import datetime, timedelta
-from PIL import Image
-from colorhash import ColorHash
-from socket import timeout
-
 from selenium.common.exceptions import WebDriverException
 
 UNIQUE_ID = 0x696969669
@@ -38,18 +34,20 @@ class ProxyDatabaseEmpty(Exception):
 class TikTok(commands.Cog):
     def __init__(self, bot, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        try:
+            self.bot = bot
+            self.log = logging.getLogger("tiktok")
+            self.log.setLevel(logging.DEBUG)
+            self.proxy = None
+            self.api = None
+            self.driver = None
 
-        self.bot = bot
-        self.log = logging.getLogger("tiktok")
-        self.log.setLevel(logging.DEBUG)
-        self.proxy = None
-        self.api = None
-        self.driver = None
-
-        self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
-        self.config.register_guild(subscriptions=[], cache=[])
-        self.config.register_global(interval=300, global_cache_size=500, global_cache=[], proxy=[], proxies=[], verifyFp=[])
-        self.main_task = self.bot.loop.create_task(self.initialize())
+            self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
+            self.config.register_guild(subscriptions=[], cache=[])
+            self.config.register_global(interval=300, global_cache_size=500, global_cache=[], proxy=[], proxies=[], verifyFp=[])
+            self.main_task = self.bot.loop.create_task(self.initialize())
+        except Exception as e:
+            self.log.error(f"[{type(e).__name__}] {str(e)}")
 
     async def initialize(self):
         await self.bot.wait_until_red_ready()
@@ -59,8 +57,6 @@ class TikTok(commands.Cog):
             self.proxy = None
             pass
 
-        self.log.info(f"A")
-
         if platform.system() == 'Windows':
             self.log.info(f"x")
             self.driver = str(bundled_data_path(self)) + r'\chromedriver_win'
@@ -68,10 +64,7 @@ class TikTok(commands.Cog):
             self.log.info(f"y")
             self.driver = str(bundled_data_path(self)) + r'/chromedriver'
 
-        self.log.info(f"B")
-
         verifyFp = await self.config.verifyFp()
-        self.log.info(f"C")
         self.log.info(f"Driver: {self.driver}")
         try:
             task = self.bot.loop.run_in_executor(None, self.get_tiktok_cookie)
@@ -82,11 +75,9 @@ class TikTok(commands.Cog):
             self.log.error("Could not fetch new verifyFP cookie")
         except WebDriverException as e:
             if 'cannot find Chrome binary' in str(e):
-                self.log.error(f"You need to have google chrome installed to use this cog")
+                self.log.error(f"You need to have google chrome installed to use this cog!")
             if 'wrong permissions' in str(e):
                 self.log.error(f"Please add executable permission to the following path: {self.driver}")
-        except Exception as e:
-            self.log.error(f"[{type(e).__name__}] {str(e)}")
 
         #self.log.info(f"Driver: {self.driver}")
         self.log.info(f"VerifyFp: {verifyFp}")
