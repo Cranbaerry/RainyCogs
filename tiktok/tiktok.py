@@ -71,7 +71,7 @@ class TikTok(commands.Cog):
                                           logging_level=logging.DEBUG, executablePath=self.driver,
                                           proxy=self.proxy)
 
-        self.log.info(f"Proxy: {await self.config.proxy()}")
+        self.log.info(f"Proxy: {self.proxy}")
 
     def get_tiktok_by_name(self, username, count):
         try:
@@ -124,7 +124,7 @@ class TikTok(commands.Cog):
             else:
                 break
 
-        driver.quit()
+        #driver.quit()
         return cookie
 
     async def get_new_proxy(self, proxies, truncate=False):
