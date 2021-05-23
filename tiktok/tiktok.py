@@ -124,7 +124,8 @@ class TikTok(commands.Cog):
             else:
                 break
 
-        return driver.get_cookie('s_v_web_id').get('value')
+        driver.quit()
+        return cookie
 
     async def get_new_proxy(self, proxies, truncate=False):
         url = 'http://pubproxy.com/api/proxy?limit=5&format=txt&type=http'
@@ -430,5 +431,5 @@ class TikTok(commands.Cog):
         self.log.info(f"VerifyFp set to {await self.config.verifyFp()}")
 
 
-test = TikTok(None)
-test.get_tiktok_cookie()
+#test = TikTok(None)
+#test.get_tiktok_cookie()
