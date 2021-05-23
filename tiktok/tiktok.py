@@ -79,7 +79,7 @@ class TikTok(commands.Cog):
         except TimeoutError:
             self.log.error("Could not fetch new verifyFP cookie")
         except Exception as e:
-            self.log.error(str(e))
+            self.log.error(f"[{type(e).__name__}] {str(e)}")
 
         #self.log.info(f"Driver: {self.driver}")
         self.log.info(f"VerifyFp: {verifyFp}")
