@@ -64,7 +64,7 @@ class TikTok(commands.Cog):
             self.driver = str(bundled_data_path(self)) + r'\chromedriver_win'
         elif platform.system() == 'Linux':
             self.log.info(f"y")
-            self.driver = str(bundled_data_path(self)) + r'\chromedriver'
+            self.driver = str(bundled_data_path(self)) + r'/chromedriver'
 
         self.log.info(f"B")
 
@@ -78,6 +78,8 @@ class TikTok(commands.Cog):
             self.log.info(f"D")
         except TimeoutError:
             self.log.error("Could not fetch new verifyFP cookie")
+        except Exception as e:
+            self.log.error(str(e))
 
         #self.log.info(f"Driver: {self.driver}")
         self.log.info(f"VerifyFp: {verifyFp}")
