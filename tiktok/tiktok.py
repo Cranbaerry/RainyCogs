@@ -157,6 +157,7 @@ class TikTok(commands.Cog):
                 res = r.text
 
             if 'You reached the maximum 50 requests for today.' in res:
+                self.log.warning("Maximum requests have been reached on pubproxy.com")
                 self.log.info(f'Switched proxy database to {url}')
                 url = 'https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt'
 
@@ -193,7 +194,6 @@ class TikTok(commands.Cog):
     async def get_new_videos(self):
         posts = cover_file = None
         for guild in self.bot.guilds:
-            self.log.debug(guild.name)
             try:
                 subs = await self.config.guild(guild).subscriptions()
                 cache = await self.config.guild(guild).cache()
