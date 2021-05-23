@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from socket import timeout
 from PIL import Image
 from TikTokApi import TikTokApi
-from TikTokApi.exceptions import TikTokCaptchaError
+from TikTokApi.exceptions import TikTokCaptchaError, TikTokNotFoundError
 from colorhash import ColorHash
 from redbot.core import commands, Config, checks
 from redbot.core.data_manager import bundled_data_path
@@ -58,19 +58,16 @@ class TikTok(commands.Cog):
             pass
 
         if platform.system() == 'Windows':
-            self.log.info(f"x")
             self.driver = str(bundled_data_path(self)) + r'\chromedriver_win'
         elif platform.system() == 'Linux':
-            self.log.info(f"y")
             self.driver = str(bundled_data_path(self)) + r'/chromedriver'
 
         verifyFp = await self.config.verifyFp()
-        self.log.info(f"Driver: {self.driver}")
+
         try:
             task = self.bot.loop.run_in_executor(None, self.get_tiktok_cookie)
             verifyFp = await asyncio.wait_for(task, timeout=30)
             await self.config.verifyFp.set(verifyFp)
-            self.log.info(f"D")
         except TimeoutError:
             self.log.error("Could not fetch new verifyFP cookie")
         except WebDriverException as e:
@@ -79,7 +76,7 @@ class TikTok(commands.Cog):
             if 'wrong permissions' in str(e):
                 self.log.error(f"Please add executable permission to the following path: {self.driver}")
 
-        #self.log.info(f"Driver: {self.driver}")
+        self.log.info(f"Driver: {self.driver}")
         self.log.info(f"VerifyFp: {verifyFp}")
         self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True,
                                           custom_verifyFp=verifyFp,
@@ -221,6 +218,7 @@ class TikTok(commands.Cog):
                 self.log.debug(f"Retrieving data of {sub['id']} from channel #{sub['channel']['name']} in {guild.name}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 updateSub = True
+                posts = None
 
                 # post cached videos
                 for post in global_cache:
@@ -256,6 +254,9 @@ class TikTok(commands.Cog):
                         self.log.warning(f"Connection error, retrying: {str(e)}")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
+                    except TikTokNotFoundError:
+                        self.log.warning("TikTok channel not found: " + sub["id"])
+                        break
                     else:
                         # print(f"Response: {posts}")
                         break
@@ -265,7 +266,7 @@ class TikTok(commands.Cog):
                     continue
 
                 if posts is None or len(posts) == 0:
-                    self.log.warning("TikTok channel not found: " + sub["id"])
+                    self.log.warning("Empty posts for tiktok: " + sub["id"])
                     continue
 
                 self.log.debug(f"Retrieved {len([post for post in posts if not post['id'] in cache])} new video posts "
