@@ -174,6 +174,8 @@ class TikTok(commands.Cog):
                                          url=f"https://www.tiktok.com/@{post['author']['uniqueId']}",
                                          icon_url=post['author']['avatarMedium'])
 
+                        embed.set_footer(icon_url='https://i.imgur.com/xtvjGGD.png')
+
                         try:
                             self.log.debug("Sending data to channel: " + sub["channel"]["name"])
                             task = functools.partial(self.get_tiktok_dynamic_cover, post)
