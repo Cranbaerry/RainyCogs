@@ -177,10 +177,10 @@ class TikTok(commands.Cog):
                     self.log.warning("TikTok channel not found: " + sub["id"])
                     continue
 
-                self.log.debug(f"Retrieved {len(tiktoks)} video posts from {sub['id']} for {sub['channel']['name']}")
+                self.log.debug(f"Retrieved {len(tiktoks)} video posts from {sub['id']} for {sub['channel']['name']} ({sub['channel']['id']})")
                 for post in tiktoks:
                     if not post["id"] in cache:
-                        self.log.debug(f"Sending data {post['id']} to channel: {sub['channel']['name']}")
+                        self.log.debug(f"Posting {post['id']} to the channel")
                         color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
 
                         # Send embed and post in channel
