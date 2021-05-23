@@ -40,7 +40,7 @@ class TikTok(commands.Cog):
 
         self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
         self.config.register_guild(subscriptions=[], cache=[])
-        self.config.register_global(interval=300, global_cache_size=500, global_cache={}, proxy=[], proxies=[], verifyFp=[])
+        self.config.register_global(interval=300, global_cache_size=500, global_cache=[], proxy=[], proxies=[], verifyFp=[])
         self.main_task = self.bot.loop.create_task(self.initialize())
 
     async def initialize(self):
