@@ -74,7 +74,7 @@ class TikTok(commands.Cog):
         try:
             data = self.api.byUsername(username, count=count)
         except TikTokCaptchaError:
-            self.log.warning(("This is supposed to show up"))
+            # self.log.warning(("This is supposed to show up"))
             data = TikTokCaptchaError
 
         return data
@@ -204,7 +204,8 @@ class TikTok(commands.Cog):
                 for post in global_cache:
                     if post['id'] not in cache:
                         self.log.debug(f"Found new posts from cache {post['id']}")
-                        await self.post_videos([post], sub['channel']['id'], guild)                
+                        await self.post_videos([post['post']], sub['channel']['id'], guild)
+
                 while True:
                     try:
                         #self.log.debug(f"Recursive no: [{i}][{num}]")
