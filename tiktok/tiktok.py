@@ -195,8 +195,8 @@ class TikTok(commands.Cog):
             for i, sub in enumerate(subs):
                 # self.log.debug(f"Retrieving data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
+                num = 1
                 while True:
-                    num = 1
                     try:
                         self.log.debug(f"Recursive no: [{i}][{num}]")
                         task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
@@ -211,7 +211,7 @@ class TikTok(commands.Cog):
                         num += 1
                         continue
                     except TikTokCaptchaError:
-                        self.log.warning("Captcha error, retrying..  [{i}][{num}]")
+                        self.log.warning(f"Captcha error, retrying..  [{i}][{num}]")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         num += 1
                         continue
