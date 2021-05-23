@@ -64,7 +64,7 @@ class TikTok(commands.Cog):
         try:
             data = self.api.byUsername(username, count=count)
         except TikTokCaptchaError:
-            data = 0
+            data = TikTokCaptchaError
 
         return data
 
@@ -152,12 +152,14 @@ class TikTok(commands.Cog):
                         task = self.bot.loop.run_in_executor(None, task)
                         tiktoks = await asyncio.wait_for(task, timeout=30)
 
-                        if tiktoks == 0:
-                            self.log.warning("Captcha error, retrying..")
-                            await self.get_new_proxy(await self.config.proxies(), True)
-                            continue
+                        if tiktoks is TikTokCaptchaError:
+                            raise TikTokCaptchaError()
                     except TimeoutError:
                         self.log.warning("Takes too long, retrying..")
+                        await self.get_new_proxy(await self.config.proxies(), True)
+                        continue
+                    except TikTokCaptchaError:
+                        self.log.warning("Captcha error, retrying..")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
                     except ConnectionError as e:
