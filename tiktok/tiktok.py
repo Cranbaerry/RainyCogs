@@ -90,7 +90,7 @@ class TikTok(commands.Cog):
             # im.save(f"{post['id']}.gif", 'gif', save_all=True)
             image_binary.seek(0)
             file = discord.File(fp=image_binary, filename=f"{post['id']}.gif")
-            self.log.info(f"Saved {post['id']}.gif")
+            # self.log.info(f"Saved {post['id']}.gif")
             return file
 
     def get_tiktok_cookie(self):
@@ -196,7 +196,7 @@ class TikTok(commands.Cog):
                 return
 
             for i, sub in enumerate(subs):
-                self.log.debug(f"Retrieving data of {sub['id']} from channel{sub['channel']['name']} in {guild.name}")
+                # self.log.debug(f"Retrieving data of {sub['id']} from channel{sub['channel']['name']} in {guild.name}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 num = 0
 
@@ -276,7 +276,7 @@ class TikTok(commands.Cog):
             # embed.set_footer(text='\u200b', icon_url='https://i.imgur.com/xtvjGGD.png')
 
             try:
-                self.log.debug("Converting webp thumbnail to GIF..")
+                # self.log.debug("Converting webp thumbnail to GIF..")
                 task = functools.partial(self.get_tiktok_dynamic_cover, post)
                 task = self.bot.loop.run_in_executor(None, task)
                 cover_file = await asyncio.wait_for(task, timeout=60)
@@ -287,7 +287,9 @@ class TikTok(commands.Cog):
             finally:
                 await self.bot.get_channel(channelId).send(embed=embed, file=cover_file)
                 cache.append(post["id"])
-                global_cache.append({'id': post['id'], 'post': post})
+                new_post = {'id': post['id'], 'post': post}
+                if new_post not in global_cache:
+                    global_cache.append(new_post)
 
         # Add id to published cache
         await self.config.guild(guild).cache.set(cache)
