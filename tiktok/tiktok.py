@@ -40,7 +40,7 @@ class TikTok(commands.Cog):
 
         self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
         self.config.register_guild(subscriptions=[], cache=[])
-        self.config.register_global(interval=300, cache_size=500, proxy=[], proxies=[], verifyFp=[])
+        self.config.register_global(interval=300, global_cache_size=500, global_cache=[], proxy=[], proxies=[], verifyFp=[])
         self.main_task = self.bot.loop.create_task(self.initialize())
 
     async def initialize(self):
@@ -185,14 +185,21 @@ class TikTok(commands.Cog):
         await self.config.proxy.set(self.api.proxy)
 
     async def get_new_videos(self):
-        tiktoks = cover_file = None
+        posts = cover_file = None
         for guild in self.bot.guilds:
             try:
                 subs = await self.config.guild(guild).subscriptions()
                 cache = await self.config.guild(guild).cache()
+                global_cache = await self.config.global_cache()
             except:
                 self.log.warning("Unable to fetch data, config is empty..")
                 return
+
+            for id, post in global_cache.items():
+                if id not in cache:
+                    self.log.debug(f"Found new posts from cache {id}")
+                    await self.post_videos([post], sub['channel']['id'], guild)
+
             for i, sub in enumerate(subs):
                 # self.log.debug(f"Retrieving data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
@@ -202,9 +209,9 @@ class TikTok(commands.Cog):
                         #self.log.debug(f"Recursive no: [{i}][{num}]")
                         task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
                         task = self.bot.loop.run_in_executor(None, task)
-                        tiktoks = await asyncio.wait_for(task, timeout=30)
+                        posts = await asyncio.wait_for(task, timeout=30)
 
-                        if tiktoks is TikTokCaptchaError:
+                        if posts is TikTokCaptchaError:
                             raise TikTokCaptchaError()
                     except TimeoutError:
                         self.log.warning(f"Takes too long, retrying.. [{i}][{num}]")
@@ -222,59 +229,69 @@ class TikTok(commands.Cog):
                         num += 1
                         continue
                     else:
-                        print(f"Response: {tiktoks}")
+                        # print(f"Response: {posts}")
                         break
 
                 if not channel:
                     self.log.warning("Guild channel not found: " + sub["channel"]['name'])
                     continue
 
-                if tiktoks is None or len(tiktoks) == 0:
+                if posts is None or len(posts) == 0:
                     self.log.warning("TikTok channel not found: " + sub["id"])
                     continue
 
-                self.log.debug(f"Retrieved {len([post for post in tiktoks if not post['id'] in cache])} new video posts "
+                self.log.debug(f"Retrieved {len([post for post in posts if not post['id'] in cache])} new video posts "
                                f"from {sub['id']} for {sub['channel']['name']} ({sub['channel']['id']})")
 
-                for post in tiktoks:
-                    cache = await self.config.guild(guild).cache()
-                    if not post["id"] in cache:
-                        self.log.debug(f"Posting {post['id']} to the channel")
-                        color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
+                await self.post_videos(posts, sub['channel']['id'], guild)
 
-                        # Send embed and post in channel
-                        embed = discord.Embed(color=color,
-                                              url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
-                        embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
-                        embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)',
-                                                   f"{post['desc']}")
-                        embed.add_field(
-                            name=f"♫ {post['music']['title']} - {post['music']['authorName']}",
-                            value=f"[Click to see full video!](https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})",
-                            inline=False)
-                        embed.set_author(name=post['author']['nickname'],
-                                         url=f"https://www.tiktok.com/@{post['author']['uniqueId']}",
-                                         icon_url=post['author']['avatarMedium'])
+    async def post_videos(self, posts, channelId, guild):
+        cache = await self.config.guild(guild).cache()
+        global_cache = await self.config.global_cache()
+        for post in posts:
+            if post["id"] in cache:
+                continue
 
-                        # embed.set_thumbnail(url='https://i.imgur.com/xtvjGGD.png')
-                        embed.set_thumbnail(url='https://i.imgur.com/ivShgrg.png')
-                        # embed.set_footer(text='\u200b', icon_url='https://i.imgur.com/xtvjGGD.png')
+            self.log.debug(f"Posting {post['id']} to the channel")
+            color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
 
-                        try:
-                            self.log.debug("Converting webp thumbnail to GIF..")
-                            task = functools.partial(self.get_tiktok_dynamic_cover, post)
-                            task = self.bot.loop.run_in_executor(None, task)
-                            cover_file = await asyncio.wait_for(task, timeout=60)
-                            embed.set_image(url=f"attachment://{post['id']}.gif")
-                        except TimeoutError:
-                            embed.set_image(url=post['video']['cover'])
-                            self.log.warning("GIF processing too long..")
-                        finally:
-                            await self.bot.get_channel(sub["channel"]["id"]).send(embed=embed, file=cover_file)
+            # Send embed and post in channel
+            embed = discord.Embed(color=color,
+                                  url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
+            embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
+            embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)',
+                                       f"{post['desc']}")
+            embed.add_field(
+                name=f"♫ {post['music']['title']} - {post['music']['authorName']}",
+                value=f"[Click to see full video!](https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})",
+                inline=False)
+            embed.set_author(name=post['author']['nickname'],
+                             url=f"https://www.tiktok.com/@{post['author']['uniqueId']}",
+                             icon_url=post['author']['avatarMedium'])
 
-                            # Add id to published cache
-                            cache.append(post["id"])
-                            await self.config.guild(guild).cache.set(cache)
+            # embed.set_thumbnail(url='https://i.imgur.com/xtvjGGD.png')
+            embed.set_thumbnail(url='https://i.imgur.com/ivShgrg.png')
+            # embed.set_footer(text='\u200b', icon_url='https://i.imgur.com/xtvjGGD.png')
+
+            try:
+                self.log.debug("Converting webp thumbnail to GIF..")
+                task = functools.partial(self.get_tiktok_dynamic_cover, post)
+                task = self.bot.loop.run_in_executor(None, task)
+                cover_file = await asyncio.wait_for(task, timeout=60)
+                embed.set_image(url=f"attachment://{post['id']}.gif")
+            except TimeoutError:
+                embed.set_image(url=post['video']['cover'])
+                self.log.warning("GIF processing too long..")
+            finally:
+                await self.bot.get_channel(channelId).send(embed=embed, file=cover_file)
+                cache.append(post["id"])
+                global_cache[channelId][post["id"]] = post
+
+        # Add id to published cache
+        await self.config.guild(guild).cache.set(cache)
+
+        # Add post to global cache
+        await self.config.guild(guild).cache.set(global_cache)
 
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
