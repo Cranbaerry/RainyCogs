@@ -93,7 +93,6 @@ class TikTok(commands.Cog):
 
         with io.BytesIO() as image_binary:
             im.save(image_binary, 'gif', save_all=True)
-            # im.save(f"{post['id']}.gif", 'gif', save_all=True)
             image_binary.seek(0)
             file = discord.File(fp=image_binary, filename=f"{post['id']}.gif")
             # self.log.info(f"Saved {post['id']}.gif")
@@ -496,7 +495,3 @@ class TikTok(commands.Cog):
         await self.config.verifyFp.set(txt)
         await ctx.send(f"VerifyFp set to {await self.config.verifyFp()}")
         self.log.info(f"VerifyFp set to {await self.config.verifyFp()}")
-
-
-#test = TikTok(None)
-#test.get_tiktok_cookie()
