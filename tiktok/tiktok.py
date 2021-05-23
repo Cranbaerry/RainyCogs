@@ -22,6 +22,8 @@ from PIL import Image
 from colorhash import ColorHash
 from socket import timeout
 
+from selenium.common.exceptions import WebDriverException
+
 UNIQUE_ID = 0x696969669
 
 
@@ -78,6 +80,11 @@ class TikTok(commands.Cog):
             self.log.info(f"D")
         except TimeoutError:
             self.log.error("Could not fetch new verifyFP cookie")
+        except WebDriverException as e:
+            if 'cannot find Chrome binary' in str(e):
+                self.log.error(f"You need to have google chrome installed to use this cog")
+            if 'wrong permissions' in str(e):
+                self.log.error(f"Please add executable permission to the following path: {self.driver}")
         except Exception as e:
             self.log.error(f"[{type(e).__name__}] {str(e)}")
 
