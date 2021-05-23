@@ -197,7 +197,7 @@ class TikTok(commands.Cog):
                             raise TikTokCaptchaError()
                     except TimeoutError:
                         self.log.warning("Takes too long, retrying..")
-                        await self.get_new_proxy(await self.config.proxies(), True)
+                        # await self.get_new_proxy(await self.config.proxies(), True)
                         continue
                     except TikTokCaptchaError:
                         self.log.warning("Captcha error, retrying..")
