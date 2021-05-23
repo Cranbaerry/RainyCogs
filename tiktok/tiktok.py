@@ -144,7 +144,7 @@ class TikTok(commands.Cog):
                 self.log.warning("Unable to fetch data, config is empty..")
                 return
             for i, sub in enumerate(subs):
-                self.log.debug(f"Fetching data of {sub['id']} from guild channel: {sub['channel']['name']}")
+                # self.log.debug(f"Retrieving data of {sub['id']} from guild channel: {sub['channel']['name']}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 while True:
                     try:
@@ -177,8 +177,8 @@ class TikTok(commands.Cog):
                     self.log.warning("TikTok channel not found: " + sub["id"])
                     continue
 
+                self.log.debug(f"Retrieved {len(tiktoks)} video posts from {sub['id']} for {sub['channel']['name']}")
                 for post in tiktoks:
-                    self.log.debug(f"Post: {post['id']}")
                     if not post["id"] in cache:
                         self.log.debug(f"Sending data {post['id']} to channel: {sub['channel']['name']}")
                         color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
