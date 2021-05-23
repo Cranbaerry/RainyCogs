@@ -192,23 +192,23 @@ class TikTok(commands.Cog):
             try:
                 subs = await self.config.guild(guild).subscriptions()
                 cache = await self.config.guild(guild).cache()
-                global_cache = await self.config.global_cache()
                 interval = await self.config.interval()
             except:
                 self.log.error("Configuration error..")
                 return
 
             for i, sub in enumerate(subs):
+                global_cache = await self.config.global_cache()
+
                 self.log.debug(f"Retrieving data of {sub['id']} from channel #{sub['channel']['name']} in {guild.name}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 updateSub = True
-                num = 0
 
                 # post cached videos
                 for post in global_cache:
                     if post['post']['author']['uniqueId'].lower() == sub['id'].lower():
-                        updateSub = True if (datetime.now() - datetime.strptime(post['last-updated'], '%Y-%m-%d %H:%M:%S.%f')) > timedelta(seconds=interval) \
-                            else False
+                        lastUpdate = datetime.strptime(post['last-updated'], '%Y-%m-%d %H:%M:%S.%f')
+                        updateSub = True if (datetime.now() - lastUpdate) > timedelta(seconds=interval) else False
 
                         if post['id'] not in cache:
                             self.log.debug(f"Retrieved cached post {post['id']}")
@@ -220,7 +220,6 @@ class TikTok(commands.Cog):
 
                 while True:
                     try:
-                        # self.log.debug(f"Recursive no: [{i}][{num}]")
                         task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
                         task = self.bot.loop.run_in_executor(None, task)
                         posts = await asyncio.wait_for(task, timeout=30)
@@ -228,19 +227,16 @@ class TikTok(commands.Cog):
                         if posts is TikTokCaptchaError:
                             raise TikTokCaptchaError()
                     except TimeoutError:
-                        self.log.warning(f"Takes too long, retrying.. [{i}][{num}]")
+                        self.log.warning(f"Takes too long, retrying..")
                         await self.get_new_proxy(await self.config.proxies(), True)
-                        num += 1
                         continue
                     except TikTokCaptchaError:
-                        self.log.warning(f"Captcha error, retrying..  [{i}][{num}]")
+                        self.log.warning(f"Captcha error, retrying..")
                         await self.get_new_proxy(await self.config.proxies(), True)
-                        num += 1
                         continue
                     except ConnectionError as e:
-                        self.log.warning(f"Connection error, retrying [{i}][{num}]: {str(e)}")
+                        self.log.warning(f"Connection error, retrying: {str(e)}")
                         await self.get_new_proxy(await self.config.proxies(), True)
-                        num += 1
                         continue
                     else:
                         # print(f"Response: {posts}")
