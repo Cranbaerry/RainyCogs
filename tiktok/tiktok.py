@@ -61,8 +61,11 @@ class TikTok(commands.Cog):
         self.log.info(f"Proxy: {await self.config.proxy()}")
 
     def get_tiktok_by_name(self, username, count):
-        data = self.api.byUsername(username, count=count)
-        return data
+        try:
+            data = self.api.byUsername(username, count=count)
+            return data
+        except TikTokCaptchaError:
+            self.log.error("WAD")
 
     def get_tiktok_dynamic_cover(self, post):
         image_data = self.api.getBytes(url=post['video']['dynamicCover'], proxy=None)
@@ -171,6 +174,7 @@ class TikTok(commands.Cog):
                     continue
 
                 for post in tiktoks:
+                    self.log.debug(f"Post: {post['id']}")
                     if not post["id"] in cache:
                         self.log.debug(f"Sending data {post['id']} to channel: {sub['channel']['name']}")
                         color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
