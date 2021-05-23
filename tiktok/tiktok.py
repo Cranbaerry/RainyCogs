@@ -312,6 +312,7 @@ class TikTok(commands.Cog):
 
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
+        self.log.debug("Running background")
         while True:
             await self.get_new_videos()
             interval = await self.config.interval()
