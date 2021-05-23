@@ -197,11 +197,12 @@ class TikTok(commands.Cog):
                 return
 
             for i, sub in enumerate(subs):
-                # self.log.debug(f"Retrieving data of {sub['id']} from channel{sub['channel']['name']} in {guild.name}")
+                self.log.debug(f"Retrieving data of {sub['id']} from channel{sub['channel']['name']} in {guild.name}")
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 updateSub = True
                 num = 0
 
+                self.log.debug("A")
                 # post cached videos
                 for post in global_cache:
                     if post['post']['author']['uniqueId'].lower() == sub['id'].lower():
@@ -213,6 +214,7 @@ class TikTok(commands.Cog):
                             self.log.debug(f"Retrieved cached post {post['id']}")
                             await self.post_videos([post['post']], sub['channel'], guild)
 
+                self.log.debug("b")
                 if not updateSub:
                     continue
 
