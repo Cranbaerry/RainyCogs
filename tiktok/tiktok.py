@@ -103,10 +103,10 @@ class TikTok(commands.Cog):
         self.api.proxy = None
         image_data = self.api.getBytes(url=post['video']['dynamicCover'], proxy=None)
         self.api.proxy = temp
+        path = f"{str(cog_data_path (self))}/caches/{post['id']}.gif"
 
-        with open("{}.gif".format(post['id']), "wb") as output:
+        with open(path, "wb") as output:
             output.write(image_data)
-            path = f"{str(cog_data_path (self))}/caches/{post['id']}.gif"
             self.log.debug(f"Saved to {path}")
             return discord.File(path)
 
