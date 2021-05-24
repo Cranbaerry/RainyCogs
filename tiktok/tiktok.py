@@ -174,15 +174,15 @@ class TikTok(commands.Cog):
 
             if len(re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', res.partition('\n')[0])) != 1:
                 if 'We have to temporarily stop you.' in res:
-                    url = 'https://www.proxyscan.io/api/proxy?limit=10&last_check=3600'
+                    url = 'https://www.proxyscan.io/api/proxy?limit=10&last_check=3600&ping=100&format=txt'
                     self.log.warning("Too fast, something went wrong..")
                     self.log.info(f'Switched proxy database to {url}')
                 elif 'You reached the maximum 50 requests for today.' in res:
-                    url = 'https://www.proxyscan.io/api/proxy?limit=10&last_check=3600'
+                    url = 'https://www.proxyscan.io/api/proxy?limit=10&last_check=3600&ping=100&format=txt'
                     self.log.warning("Maximum requests have been reached on pubproxy.com")
                     self.log.info(f'Switched proxy database to {url}')
                 else:
-                    url = 'https://www.proxyscan.io/api/proxy?limit=10&last_check=3600'
+                    url = 'https://www.proxyscan.io/api/proxy?limit=10&last_check=3600&ping=100&format=txt'
                     self.log.warning(f"Unexpected response: {res}")
                     self.log.info(f'Switched proxy database to {url}')
 
