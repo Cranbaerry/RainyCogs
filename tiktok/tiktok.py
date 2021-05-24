@@ -116,8 +116,7 @@ class TikTok(commands.Cog):
 
         im = Image.open(io.BytesIO(image_data))
         im.info.pop('background', None)
-
-        self.log.debug("C")
+        image_path.mkdir(parents=True, exist_ok=True)
 
         with io.BytesIO() as image_binary:
             self.log.debug(f"Saving to {str(image_path)}")
