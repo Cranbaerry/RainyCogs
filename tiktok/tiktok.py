@@ -220,7 +220,7 @@ class TikTok(commands.Cog):
             self.log.warning(f"Clearing proxy database..")
             await self.config.proxies.set([])
             await asyncio.sleep(1)
-            await self.get_new_proxy(proxies, truncate)
+            await self.get_new_proxy([], truncate)
             return
 
         self.api.proxy = new_proxy
