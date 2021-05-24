@@ -49,11 +49,10 @@ class TikTok(commands.Cog):
         self.config.register_global(interval=300, global_cache_size=500, global_cache=[], proxy=[], proxies=[], verifyFp=[])
         self.main_task = self.bot.loop.create_task(self.initialize())
 
-
     async def initialize(self):
         await self.bot.wait_until_red_ready()
         self.proxy = await self.config.proxy()
-        print(self.proxy)
+        self.proxy = None if not self.proxy else self.proxy
 
         if platform.system() == 'Windows':
             self.driver = str(bundled_data_path(self)) + r'\chromedriver_win'
@@ -84,7 +83,6 @@ class TikTok(commands.Cog):
                                           logging_level=logging.DEBUG, executablePath=self.driver,
                                           proxy=self.proxy)
 
-
         self.log.info(f"Proxy: {self.proxy}")
         self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
 
@@ -94,6 +92,10 @@ class TikTok(commands.Cog):
             data = self.api.byUsername(username, count=count)
         except TikTokCaptchaError:
             data = TikTokCaptchaError
+            self.log.error(f"[{type(e).__name__}] {str(e)}")
+        except Exception as e:
+            data = None
+            self.log.error(f"[{type(e).__name__}] {str(e)}")
 
         return data
 
