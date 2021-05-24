@@ -264,8 +264,8 @@ class TikTok(commands.Cog):
                         embed = discord.Embed(color=color)
                         embed.description = f'TikTok user ' \
                                             f'[{sub["id"]}](https://www.tiktok.com/@{sub["id"]}) ' \
-                                            f'could not be found\nand has been removed from {channels}.'
-                        
+                                            f'could not be found\nand has been removed from {channels}'
+
                         if channel:
                             newSub = {'id': tiktokId,
                                       'channel': {"name": channel.name,
@@ -401,7 +401,7 @@ class TikTok(commands.Cog):
         for i, sub in enumerate(subs):
             if sub['id'] == tiktokId:
                 embed.description = f"[{tiktokId}](https://www.tiktok.com/@{tiktokId}) " \
-                                    f"has already been subscribed to <#{sub['channel']['id']}>."
+                                    f"has already been subscribed to <#{sub['channel']['id']}>"
                 await ctx.send(embed=embed)
                 return
 
@@ -412,7 +412,7 @@ class TikTok(commands.Cog):
         subs.append(newSub)
         await self.config.guild(ctx.guild).subscriptions.set(subs)
         embed.description = f'TikTok feeds of user [{tiktokId}](https://www.tiktok.com/@{tiktokId}) ' \
-                            f'added to <#{channelDiscord.id}>.'
+                            f'added to <#{channelDiscord.id}>'
         await ctx.send(embed=embed)
 
     @tiktok.command()
@@ -453,7 +453,7 @@ class TikTok(commands.Cog):
         color = int(hex(int(ColorHash(tiktokId).hex.replace("#", ""), 16)), 0)
         embed = discord.Embed(color=color)
         embed.description = f'TikTok feeds of user [{tiktokId}](https://www.tiktok.com/@{tiktokId}) no longer be ' \
-                            f'subscribed to {channels} '
+                            f'subscribed to {channels}'
         await ctx.send(embed=embed)
 
     @tiktok.command()
