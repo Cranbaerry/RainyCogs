@@ -257,15 +257,12 @@ class TikTok(commands.Cog):
 
                 retry_count = 3
                 while True:
+                    current_proxy = self.api.proxy
                     try:
-                        current_proxy = self.api.proxy
                         self.log.debug("Fetching data from tiktok.com..")
                         task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
                         task = self.bot.loop.run_in_executor(None, task)
                         posts = await asyncio.wait_for(task, timeout=30)
-
-                        '''if posts is TikTokCaptchaError:
-                            raise TikTokCaptchaError()'''
                     except TimeoutError:
                         self.log.warning(f"Takes too long, retrying.. {retry_count}")
                         if self.api.proxy != current_proxy:
