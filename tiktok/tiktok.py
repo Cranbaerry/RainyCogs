@@ -87,14 +87,15 @@ class TikTok(commands.Cog):
         self.log.info(f"Proxy: {self.proxy}")
         self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
 
-
     def get_tiktok_by_name(self, username, count):
-        try:
+        data = self.api.byUsername(username, count=count)
+
+        '''try:
             data = self.api.byUsername(username, count=count)
         except TikTokCaptchaError as e:
             data = TikTokCaptchaError
-            self.log.error(f"[{type(e).__name__}] {str(e)}")
-
+            self.log.error(f"[{type(e).__name__}] {str(e)}")'''
+#
         return data
 
     def get_tiktok_dynamic_cover(self, post):
@@ -197,6 +198,8 @@ class TikTok(commands.Cog):
 
         if 'list' in proxies and len(proxies['list']) == 0:
             self.log.warning("Proxy database is empty..")
+            await asyncio.sleep(1)
+            await self.get_new_proxy(self, proxies, truncate)
             return
 
         self.api.proxy = next(iter(proxies['list']))
@@ -238,8 +241,8 @@ class TikTok(commands.Cog):
                         task = self.bot.loop.run_in_executor(None, task)
                         posts = await asyncio.wait_for(task, timeout=30)
 
-                        if posts is TikTokCaptchaError:
-                            raise TikTokCaptchaError()
+                        '''if posts is TikTokCaptchaError:
+                            raise TikTokCaptchaError()'''
                     except TimeoutError:
                         self.log.warning(f"Takes too long, retrying..")
                         await self.get_new_proxy(await self.config.proxies(), True)
@@ -258,7 +261,7 @@ class TikTok(commands.Cog):
                         break
                     else:
                         # print(f"Response: {posts}")
-                        self.log.debug(("Response pass reached~"))
+                        self.log.debug(("Response pass reached.."))
                         break
                     '''except Exception as e:
                        self.log.error(f"[{type(e).__name__}] {str(e)}")
