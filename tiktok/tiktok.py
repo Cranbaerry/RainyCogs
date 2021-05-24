@@ -90,7 +90,7 @@ class TikTok(commands.Cog):
     def get_tiktok_by_name(self, username, count):
         try:
             data = self.api.byUsername(username, count=count)
-        except TikTokCaptchaError:
+        except TikTokCaptchaError as e:
             data = TikTokCaptchaError
             self.log.error(f"[{type(e).__name__}] {str(e)}")
         except Exception as e:
@@ -206,7 +206,6 @@ class TikTok(commands.Cog):
         await self.config.proxy.set(self.api.proxy)
 
     async def get_new_videos(self):
-        posts = cover_file = None
         for guild in self.bot.guilds:
             subs = await self.config.guild(guild).subscriptions()
             cache = await self.config.guild(guild).cache()
@@ -257,12 +256,14 @@ class TikTok(commands.Cog):
                         continue
                     except TikTokNotFoundError:
                         self.log.warning("TikTok channel not found: " + sub["id"])
+                        posts = None
                         break
                     except Exception as e:
                        self.log.error(f"[{type(e).__name__}] {str(e)}")
                        traceback.print_exc()
                     else:
                         # print(f"Response: {posts}")
+                        #
                         break
 
                 if not channel:
@@ -281,6 +282,7 @@ class TikTok(commands.Cog):
     async def post_videos(self, posts, channel, guild):
         cache = await self.config.guild(guild).cache()
         global_cache = await self.config.global_cache()
+        cover_file = None
         for post in posts:
             if post["id"] in cache:
                 continue
