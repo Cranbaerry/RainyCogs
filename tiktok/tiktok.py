@@ -253,7 +253,7 @@ class TikTok(commands.Cog):
                         self.log.warning(f"Captcha error, retrying..")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
-                    except (ConnectionError, ProxyError, requests.exceptions.ProxyError) as e:
+                    except (ConnectionError, ProxyError, requests.exceptions.ProxyError, requests.exceptions.ChunkedEncodingError) as e:
                         self.log.warning(f"Connection error, retrying: {str(e)}")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
