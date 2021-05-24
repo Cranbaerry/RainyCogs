@@ -324,8 +324,6 @@ class TikTok(commands.Cog):
             user_avatar = post['author']['avatarMedium']
             user_content = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', f"{post['desc']}")
 
-            self.log.debug(f"Posting {post['id']} to the channel #{channel['name']} ({channel['id']})")
-
             # Send embed and post in channel
             embed = discord.Embed(color=user_color, url=user_link)
             embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
@@ -335,15 +333,16 @@ class TikTok(commands.Cog):
             embed.set_thumbnail(url='https://i.imgur.com/ivShgrg.png')
 
             try:
-                # self.log.debug("Converting webp thumbnail to GIF..")
+                self.log.debug("Converting webp thumbnail to GIF..")
                 task = functools.partial(self.get_tiktok_dynamic_cover, post)
                 task = self.bot.loop.run_in_executor(None, task)
-                cover_file = await asyncio.wait_for(task, timeout=60)
+                cover_file = await asyncio.wait_for(task, timeout=30)
                 embed.set_image(url=f"attachment://{post['id']}.gif")
             except (TimeoutError, requests.exceptions.Timeout, timeout):
-                embed.set_image(url=post['video']['cover'])
                 self.log.warning("GIF processing too long..")
+                embed.set_image(url=post['video']['cover'])
             finally:
+                self.log.debug(f"Posting {post['id']} to the channel #{channel['name']} ({channel['id']})")
                 await self.bot.get_channel(channel['id']).send(embed=embed, file=cover_file)
                 cache.append(post["id"])
                 new_post = {'id': post['id'], 'last-updated': str(datetime.now()), 'post': post}
