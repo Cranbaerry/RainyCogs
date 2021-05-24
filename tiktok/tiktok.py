@@ -201,7 +201,7 @@ class TikTok(commands.Cog):
         if 'list' in proxies and len(proxies['list']) == 0:
             self.log.warning("Proxy database is empty..")
             await asyncio.sleep(1)
-            await self.get_new_proxy(self, proxies, truncate)
+            await self.get_new_proxy(proxies, truncate)
             return
 
         self.api.proxy = next(iter(proxies['list']))
