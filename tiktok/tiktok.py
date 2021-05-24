@@ -99,6 +99,7 @@ class TikTok(commands.Cog):
 
     def get_tiktok_dynamic_cover(self, post):
         # temporarily disable proxy
+        self.log.debug(f"Cover link: {post['video']['dynamicCover']}")
         temp = self.api.proxy
         self.api.proxy = None
         image_data = self.api.getBytes(url=post['video']['dynamicCover'], proxy=None)
