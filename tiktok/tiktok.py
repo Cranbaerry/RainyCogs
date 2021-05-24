@@ -251,7 +251,7 @@ class TikTok(commands.Cog):
                         self.log.warning(f"Captcha error, retrying..")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
-                    except (ConnectionError, ProxyError) as e:
+                    except (ConnectionError) as e:
                         self.log.warning(f"Connection error, retrying: {str(e)}")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
@@ -259,13 +259,13 @@ class TikTok(commands.Cog):
                         self.log.warning("TikTok channel not found: " + sub["id"])
                         posts = None
                         break
-                    except Exception as e:
-                       self.log.error(f"[{type(e).__name__}] {str(e)}")
-                       traceback.print_exc()
                     else:
                         # print(f"Response: {posts}")
-                        #
+                        self.log.debug(("Response pass reached.."))
                         break
+                    '''except Exception as e:
+                       self.log.error(f"[{type(e).__name__}] {str(e)}")
+                       traceback.print_exc()'''
 
                 if not channel:
                     self.log.warning("Guild channel not found: " + sub["channel"]['name'])
