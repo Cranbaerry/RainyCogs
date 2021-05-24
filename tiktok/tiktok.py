@@ -261,6 +261,9 @@ class TikTok(commands.Cog):
                         self.log.warning("TikTok channel not found: " + sub["id"])
                         posts = None
                         break
+                    except Exception as e:
+                        self.log.error(f"[{type(e).__name__}] {str(e)}")
+                        traceback.print_exc()
                     else:
                         # print(f"Response: {posts}")
                         self.log.debug(("Response pass reached.."))
