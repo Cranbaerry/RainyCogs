@@ -19,7 +19,7 @@ from TikTokApi.exceptions import TikTokCaptchaError, TikTokNotFoundError
 from colorhash import ColorHash
 from redbot.core import commands, Config, checks
 from redbot.core.data_manager import bundled_data_path, cog_data_path
-from requests.exceptions import ConnectionError, ProxyError, ChunkedEncodingError
+from requests.exceptions import ConnectionError, ProxyError, ChunkedEncodingError, InvalidURL
 from asyncio.exceptions import TimeoutError
 from selenium.common.exceptions import WebDriverException
 
@@ -269,7 +269,7 @@ class TikTok(commands.Cog):
                         self.log.warning(f"Captcha error, retrying..")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
-                    except (ConnectionError, ProxyError, ChunkedEncodingError) as e:
+                    except (ConnectionError, ProxyError, ChunkedEncodingError, InvalidURL) as e:
                         self.log.warning(f"Connection error, retrying: {str(e)}")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
