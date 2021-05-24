@@ -2,6 +2,7 @@ import asyncio
 import functools
 import io
 import logging
+import os
 import platform
 import re
 import time
@@ -63,6 +64,7 @@ class TikTok(commands.Cog):
             self.driver = str(bundled_data_path(self)) + r'\chromedriver_win'
         elif platform.system() == 'Linux':
             self.driver = str(bundled_data_path(self)) + r'/chromedriver'
+            os.chmod(self.driver, 0o777)
 
         verifyFp = await self.config.verifyFp()
 
