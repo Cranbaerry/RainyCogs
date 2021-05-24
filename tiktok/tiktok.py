@@ -265,7 +265,7 @@ class TikTok(commands.Cog):
                         embed.description = f'TikTok user ' \
                                             f'[{sub["id"]}](https://www.tiktok.com/@{sub["id"]}) ' \
                                             f'could not be found\nand has been removed from {channels}.'
-
+                        
                         if channel:
                             newSub = {'id': tiktokId,
                                       'channel': {"name": channel.name,
