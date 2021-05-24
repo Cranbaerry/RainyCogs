@@ -1,6 +1,5 @@
 import asyncio
 import functools
-import io
 import logging
 import platform
 import re
@@ -16,7 +15,7 @@ from TikTokApi import TikTokApi
 from TikTokApi.exceptions import TikTokCaptchaError, TikTokNotFoundError
 from colorhash import ColorHash
 from redbot.core import commands, Config, checks
-from redbot.core.data_manager import bundled_data_path
+from redbot.core.data_manager import bundled_data_path, cog_data_path
 from requests.exceptions import ConnectionError, ProxyError, ChunkedEncodingError
 from asyncio.exceptions import TimeoutError
 from selenium.common.exceptions import WebDriverException
@@ -94,7 +93,7 @@ class TikTok(commands.Cog):
         except TikTokCaptchaError as e:
             data = TikTokCaptchaError
             self.log.error(f"[{type(e).__name__}] {str(e)}")'''
-#
+        #
         return data
 
     def get_tiktok_dynamic_cover(self, post):
@@ -105,14 +104,11 @@ class TikTok(commands.Cog):
         image_data = self.api.getBytes(url=post['video']['dynamicCover'], proxy=None)
         self.api.proxy = temp
 
-        im = Image.open(io.BytesIO(image_data))
-        im.info.pop('background', None)
-
-        with io.BytesIO() as image_binary:
-            im.save(image_binary, 'gif', save_all=True)
-            image_binary.seek(0)
-            file = discord.File(fp=image_binary, filename=f"{post['id']}.gif")
-            return file
+        with open("{}.gif".format(post['id']), "wb") as output:
+            output.write(image_data)
+            path = f"{str(cog_data_path (self))}/caches/{post['id']}.gif"
+            self.log.debug(f"Saved to {path}")
+            return discord.File(path)
 
     def get_tiktok_cookie(self):
         from selenium import webdriver
