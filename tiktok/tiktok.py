@@ -435,7 +435,7 @@ class TikTok(commands.Cog):
         color = int(hex(int(ColorHash(tiktokId).hex.replace("#", ""), 16)), 0)
         embed = discord.Embed(color=color)
         embed.description = f'TikTok feeds of user [{tiktokId}](https://www.tiktok.com/@{tiktokId}) no longer be ' \
-                            f'subscriped to {channels} '
+                            f'subscribed to {channels} '
         await ctx.send(embed=embed)
 
     @tiktok.command()
