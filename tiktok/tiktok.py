@@ -11,7 +11,7 @@ import requests
 
 from datetime import datetime, timedelta
 from socket import timeout
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from TikTokApi import TikTokApi
 from TikTokApi.exceptions import TikTokCaptchaError, TikTokNotFoundError
 from colorhash import ColorHash
@@ -340,7 +340,10 @@ class TikTok(commands.Cog):
                 cover_file = await asyncio.wait_for(task, timeout=30)
                 embed.set_image(url=f"attachment://{post['id']}.gif")
             except (TimeoutError, requests.exceptions.Timeout, timeout):
-                self.log.warning("GIF processing too long..")
+                self.log.warning("GIF processing too long, reverting to static cover..")
+                embed.set_image(url=post['video']['cover'])
+            except UnidentifiedImageError:
+                self.log.warning("Could not read dynamic cover, reverting to static cover..")
                 embed.set_image(url=post['video']['cover'])
             finally:
                 self.log.debug(f"Posting {post['id']} to the channel #{channel['name']} ({channel['id']})")
