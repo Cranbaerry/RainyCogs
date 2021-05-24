@@ -341,9 +341,11 @@ class TikTok(commands.Cog):
                 embed.set_image(url=f"attachment://{post['id']}.gif")
             except (TimeoutError, requests.exceptions.Timeout, timeout):
                 self.log.warning("GIF processing too long, reverting to static cover..")
+                self.log.warning(f"Static cover link: {post['video']['cover']}")
                 embed.set_image(url=post['video']['cover'])
             except UnidentifiedImageError:
                 self.log.warning("Could not read dynamic cover, reverting to static cover..")
+                self.log.warning(f"Static cover link: {post['video']['cover']}")
                 embed.set_image(url=post['video']['cover'])
             finally:
                 self.log.debug(f"Posting {post['id']} to the channel #{channel['name']} ({channel['id']})")
@@ -353,18 +355,11 @@ class TikTok(commands.Cog):
                 if new_post not in global_cache:
                     global_cache.append(new_post)
 
-        try:
-            self.log.debug("uwu")
-            # Add id to published cache
-            await self.config.guild(guild).cache.set(cache)
+        # Add id to published cache
+        await self.config.guild(guild).cache.set(cache)
 
-            self.log.debug("owo")
-            # Add post to global cache
-            await self.config.global_cache.set(global_cache)
-
-            self.log.debug("ewe")
-        except Exception as e:
-            self.log.error(str(e))
+        # Add post to global cache
+        await self.config.global_cache.set(global_cache)
 
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
