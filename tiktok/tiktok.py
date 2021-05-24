@@ -264,7 +264,7 @@ class TikTok(commands.Cog):
                         task = self.bot.loop.run_in_executor(None, task)
                         posts = await asyncio.wait_for(task, timeout=30)
                     except TimeoutError:
-                        self.log.warning(f"Takes too long, retrying.. {retry_count}")
+                        self.log.warning(f"Takes too long!")
                         if self.api.proxy != current_proxy:
                             self.log.info(f"Detected new proxy {self.api.proxy}")
                             continue
@@ -274,6 +274,7 @@ class TikTok(commands.Cog):
                             await self.get_new_proxy(await self.config.proxies(), True)
                             continue
                         else:
+                            self.log.warning(f"Retrying.. {retry_count}")
                             retry_count -= 1
                             continue
                     except TikTokCaptchaError:
