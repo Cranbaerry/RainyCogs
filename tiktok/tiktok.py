@@ -6,7 +6,6 @@ import platform
 import re
 import time
 import traceback
-
 import discord
 import requests
 
@@ -18,10 +17,9 @@ from TikTokApi.exceptions import TikTokCaptchaError, TikTokNotFoundError
 from colorhash import ColorHash
 from redbot.core import commands, Config, checks
 from redbot.core.data_manager import bundled_data_path
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, ProxyError, ChunkedEncodingError
 from asyncio.exceptions import TimeoutError
 from selenium.common.exceptions import WebDriverException
-from urllib3.exceptions import ProxyError
 
 UNIQUE_ID = 0x696969669
 
@@ -44,10 +42,12 @@ class TikTok(commands.Cog):
         self.proxy = None
         self.api = None
         self.driver = None
+        self.background_task = None
 
         self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
         self.config.register_guild(subscriptions=[], cache=[])
-        self.config.register_global(interval=300, global_cache_size=500, global_cache=[], proxy=[], proxies=[], verifyFp=[])
+        self.config.register_global(interval=300, global_cache_size=500, global_cache=[],
+                                    proxy=[], proxies=[], verifyFp=[])
         self.main_task = self.bot.loop.create_task(self.initialize())
 
     async def initialize(self):
@@ -79,10 +79,9 @@ class TikTok(commands.Cog):
 
         self.log.info(f"Driver: {self.driver}")
         self.log.info(f"VerifyFp: {verifyFp}")
-        self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True,
-                                          custom_verifyFp=verifyFp,
-                                          logging_level=logging.DEBUG, executablePath=self.driver,
-                                          proxy=self.proxy)
+        self.api = TikTokApi.get_instance(use_test_endpoints=False, custom_verifyFp=verifyFp,
+                                          use_selenium=True, executablePath=self.driver,
+                                          proxy=self.proxy, logging_level=logging.DEBUG)
 
         self.log.info(f"Proxy: {self.proxy}")
         self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
@@ -123,7 +122,8 @@ class TikTok(commands.Cog):
         options.add_argument("--headless")
         options.add_argument("--test-type")
         options.add_argument("--no-sandbox")
-        options.add_argument("--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36")
+        options.add_argument("--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) "
+                             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36")
 
         driver = webdriver.Chrome(executable_path=self.driver, options=options)
         url = 'https://www.tiktok.com/'
@@ -149,7 +149,7 @@ class TikTok(commands.Cog):
         if len(proxies) > 0:
             self.log.info(f"Cached proxies: {len(proxies['list'])}")
             self.log.info(f"Last update: {proxies['last-updated']}")
-            #self.log.info(f"Cached: {proxies['list']}")
+            # self.log.info(f"Cached: {proxies['list']}")
 
         # More than 24 hours or empty
         if len(proxies) == 0 or \
@@ -163,7 +163,7 @@ class TikTok(commands.Cog):
             if 'We have to temporarily stop you.' in res:
                 self.log.warning("Too fast, something went wrong..")
                 self.log.info(f'Switched proxy database to {url}')
-                #url = 'https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt'
+                # url = 'https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt'
                 url = 'https://raw.githubusercontent.com/shiftytr/proxy-list/master/proxy.txt'
 
                 r = requests.get(url=url)
@@ -251,20 +251,26 @@ class TikTok(commands.Cog):
                         self.log.warning(f"Captcha error, retrying..")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
-                    except (ConnectionError, ProxyError, requests.exceptions.ProxyError, requests.exceptions.ChunkedEncodingError) as e:
+                    except (ConnectionError, ProxyError, ChunkedEncodingError) as e:
                         self.log.warning(f"Connection error, retrying: {str(e)}")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
                     except TikTokNotFoundError:
-                        self.log.warning("TikTok channel not found: " + sub["id"])
-                        posts = None
+                        self.log.warning(f"TikTok channel not found: {sub['id']}")
+                        color = int(hex(int(ColorHash(sub["id"]).hex.replace("#", ""), 16)), 0)
+                        embed = discord.Embed(color=color)
+                        embed.description = f'TikTok user ' \
+                                            f'[{sub["id"]}](https://www.tiktok.com/@{sub["id"]}) ' \
+                                            f'could not found found.'
+
+                        await self.bot.get_channel(int(sub["channel"]["id"])).send(embed=embed)
                         break
                     except Exception as e:
                         self.log.error(f"[{type(e).__name__}] {str(e)}")
                         traceback.print_exc()
                     else:
                         # print(f"Response: {posts}")
-                        self.log.debug(("Response pass reached.."))
+                        self.log.debug("Response pass reached..")
                         break
                     '''except Exception as e:
                        self.log.error(f"[{type(e).__name__}] {str(e)}")
@@ -291,23 +297,23 @@ class TikTok(commands.Cog):
             if post["id"] in cache:
                 continue
 
+            user_name = post['author']['nickname']
+            user_color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
+            user_link = f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}"
+            user_video = f"[Click to see full video!]" \
+                         f"(https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})"
+            user_music = f"♫ {post['music']['title']} - {post['music']['authorName']}"
+            user_avatar = post['author']['avatarMedium']
+            user_content = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', f"{post['desc']}")
+
             self.log.debug(f"Posting {post['id']} to the channel #{channel['name']} ({channel['id']})")
-            color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
 
             # Send embed and post in channel
-            embed = discord.Embed(color=color,
-                                  url=f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}")
+            embed = discord.Embed(color=user_color, url=user_link)
             embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
-            embed.description = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)',
-                                       f"{post['desc']}")
-            embed.add_field(
-                name=f"♫ {post['music']['title']} - {post['music']['authorName']}",
-                value=f"[Click to see full video!](https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})",
-                inline=False)
-            embed.set_author(name=post['author']['nickname'],
-                             url=f"https://www.tiktok.com/@{post['author']['uniqueId']}",
-                             icon_url=post['author']['avatarMedium'])
-
+            embed.description = user_content
+            embed.add_field(name=user_music, value=user_video, inline=False)
+            embed.set_author(name=user_name, url=user_link, icon_url=user_avatar)
             embed.set_thumbnail(url='https://i.imgur.com/ivShgrg.png')
 
             try:
@@ -338,7 +344,7 @@ class TikTok(commands.Cog):
         while True:
             await self.get_new_videos()
             interval = await self.config.interval()
-            self.log.debug(f"Sleeping {interval} seconds..")
+            self.log.debug(f"Sleeping for {interval} seconds..")
             await asyncio.sleep(interval)
 
     def cog_unload(self):
@@ -376,7 +382,8 @@ class TikTok(commands.Cog):
 
         for i, sub in enumerate(subs):
             if sub['id'] == tiktokId:
-                embed.description = f"[{tiktokId}](https://www.tiktok.com/@{tiktokId}) has already been subscribed to <#{sub['channel']['id']}>."
+                embed.description = f"[{tiktokId}](https://www.tiktok.com/@{tiktokId}) " \
+                                    f"has already been subscribed to <#{sub['channel']['id']}>."
                 await ctx.send(embed=embed)
                 return
 
@@ -386,7 +393,8 @@ class TikTok(commands.Cog):
 
         subs.append(newSub)
         await self.config.guild(ctx.guild).subscriptions.set(subs)
-        embed.description = f'TikTok feeds of user [{tiktokId}](https://www.tiktok.com/@{tiktokId}) added to <#{channelDiscord.id}>.'
+        embed.description = f'TikTok feeds of user [{tiktokId}](https://www.tiktok.com/@{tiktokId}) ' \
+                            f'added to <#{channelDiscord.id}>.'
         await ctx.send(embed=embed)
 
     @tiktok.command()
@@ -459,7 +467,6 @@ class TikTok(commands.Cog):
         """Clear global cache database"""
         await self.config.global_cache.set([])
         await ctx.send("Posts database cleared!")
-
 
     @tiktok.command()
     @checks.is_owner()
