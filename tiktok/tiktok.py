@@ -257,13 +257,30 @@ class TikTok(commands.Cog):
                         continue
                     except TikTokNotFoundError:
                         self.log.warning(f"TikTok channel not found: {sub['id']}")
+                        tiktokId = sub["id"]
+                        unsubbed = []
                         color = int(hex(int(ColorHash(sub["id"]).hex.replace("#", ""), 16)), 0)
+                        channels = f'<#{channel.id}>' if channel else 'all channels'
                         embed = discord.Embed(color=color)
                         embed.description = f'TikTok user ' \
                                             f'[{sub["id"]}](https://www.tiktok.com/@{sub["id"]}) ' \
-                                            f'could not be found.'
-                        embed.set_footer = f"Use the following command to unsubscribe: [p]tiktok remove {sub['id']}"
+                                            f'could not be found and has been removed from {channels}.'
 
+                        if channel:
+                            newSub = {'id': tiktokId,
+                                      'channel': {"name": channel.name,
+                                                  "id": channel.id}}
+
+                            for _i, _sub in enumerate(subs):
+                                if _sub['id'] == newSub['id']:
+                                    unsubbed.append(subs.pop(_i))
+                                    break
+                        else:
+                            for _i, _sub in enumerate(subs):
+                                if _sub['id'] == tiktokId:
+                                    unsubbed.append(subs.pop(_i))
+
+                        await self.config.guild(guild).subscriptions.set(subs)
                         await self.bot.get_channel(int(sub["channel"]["id"])).send(embed=embed)
                         break
                     except Exception as e:
