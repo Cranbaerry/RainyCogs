@@ -88,9 +88,7 @@ class TikTok(commands.Cog):
         self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
 
     def get_tiktok_by_name(self, username, count):
-        self.log.debug(("Wee"))
         data = self.api.byUsername(username, count=count)
-        self.log.debug(("Woo"))
 
         '''try:
             data = self.api.byUsername(username, count=count)
@@ -114,7 +112,6 @@ class TikTok(commands.Cog):
             im.save(image_binary, 'gif', save_all=True)
             image_binary.seek(0)
             file = discord.File(fp=image_binary, filename=f"{post['id']}.gif")
-            # self.log.info(f"Saved {post['id']}.gif")
             return file
 
     def get_tiktok_cookie(self):
@@ -130,6 +127,7 @@ class TikTok(commands.Cog):
 
         driver = webdriver.Chrome(executable_path=self.driver, options=options)
         url = 'https://www.tiktok.com/'
+        cookie = None
         driver.get(url)
 
         while True:
