@@ -36,28 +36,24 @@ class ProxyDatabaseEmpty(Exception):
 class TikTok(commands.Cog):
     def __init__(self, bot, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        try:
-            self.bot = bot
-            self.log = logging.getLogger("tiktok")
-            self.log.setLevel(logging.DEBUG)
-            self.proxy = None
-            self.api = None
-            self.driver = None
 
-            self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
-            self.config.register_guild(subscriptions=[], cache=[])
-            self.config.register_global(interval=300, global_cache_size=500, global_cache=[], proxy=[], proxies=[], verifyFp=[])
-            self.main_task = self.bot.loop.create_task(self.initialize())
-        except Exception as e:
-            self.log.error(f"[{type(e).__name__}] {str(e)}")
+        self.bot = bot
+        self.log = logging.getLogger("tiktok")
+        self.log.setLevel(logging.DEBUG)
+        self.proxy = None
+        self.api = None
+        self.driver = None
+
+        self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
+        self.config.register_guild(subscriptions=[], cache=[])
+        self.config.register_global(interval=300, global_cache_size=500, global_cache=[], proxy=[], proxies=[], verifyFp=[])
+        self.main_task = self.bot.loop.create_task(self.initialize())
+
 
     async def initialize(self):
         await self.bot.wait_until_red_ready()
-        try:
-            self.proxy = await self.config.proxy()
-        except:
-            self.proxy = None
-            pass
+        self.proxy = await self.config.proxy()
+        print(self.proxy)        
 
         if platform.system() == 'Windows':
             self.driver = str(bundled_data_path(self)) + r'\chromedriver_win'
@@ -81,15 +77,13 @@ class TikTok(commands.Cog):
             if 'wrong permissions' in str(e):
                 self.log.error(f"Please add executable permission to the following path: {self.driver}")
 
-        try:
-            self.log.info(f"Driver: {self.driver}")
-            self.log.info(f"VerifyFp: {verifyFp}")
-            self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True,
-                                              custom_verifyFp=verifyFp,
-                                              logging_level=logging.DEBUG, executablePath=self.driver,
-                                              proxy=self.proxy)
-        except:
-            traceback.print_exc()
+        self.log.info(f"Driver: {self.driver}")
+        self.log.info(f"VerifyFp: {verifyFp}")
+        self.api = TikTokApi.get_instance(use_test_endpoints=False, use_selenium=True,
+                                          custom_verifyFp=verifyFp,
+                                          logging_level=logging.DEBUG, executablePath=self.driver,
+                                          proxy=self.proxy)
+
 
         self.log.info(f"Proxy: {self.proxy}")
         self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
@@ -212,13 +206,9 @@ class TikTok(commands.Cog):
     async def get_new_videos(self):
         posts = cover_file = None
         for guild in self.bot.guilds:
-            try:
-                subs = await self.config.guild(guild).subscriptions()
-                cache = await self.config.guild(guild).cache()
-                interval = await self.config.interval()
-            except:
-                self.log.error("Configuration error..")
-                return
+            subs = await self.config.guild(guild).subscriptions()
+            cache = await self.config.guild(guild).cache()
+            interval = await self.config.interval()
 
             for i, sub in enumerate(subs):
                 global_cache = await self.config.global_cache()
