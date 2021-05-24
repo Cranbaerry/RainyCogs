@@ -342,26 +342,25 @@ class TikTok(commands.Cog):
                 self.log.warning("GIF processing too long..")
                 embed.set_image(url=post['video']['cover'])
             finally:
-                try:
-                    self.log.debug(f"Posting {post['id']} to the channel #{channel['name']} ({channel['id']})")
-                    await self.bot.get_channel(channel['id']).send(embed=embed, file=cover_file)
-                    self.log.debug("w")
-                    cache.append(post["id"])
-                    self.log.debug("b")
-                    new_post = {'id': post['id'], 'last-updated': str(datetime.now()), 'post': post}
-                    self.log.debug("c")
-                    if new_post not in global_cache:
-                        self.log.debug("d")
-                        global_cache.append(new_post)
-                    self.log.debug("e")
-                except Exception as e:
-                    self.log.error(str(e))
+                self.log.debug(f"Posting {post['id']} to the channel #{channel['name']} ({channel['id']})")
+                await self.bot.get_channel(channel['id']).send(embed=embed, file=cover_file)
+                cache.append(post["id"])
+                new_post = {'id': post['id'], 'last-updated': str(datetime.now()), 'post': post}
+                if new_post not in global_cache:
+                    global_cache.append(new_post)
 
-        # Add id to published cache
-        await self.config.guild(guild).cache.set(cache)
+        try:
+            self.log.debug("uwu")
+            # Add id to published cache
+            await self.config.guild(guild).cache.set(cache)
 
-        # Add post to global cache
-        await self.config.global_cache.set(global_cache)
+            self.log.debug("owo")
+            # Add post to global cache
+            await self.config.global_cache.set(global_cache)
+
+            self.log.debug("ewe")
+        except Exception as e:
+            self.log.error(str(e))
 
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
