@@ -21,6 +21,7 @@ from redbot.core.data_manager import bundled_data_path
 from requests.exceptions import ConnectionError
 from asyncio.exceptions import TimeoutError
 from selenium.common.exceptions import WebDriverException
+from urllib3.exceptions import ProxyError
 
 UNIQUE_ID = 0x696969669
 
@@ -250,7 +251,7 @@ class TikTok(commands.Cog):
                         self.log.warning(f"Captcha error, retrying..")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
-                    except ConnectionError as e:
+                    except (ConnectionError, ProxyError) as e:
                         self.log.warning(f"Connection error, retrying: {str(e)}")
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
