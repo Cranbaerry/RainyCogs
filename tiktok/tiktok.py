@@ -94,9 +94,6 @@ class TikTok(commands.Cog):
         except TikTokCaptchaError as e:
             data = TikTokCaptchaError
             self.log.error(f"[{type(e).__name__}] {str(e)}")
-        except Exception as e:
-            data = None
-            self.log.error(f"[{type(e).__name__}] {str(e)}")
 
         return data
 
@@ -261,7 +258,7 @@ class TikTok(commands.Cog):
                         break
                     else:
                         # print(f"Response: {posts}")
-                        self.log.debug(("Response pass reached.."))
+                        self.log.debug(("Response pass reached~"))
                         break
                     '''except Exception as e:
                        self.log.error(f"[{type(e).__name__}] {str(e)}")
