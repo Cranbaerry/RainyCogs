@@ -176,7 +176,7 @@ class TikTok(commands.Cog):
                 self.log.warning("Too fast, something went wrong..")
                 self.log.info(f'Switched proxy database to {url}')
                 # url = 'https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt'
-                url = 'https://raw.githubusercontent.com/shiftytr/proxy-list/master/proxy.txt'
+                url = 'https://www.proxyscan.io/api/proxy?limit=10&last_check=3600'
 
                 r = requests.get(url=url)
                 res = r.text
@@ -184,7 +184,7 @@ class TikTok(commands.Cog):
             if 'You reached the maximum 50 requests for today.' in res:
                 self.log.warning("Maximum requests have been reached on pubproxy.com")
                 self.log.info(f'Switched proxy database to {url}')
-                url = 'https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt'
+                url = 'https://www.proxyscan.io/api/proxy?limit=10&last_check=3600'
 
                 r = requests.get(url=url)
                 res = r.text
@@ -198,7 +198,7 @@ class TikTok(commands.Cog):
             await self.config.proxies.set(proxies)
             self.log.info(f"Proxies list updated: {proxies_list}")
         else:
-            self.log.debug("Skipped proxy database update")
+            self.log.debug("No database update was performed")
 
         if truncate:
             try:
@@ -246,6 +246,7 @@ class TikTok(commands.Cog):
                     self.log.debug(f"Skipping update feed for {sub['id']}")
                     continue
 
+                retry_count = 3
                 while True:
                     try:
                         self.log.debug("Fetching data from tiktok.com..")
@@ -256,9 +257,14 @@ class TikTok(commands.Cog):
                         '''if posts is TikTokCaptchaError:
                             raise TikTokCaptchaError()'''
                     except TimeoutError:
-                        self.log.warning(f"Takes too long, retrying..")
-                        await self.get_new_proxy(await self.config.proxies(), True)
-                        continue
+                        if retry_count < 1:
+                            self.log.warning(f"Reached maximum number of timeout retry attempts!")
+                            await self.get_new_proxy(await self.config.proxies(), True)
+                            continue
+                        else:
+                            self.log.warning(f"Takes too long, retrying.. {retry_count}")
+                            retry_count -= 1
+                            continue
                     except TikTokCaptchaError:
                         self.log.warning(f"Captcha error, retrying..")
                         await self.get_new_proxy(await self.config.proxies(), True)
