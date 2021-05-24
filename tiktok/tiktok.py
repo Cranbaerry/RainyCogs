@@ -258,6 +258,7 @@ class TikTok(commands.Cog):
                 retry_count = 3
                 while True:
                     try:
+                        current_proxy = self.api.proxy
                         self.log.debug("Fetching data from tiktok.com..")
                         task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
                         task = self.bot.loop.run_in_executor(None, task)
@@ -266,20 +267,32 @@ class TikTok(commands.Cog):
                         '''if posts is TikTokCaptchaError:
                             raise TikTokCaptchaError()'''
                     except TimeoutError:
+                        self.log.warning(f"Takes too long, retrying.. {retry_count}")
+                        if self.api.proxy != current_proxy:
+                            self.log.info(f"Detected new proxy {self.api.proxy}")
+                            continue
+
                         if retry_count < 1:
                             self.log.warning(f"Reached maximum number of timeout retry attempts!")
                             await self.get_new_proxy(await self.config.proxies(), True)
                             continue
                         else:
-                            self.log.warning(f"Takes too long, retrying.. {retry_count}")
                             retry_count -= 1
                             continue
                     except TikTokCaptchaError:
                         self.log.warning(f"Captcha error, retrying..")
+                        if self.api.proxy != current_proxy:
+                            self.log.info(f"Detected new proxy {self.api.proxy}")
+                            continue
+
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
                     except (ConnectionError, ProxyError, ChunkedEncodingError, InvalidURL) as e:
                         self.log.warning(f"Connection error, retrying: {str(e)}")
+                        if self.api.proxy != current_proxy:
+                            self.log.info(f"Detected new proxy {self.api.proxy}")
+                            continue
+
                         await self.get_new_proxy(await self.config.proxies(), True)
                         continue
                     except TikTokNotFoundError:
