@@ -261,7 +261,7 @@ class TikTok(commands.Cog):
                         embed = discord.Embed(color=color)
                         embed.description = f'TikTok user ' \
                                             f'[{sub["id"]}](https://www.tiktok.com/@{sub["id"]}) ' \
-                                            f'could not found found.'
+                                            f'could not be found.'
 
                         await self.bot.get_channel(int(sub["channel"]["id"])).send(embed=embed)
                         break
