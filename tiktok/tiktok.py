@@ -172,19 +172,19 @@ class TikTok(commands.Cog):
             r = requests.get(url=url)
             res = r.text
 
-            if 'We have to temporarily stop you.' in res:
-                self.log.warning("Too fast, something went wrong..")
-                self.log.info(f'Switched proxy database to {url}')
-                # url = 'https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt'
-                url = 'https://www.proxyscan.io/api/proxy?limit=10&last_check=3600'
-
-                r = requests.get(url=url)
-                res = r.text
-
-            if 'You reached the maximum 50 requests for today.' in res:
-                self.log.warning("Maximum requests have been reached on pubproxy.com")
-                self.log.info(f'Switched proxy database to {url}')
-                url = 'https://www.proxyscan.io/api/proxy?limit=10&last_check=3600'
+            if len(re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', res.partition('\n')[0])) != 1:
+                if 'We have to temporarily stop you.' in res:
+                    url = 'https://www.proxyscan.io/api/proxy?limit=10&last_check=3600'
+                    self.log.warning("Too fast, something went wrong..")
+                    self.log.info(f'Switched proxy database to {url}')
+                elif 'You reached the maximum 50 requests for today.' in res:
+                    url = 'https://www.proxyscan.io/api/proxy?limit=10&last_check=3600'
+                    self.log.warning("Maximum requests have been reached on pubproxy.com")
+                    self.log.info(f'Switched proxy database to {url}')
+                else:
+                    url = 'https://www.proxyscan.io/api/proxy?limit=10&last_check=3600'
+                    self.log.warning(f"Unexpected response: {res}")
+                    self.log.info(f'Switched proxy database to {url}')
 
                 r = requests.get(url=url)
                 res = r.text
