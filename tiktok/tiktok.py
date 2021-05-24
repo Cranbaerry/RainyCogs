@@ -262,6 +262,7 @@ class TikTok(commands.Cog):
                         embed.description = f'TikTok user ' \
                                             f'[{sub["id"]}](https://www.tiktok.com/@{sub["id"]}) ' \
                                             f'could not be found.'
+                        embed.set_footer = f"Use the following command to unsubscribe: [p]tiktok remove {sub['id']}"
 
                         await self.bot.get_channel(int(sub["channel"]["id"])).send(embed=embed)
                         break
