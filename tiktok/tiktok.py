@@ -103,7 +103,7 @@ class TikTok(commands.Cog):
         # temporarily disable proxy
         self.log.debug(f"Cover link: {post['video']['dynamicCover']}")
         image_path = Path(f"{str(cog_data_path(self))}/caches/")
-        image_file = Path(f"{str(image_path)}{post['id']}.gif")
+        image_file = Path(f"{str(image_path)}/{post['id']}.gif")
         if image_file.is_file():
             self.log.debug(f"Using cached cover: {str(image_file)}")
             return discord.File(str(image_file))
