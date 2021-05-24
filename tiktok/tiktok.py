@@ -53,7 +53,7 @@ class TikTok(commands.Cog):
     async def initialize(self):
         await self.bot.wait_until_red_ready()
         self.proxy = await self.config.proxy()
-        print(self.proxy)        
+        print(self.proxy)
 
         if platform.system() == 'Windows':
             self.driver = str(bundled_data_path(self)) + r'\chromedriver_win'
