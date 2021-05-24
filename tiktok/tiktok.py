@@ -1,10 +1,13 @@
 import asyncio
 import functools
+import io
 import logging
 import platform
 import re
 import time
 import traceback
+from pathlib import Path
+
 import discord
 import requests
 
@@ -99,16 +102,25 @@ class TikTok(commands.Cog):
     def get_tiktok_dynamic_cover(self, post):
         # temporarily disable proxy
         self.log.debug(f"Cover link: {post['video']['dynamicCover']}")
+        image_path = Path(f"{str(cog_data_path (self))}/caches/{post['id']}.gif")
+        if image_path.is_file():
+            self.log.debug(f"Using cached cover: {str(image_path)}")
+            return discord.File(str(image_path))
+
         temp = self.api.proxy
         self.api.proxy = None
         image_data = self.api.getBytes(url=post['video']['dynamicCover'], proxy=None)
         self.api.proxy = temp
-        path = f"{str(cog_data_path (self))}/caches/{post['id']}.gif"
 
-        with open(path, "wb") as output:
-            output.write(image_data)
-            self.log.debug(f"Saved to {path}")
-            return discord.File(path)
+        im = Image.open(io.BytesIO(image_data))
+        im.info.pop('background', None)
+
+        with io.BytesIO() as image_binary:
+            im.save(image_binary, 'gif', save_all=True)
+            im.save(str(image_path), 'gif', save_all=True)
+            image_binary.seek(0)
+            file = discord.File(fp=image_binary, filename=f"{post['id']}.gif")
+            return file
 
     def get_tiktok_cookie(self):
         from selenium import webdriver
