@@ -101,12 +101,12 @@ class TikTok(commands.Cog):
 
     def get_tiktok_dynamic_cover(self, post):
         # temporarily disable proxy
-        self.log.debug(f"Cover link~ {post['video']['dynamicCover']}")
-        image_dir = f"{str(cog_data_path (self))}/caches/"
-        image_path = Path(f"{str(cog_data_path (self))}/caches/{post['id']}.gif")
-        if image_path.is_file():
-            self.log.debug(f"Using cached cover: {str(image_path)}")
-            return discord.File(str(image_path))
+        self.log.debug(f"Cover link: {post['video']['dynamicCover']}")
+        image_path = Path(f"{str(cog_data_path(self))}/caches/")
+        image_file = Path(f"{str(image_path)}{post['id']}.gif")
+        if image_file.is_file():
+            self.log.debug(f"Using cached cover: {str(image_file)}")
+            return discord.File(str(image_file))
 
         temp = self.api.proxy
         self.api.proxy = None
@@ -115,12 +115,12 @@ class TikTok(commands.Cog):
 
         im = Image.open(io.BytesIO(image_data))
         im.info.pop('background', None)
-        image_dir.mkdir(parents=True, exist_ok=True)
+        image_path.mkdir(parents=True, exist_ok=True)
 
         with io.BytesIO() as image_binary:
-            self.log.debug(f"Saving to {str(image_path)}")
+            self.log.debug(f"Saving to {str(image_file)}")
             im.save(image_binary, 'gif', save_all=True)
-            im.save(str(image_path), 'gif', save_all=True)
+            im.save(str(image_file), 'gif', save_all=True)
             image_binary.seek(0)
             file = discord.File(fp=image_binary, filename=f"{post['id']}.gif")
             return file
