@@ -88,7 +88,9 @@ class TikTok(commands.Cog):
         self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
 
     def get_tiktok_by_name(self, username, count):
+        self.log.debug(("Wee"))
         data = self.api.byUsername(username, count=count)
+        self.log.debug(("Woo"))
 
         '''try:
             data = self.api.byUsername(username, count=count)
@@ -305,9 +307,7 @@ class TikTok(commands.Cog):
                              url=f"https://www.tiktok.com/@{post['author']['uniqueId']}",
                              icon_url=post['author']['avatarMedium'])
 
-            # embed.set_thumbnail(url='https://i.imgur.com/xtvjGGD.png')
             embed.set_thumbnail(url='https://i.imgur.com/ivShgrg.png')
-            # embed.set_footer(text='\u200b', icon_url='https://i.imgur.com/xtvjGGD.png')
 
             try:
                 # self.log.debug("Converting webp thumbnail to GIF..")
@@ -333,7 +333,7 @@ class TikTok(commands.Cog):
 
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
-        self.log.debug("Running background task")
+        self.log.debug("Booting up TikTok service..")
         while True:
             await self.get_new_videos()
             interval = await self.config.interval()
