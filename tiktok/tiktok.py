@@ -215,7 +215,7 @@ class TikTok(commands.Cog):
             return
 
         new_proxy = next(iter(proxies['list']))
-        if len(re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', res.partition('\n')[0])) != 1:
+        if len(re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', new_proxy)) != 1:
             self.log.warning(f"Invalid proxy format: {new_proxy}")
             self.log.warning(f"Clearing proxy database..")
             await self.config.proxies.set([])
