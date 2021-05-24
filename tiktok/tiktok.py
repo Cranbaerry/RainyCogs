@@ -214,7 +214,16 @@ class TikTok(commands.Cog):
             await self.get_new_proxy(proxies, truncate)
             return
 
-        self.api.proxy = next(iter(proxies['list']))
+        new_proxy = next(iter(proxies['list']))
+        if len(re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', res.partition('\n')[0])) != 1:
+            self.log.warning(f"Invalid proxy format: {new_proxy}")
+            self.log.warning(f"Clearing proxy database..")
+            await self.config.proxies.set([])
+            await asyncio.sleep(1)
+            await self.get_new_proxy(proxies, truncate)
+            return
+
+        self.api.proxy = new_proxy
         self.log.info(f"New proxy acquired: {self.api.proxy}")
         await self.config.proxy.set(self.api.proxy)
 
