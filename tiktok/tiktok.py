@@ -247,8 +247,7 @@ class TikTok(commands.Cog):
                     self.log.warning(f"Guild channel not found: {sub['channel']['name']}")
                     self.log.info(f"Deleting {sub['id']} from {sub['channel']['name']}")
                     self.log.debug(f"Before: {subs}")
-                    subs[:] = [_sub for _sub in subs if _sub['id'] == sub['id']
-                               and _sub['channel']['id'] != sub['channel']['id']]
+                    subs[:] = [_sub for _sub in sub if _sub['id'] != sub['id'] and _sub['channel']['id'] != sub['channel']['id']]
                     await self.config.guild(guild).subscriptions.set(subs)
                     self.log.debug(f"After: {subs}")
                     continue
@@ -314,7 +313,7 @@ class TikTok(commands.Cog):
                                             f'[{sub["id"]}](https://www.tiktok.com/@{sub["id"]}) ' \
                                             f'could not be found\nand has been removed from {channels}'
 
-                        subs[:] = [_sub for _sub in subs if _sub['id'] == sub['id']]
+                        subs[:] = [_sub for _sub in subs if _sub['id'] != sub['id']]
                         await self.config.guild(guild).subscriptions.set(subs)
                         await self.bot.get_channel(int(sub["channel"]["id"])).send(embed=embed)
                         break
