@@ -298,8 +298,6 @@ class TikTok(commands.Cog):
                         continue
                     except TikTokNotFoundError:
                         self.log.warning(f"TikTok channel not found: {sub['id']}")
-                        tiktokId = sub["id"]
-                        unsubbed = []
                         color = int(hex(int(ColorHash(sub["id"]).hex.replace("#", ""), 16)), 0)
                         channels = f'<#{channel.id}>' if channel else 'all channels'
                         embed = discord.Embed(color=color)
@@ -307,20 +305,7 @@ class TikTok(commands.Cog):
                                             f'[{sub["id"]}](https://www.tiktok.com/@{sub["id"]}) ' \
                                             f'could not be found\nand has been removed from {channels}'
 
-                        if channel:
-                            newSub = {'id': tiktokId,
-                                      'channel': {"name": channel.name,
-                                                  "id": channel.id}}
-
-                            for _i, _sub in enumerate(subs):
-                                if _sub['id'] == newSub['id']:
-                                    unsubbed.append(subs.pop(_i))
-                                    break
-                        else:
-                            for _i, _sub in enumerate(subs):
-                                if _sub['id'] == tiktokId:
-                                    unsubbed.append(subs.pop(_i))
-
+                        subs[:] = [_sub for _sub in subs if _sub['id'] == sub['id']]
                         await self.config.guild(guild).subscriptions.set(subs)
                         await self.bot.get_channel(int(sub["channel"]["id"])).send(embed=embed)
                         break
@@ -336,7 +321,11 @@ class TikTok(commands.Cog):
                        traceback.print_exc()'''
 
                 if not channel:
-                    self.log.warning("Guild channel not found: " + sub["channel"]['name'])
+                    self.log.warning(f"Guild channel not found: {sub['channel']['name']}")
+                    self.log.info(f"Deleting {sub['id']} from {sub['channel']['name']}")
+                    subs[:] = [_sub for _sub in subs if _sub['id'] == sub['id']
+                               and _sub['channel']['id'] != sub['channel']['id']]
+                    await self.config.guild(guild).subscriptions.set(subs)
                     continue
 
                 if posts is None or len(posts) == 0:
