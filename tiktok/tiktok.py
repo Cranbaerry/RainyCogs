@@ -246,10 +246,8 @@ class TikTok(commands.Cog):
                 if not channel:
                     self.log.warning(f"Guild channel not found: {sub['channel']['name']}")
                     self.log.info(f"Deleting {sub['id']} from {sub['channel']['name']}")
-                    self.log.debug(f"Before: {subs}")
                     subs[:] = [_sub for _sub in subs if _sub['id'] != sub['id'] and _sub['channel']['id'] != sub['channel']['id']]
                     await self.config.guild(guild).subscriptions.set(subs)
-                    self.log.debug(f"After: {subs}")
                     continue
 
                 # post cached videos
