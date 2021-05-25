@@ -237,12 +237,19 @@ class TikTok(commands.Cog):
             interval = await self.config.interval()
 
             for i, sub in enumerate(subs):
-                global_cache = await self.config.global_cache()
-
                 self.log.debug(f"Found {sub['id']} from channel #{sub['channel']['name']} in {guild.name}")
+                global_cache = await self.config.global_cache()
                 channel = self.bot.get_channel(int(sub["channel"]["id"]))
                 updateSub = True
                 posts = None
+
+                if not channel:
+                    self.log.warning(f"Guild channel not found: {sub['channel']['name']}")
+                    self.log.info(f"Deleting {sub['id']} from {sub['channel']['name']}")
+                    subs[:] = [_sub for _sub in subs if _sub['id'] == sub['id']
+                               and _sub['channel']['id'] != sub['channel']['id']]
+                    await self.config.guild(guild).subscriptions.set(subs)
+                    continue
 
                 # post cached videos
                 for post in global_cache:
@@ -319,14 +326,6 @@ class TikTok(commands.Cog):
                     '''except Exception as e:
                        self.log.error(f"[{type(e).__name__}] {str(e)}")
                        traceback.print_exc()'''
-
-                if not channel:
-                    self.log.warning(f"Guild channel not found: {sub['channel']['name']}")
-                    self.log.info(f"Deleting {sub['id']} from {sub['channel']['name']}")
-                    subs[:] = [_sub for _sub in subs if _sub['id'] == sub['id']
-                               and _sub['channel']['id'] != sub['channel']['id']]
-                    await self.config.guild(guild).subscriptions.set(subs)
-                    continue
 
                 if posts is None or len(posts) == 0:
                     self.log.warning("Empty posts for tiktok: " + sub["id"])
