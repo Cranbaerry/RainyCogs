@@ -384,7 +384,7 @@ class TikTok(commands.Cog):
                     global_cache.append(new_post)
 
         # remove cache if > global_cache_size
-        if len(global_cache) > global_cache_size:
+        if len(global_cache) > int(global_cache_size):
             self.log.debug("Maximum number of cache size reached!")
             cache_to_delete = next(iter(global_cache))
 
@@ -595,7 +595,7 @@ class TikTok(commands.Cog):
     @checks.is_owner()
     async def setsize(self, ctx: commands.Context, size):
         """Set global_cache_size"""
-        await self.config.global_cache_size.set(size)
+        await self.config.global_cache_size.set(int(size))
         await ctx.send(f"Global cache's size set to {size}")
         self.log.info(f"Global cache's size set to {size}")
 
