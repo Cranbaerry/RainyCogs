@@ -262,7 +262,7 @@ class TikTok(commands.Cog):
                 while True:
                     current_proxy = self.api.proxy
                     try:
-                        self.log.debug("Fetching data from tiktok.com..")
+                        self.log.debug(f"Fetching data {sub['id']} from tiktok.com.. [{current_proxy}]")
                         task = functools.partial(self.get_tiktok_by_name, sub["id"], 3)
                         task = self.bot.loop.run_in_executor(None, task)
                         posts = await asyncio.wait_for(task, timeout=30)
@@ -351,6 +351,7 @@ class TikTok(commands.Cog):
     async def post_videos(self, posts, channel, guild):
         cache = await self.config.guild(guild).cache()
         global_cache = await self.config.global_cache()
+        global_cache_size = await self.config.global_cache_size()
         cover_file = None
         for post in posts:
             if post["id"] in cache:
@@ -394,6 +395,19 @@ class TikTok(commands.Cog):
                 new_post = {'id': post['id'], 'last-updated': str(datetime.now()), 'post': post}
                 if new_post not in global_cache:
                     global_cache.append(new_post)
+
+        # remove cache if > global_cache_size
+        if len(global_cache) > global_cache_size:
+            self.log.debug("Maximum number of cache size reached!")
+            cache_to_delete = next(iter(global_cache))
+
+            self.log.debug(f"Deleting {cache_to_delete['id']} from global cache..")
+            global_cache[:] = [post for post in global_cache if post.get('id') != cache_to_delete.get('id')]
+
+            cached_cover = Path(f"{str(cog_data_path(self))}/caches/{cache_to_delete.get('id')}.gif")
+            if cached_cover.exists():
+                self.log.debug(f"Deleting {str(cached_cover)} from disk..")
+                cached_cover.unlink()
 
         # Add id to published cache
         await self.config.guild(guild).cache.set(cache)
@@ -584,19 +598,25 @@ class TikTok(commands.Cog):
     @tiktok.command()
     @checks.is_owner()
     async def setproxy(self, ctx: commands.Context, proxy):
-        """Manually set HTTP proxy address"""
+        """Set HTTP proxy address"""
         self.api.proxy = proxy
-
         await self.config.proxy.set(proxy)
-        await ctx.send(f"Proxy set to {await self.config.proxy()}")
-        self.log.info(f"Proxy set to {await self.config.proxy()}")
+        await ctx.send(f"Proxy set to {proxy}")
+        self.log.info(f"Proxy set to {proxy}")
+
+    @tiktok.command()
+    @checks.is_owner()
+    async def setsize(self, ctx: commands.Context, size):
+        """Set global_cache_size"""
+        await self.config.global_cache_size.set(size)
+        await ctx.send(f"Global cache's size set to {size}")
+        self.log.info(f"Global cache's size set to {size}")
 
     @tiktok.command()
     @checks.is_owner()
     async def setverify(self, ctx: commands.Context, txt):
-        """Manually set verifyFp cookie value"""
+        """Set verifyFp cookie value"""
         self.api.custom_verifyFp = txt
-
         await self.config.verifyFp.set(txt)
-        await ctx.send(f"VerifyFp set to {await self.config.verifyFp()}")
-        self.log.info(f"VerifyFp set to {await self.config.verifyFp()}")
+        await ctx.send(f"VerifyFp set to {txt}")
+        self.log.info(f"VerifyFp set to {txt}")
