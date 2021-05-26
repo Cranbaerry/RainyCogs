@@ -380,15 +380,14 @@ class TikTok(commands.Cog):
                 try:
                     self.log.debug(f"Posting {post['id']} to the channel #{channel['name']} ({channel['id']})")
                     await self.bot.get_channel(channel['id']).send(embed=embed, file=cover_file)
+                    cache.append(post["id"])
+                    new_post = {'id': post['id'], 'last-updated': str(datetime.now()), 'post': post}
+                    if new_post not in global_cache:
+                        global_cache.append(new_post)
                 except discord.errors.HTTPException as e:
                     self.log.error(f"Unable to post: {str(e)}")
                     continue
                     pass
-
-                cache.append(post["id"])
-                new_post = {'id': post['id'], 'last-updated': str(datetime.now()), 'post': post}
-                if new_post not in global_cache:
-                    global_cache.append(new_post)
 
         # remove cache if > global_cache_size
         if len(global_cache) > int(global_cache_size):
