@@ -328,7 +328,7 @@ class TikTok(commands.Cog):
                         options.add_argument("log-level=2")
 
                         try:
-                            self.api.browser = self.api.webdriver.Chrome(
+                            self.api.browser.browser = self.api.webdriver.Chrome(
                                 executable_path=self.api.executablePath, chrome_options=options
                             )
                         except Exception as e:
