@@ -332,6 +332,7 @@ class TikTok(commands.Cog):
                                 executable_path=self.api.executablePath, chrome_options=options
                             )
                         except Exception as e:
+                            self.log.error(f"Error in setting up new browser: {str(e)}")
                             raise e
 
                         self.api.setup_browser()
