@@ -318,24 +318,25 @@ class TikTok(commands.Cog):
                         break
                     except InvalidSessionIdException:
                         self.log.warning(f"Web browser crashed, setting up new one..")
-                        # from selenium import webdriver
-                        options = self.api.webdriver.ChromeOptions()
+                        from selenium import webdriver
+
+                        options = webdriver.ChromeOptions()
                         options.add_argument('--no-sandbox')
-                        options.add_argument('--disable-dev-shm-usage')
                         options.add_argument('--window-size=1420,1080')
                         options.add_argument('--headless')
                         options.add_argument('--disable-gpu')
                         options.add_argument("log-level=2")
 
                         try:
-                            self.api.browser.browser = self.api.webdriver.Chrome(
-                                executable_path=self.api.executablePath, chrome_options=options
+                            self.api.browser.browser = webdriver.Chrome(
+                                executable_path=self.api.browser.executablePath, chrome_options=options
                             )
                         except Exception as e:
                             self.log.error(f"Error in setting up new browser: {str(e)}")
                             raise e
 
-                        self.api.setup_browser()
+                        # Page avoidance
+                        self.api.browser.setup_browser()
                         self.log.info("New browser setup!")
                         continue
                     except Exception as e:
