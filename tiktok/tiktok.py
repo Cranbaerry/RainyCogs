@@ -6,6 +6,7 @@ import platform
 import re
 import time
 import traceback
+import os
 from pathlib import Path
 
 import discord
@@ -376,8 +377,14 @@ class TikTok(commands.Cog):
                 self.log.warning(f"Static cover link: {post['video']['cover']}")
                 embed.set_image(url=post['video']['cover'])
             finally:
-                self.log.debug(f"Posting {post['id']} to the channel #{channel['name']} ({channel['id']})")
-                await self.bot.get_channel(channel['id']).send(embed=embed, file=cover_file)
+                try:
+                    self.log.debug(f"Posting {post['id']} to the channel #{channel['name']} ({channel['id']})")
+                    await self.bot.get_channel(channel['id']).send(embed=embed, file=cover_file)
+                except discord.errors.HTTPException as e:
+                    self.log.error(f"Unable to post: {str(e)}")
+                    continue
+                    pass
+
                 cache.append(post["id"])
                 new_post = {'id': post['id'], 'last-updated': str(datetime.now()), 'post': post}
                 if new_post not in global_cache:
@@ -529,6 +536,15 @@ class TikTok(commands.Cog):
     @checks.is_owner()
     async def clearglobal(self, ctx):
         """Clear global cache database"""
+        folder = Path(f"{str(cog_data_path(self))}/caches/")
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+            except OSError as e:
+                self.log.error('Failed to delete %s. Reason: %s' % (file_path, e))
+
         await self.config.global_cache.set([])
         await ctx.send("Posts database cleared!")
 
