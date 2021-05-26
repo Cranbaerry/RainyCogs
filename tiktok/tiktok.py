@@ -22,7 +22,7 @@ from redbot.core import commands, Config, checks
 from redbot.core.data_manager import bundled_data_path, cog_data_path
 from requests.exceptions import ConnectionError, ProxyError, ChunkedEncodingError, InvalidURL
 from asyncio.exceptions import TimeoutError
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import WebDriverException, InvalidSessionIdException
 
 UNIQUE_ID = 0x696969669
 
@@ -316,6 +316,27 @@ class TikTok(commands.Cog):
                         await self.config.guild(guild).subscriptions.set(subs)
                         await self.bot.get_channel(int(sub["channel"]["id"])).send(embed=embed)
                         break
+                    except InvalidSessionIdException:
+                        self.log.warning(f"Web browser crashed, setting up new one..")
+                        from selenium import webdriver
+                        options = webdriver.ChromeOptions()
+                        options.add_argument('--no-sandbox')
+                        options.add_argument('--disable-dev-shm-usage')
+                        options.add_argument('--window-size=1420,1080')
+                        options.add_argument('--headless')
+                        options.add_argument('--disable-gpu')
+                        options.add_argument("log-level=2")
+
+                        try:
+                            self.api.browser = webdriver.Chrome(
+                                executable_path=self.api.executablePath, chrome_options=options
+                            )
+                        except Exception as e:
+                            raise e
+
+                        self.api.setup_browser()
+                        self.log.info("New browser setup!")
+                        continue
                     except Exception as e:
                         self.log.error(f"[{type(e).__name__}] {str(e)}")
                         traceback.print_exc()
