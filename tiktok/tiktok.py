@@ -392,7 +392,7 @@ class TikTok(commands.Cog):
                 task = self.bot.loop.run_in_executor(None, task)
                 cover_file = await asyncio.wait_for(task, timeout=30)
                 embed.set_image(url=f"attachment://{post['id']}.gif")
-            except (TimeoutError, requests.exceptions.Timeout, timeout):
+            except (TimeoutError, timeout):
                 self.log.warning("GIF processing too long, reverting to static cover..")
                 self.log.warning(f"Static cover link: {post['video']['cover']}")
                 embed.set_image(url=post['video']['cover'])
