@@ -9,8 +9,8 @@ import traceback
 import os
 from pathlib import Path
 
+import aiohttp
 import discord
-import requests
 
 from datetime import datetime, timedelta
 from socket import timeout
@@ -156,7 +156,10 @@ class TikTok(commands.Cog):
         return cookie
 
     async def get_new_proxy(self, proxies, truncate=False):
-        url = 'http://pubproxy.com/api/proxy?limit=5&format=txt&type=http'
+        url = 'https://www.proxyscan.io/api/proxy?' \
+              'limit=10&last_check=3600&ping=100&format=txt&type=http,https'
+        hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}
+        res = None
         self.log.debug("Attempting to get new proxy..")
 
         if len(proxies) > 0:
@@ -170,10 +173,16 @@ class TikTok(commands.Cog):
                 (datetime.now() - datetime.strptime(proxies['last-updated'], '%Y-%m-%d %H:%M:%S.%f')) > timedelta(1):
             self.log.debug("Updating proxy database..")
             proxies_list = []
-            r = requests.get(url=url)
-            res = r.text
 
-            if len(re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', res.partition('\n')[0])) != 1:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, headers=hdr) as r:
+                    res = await r.text()
+
+                    for lines in res.split('\n'):
+                        proxy = ''.join(lines)
+                        proxies_list.append(proxy)
+
+            '''if len(re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', res.partition('\n')[0])) != 1:
                 if 'We have to temporarily stop you.' in res:
                     url = 'https://www.proxyscan.io/api/proxy?' \
                           'limit=10&last_check=3600&ping=100&format=txt&type=http,https'
@@ -188,17 +197,9 @@ class TikTok(commands.Cog):
                     url = 'https://www.proxyscan.io/api/proxy?' \
                           'limit=10&last_check=3600&ping=100&format=txt&type=http,https'
                     self.log.warning(f"Unexpected response: {res}")
-                    self.log.info(f'Switched proxy database to {url}')
-
-                r = requests.get(url=url)
-                res = r.text
-
-            for lines in res.split('\n'):
-                proxy = ''.join(lines)
-                proxies_list.append(proxy)
+                    self.log.info(f'Switched proxy database to {url}')'''
 
             proxies = {'last-updated': str(datetime.now()), 'list': proxies_list}
-
             await self.config.proxies.set(proxies)
             self.log.info(f"Proxies list updated: {proxies_list}")
         else:
