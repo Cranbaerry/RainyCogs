@@ -159,7 +159,7 @@ class TikTok(commands.Cog):
         url = 'https://www.proxyscan.io/api/proxy?' \
               'limit=10&last_check=3600&ping=100&format=txt&type=http,https'
         hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}
-        res = None
+        # res = None
         self.log.debug("Attempting to get new proxy..")
 
         if len(proxies) > 0:
