@@ -174,13 +174,17 @@ class TikTok(commands.Cog):
             self.log.debug("Updating proxy database..")
             proxies_list = []
 
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url, headers=hdr) as r:
-                    res = await r.text()
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(url, headers=hdr) as r:
+                        res = await r.text()
 
-                    for lines in res.split('\n'):
-                        proxy = ''.join(lines)
-                        proxies_list.append(proxy)
+                        for lines in res.split('\n'):
+                            proxy = ''.join(lines)
+                            proxies_list.append(proxy)
+            except Exception as e:
+                self.log.error(f"Unable to get database: {str(e)}")
+                return
 
             '''if len(re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', res.partition('\n')[0])) != 1:
                 if 'We have to temporarily stop you.' in res:
