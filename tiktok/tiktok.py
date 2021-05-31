@@ -216,6 +216,8 @@ class TikTok(commands.Cog):
                 await self.config.proxies.set(proxies)
             except ValueError:
                 pass
+            except:
+                pass
 
         if 'list' in proxies and len(proxies['list']) == 0:
             self.log.warning("Proxy database is empty..")
