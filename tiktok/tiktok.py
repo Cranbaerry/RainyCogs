@@ -155,12 +155,13 @@ class TikTok(commands.Cog):
         driver.quit()
         return cookie
 
-    async def get_new_proxy(self, proxies, truncate=False):
+    async def get_new_proxy(self, truncate=False):
         url = 'https://www.proxyscan.io/api/proxy?' \
               'limit=10&last_check=3600&ping=100&format=txt&type=http,https'
         hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}
         # res = None
         self.log.debug("Attempting to get new proxy..")
+        proxies = await self.config.proxies()
 
         if len(proxies) > 0:
             self.log.info(f"Cached proxies: {len(proxies['list'])}")
@@ -214,6 +215,7 @@ class TikTok(commands.Cog):
                 self.log.debug(f"Removing {self.api.proxy} from database")
                 proxies['list'].remove(self.api.proxy)
                 await self.config.proxies.set(proxies)
+                self.log.debug(f"Removed!")
             except ValueError:
                 pass
             except:
@@ -222,7 +224,7 @@ class TikTok(commands.Cog):
         if 'list' in proxies and len(proxies['list']) == 0:
             self.log.warning("Proxy database is empty..")
             await asyncio.sleep(1)
-            await self.get_new_proxy(proxies, truncate)
+            await self.get_new_proxy(truncate)
             return
 
         self.log.warning(f"Setting up a new proxy..")
@@ -232,7 +234,7 @@ class TikTok(commands.Cog):
             self.log.warning(f"Clearing proxy database..")
             await self.config.proxies.set([])
             await asyncio.sleep(1)
-            await self.get_new_proxy([], truncate)
+            await self.get_new_proxy(truncate)
             return
 
         self.log.info(f"New proxy acquired: {self.api.proxy}")
@@ -289,7 +291,7 @@ class TikTok(commands.Cog):
 
                         if retry_count < 1:
                             self.log.warning(f"Reached maximum number of timeout retry attempts!")
-                            await self.get_new_proxy(await self.config.proxies(), True)
+                            await self.get_new_proxy(True)
                             continue
                         else:
                             self.log.warning(f"Retrying.. {retry_count}")
@@ -301,7 +303,7 @@ class TikTok(commands.Cog):
                             self.log.info(f"Detected new proxy {self.api.proxy}")
                             continue
 
-                        await self.get_new_proxy(await self.config.proxies(), True)
+                        await self.get_new_proxy(True)
                         continue
                     except (ConnectionError, ProxyError, ChunkedEncodingError, InvalidURL) as e:
                         self.log.warning(f"Connection error, retrying: {str(e)}")
@@ -309,7 +311,7 @@ class TikTok(commands.Cog):
                             self.log.info(f"Detected new proxy {self.api.proxy}")
                             continue
 
-                        await self.get_new_proxy(await self.config.proxies(), True)
+                        await self.get_new_proxy(True)
                         continue
                     except TikTokNotFoundError:
                         self.log.warning(f"TikTok channel not found: {sub['id']}")
