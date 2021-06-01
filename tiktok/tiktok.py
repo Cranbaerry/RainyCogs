@@ -210,23 +210,20 @@ class TikTok(commands.Cog):
         else:
             self.log.debug("No database update was performed")
 
-        if 'list' in proxies:
-            if truncate:
-                try:
-                    self.log.debug(f"Removing {self.api.proxy} from database")
-                    proxies['list'].remove(self.api.proxy)
-                    await self.config.proxies.set(proxies)
-                    self.log.debug(f"Removed!")
-                except ValueError:
-                    pass
-                except:
-                    pass
+        if 'list' in proxies and truncate:
+            try:
+                self.log.debug(f"Removing {self.api.proxy} from database")
+                proxies['list'].remove(self.api.proxy)
+                await self.config.proxies.set(proxies)
+                self.log.debug(f"Removed!")
+            except ValueError:
+                pass
 
-            if len(proxies['list']) == 0:
-                self.log.warning("Proxy database is empty..")
-                await asyncio.sleep(1)
-                await self.get_new_proxy(truncate)
-                return
+        if 'list' in proxies and len(proxies['list']) == 0:
+            self.log.warning("Proxy database is empty..")
+            await asyncio.sleep(1)
+            await self.get_new_proxy(truncate)
+            return
 
         self.log.warning(f"Setting up a new proxy..")
         new_proxy = next(iter(proxies['list']))
