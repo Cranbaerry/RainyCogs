@@ -182,6 +182,8 @@ class TikTok(commands.Cog):
 
                         for lines in res.split('\n'):
                             proxy = ''.join(lines)
+                            if len(proxy) == 0:
+                                continue
                             proxies_list.append(proxy)
             except Exception as e:
                 self.log.error(f"Unable to get database: {str(e)}")
@@ -214,9 +216,13 @@ class TikTok(commands.Cog):
             try:
                 self.log.debug(f"Removing {self.api.proxy} from database")
                 proxies['list'].remove(self.api.proxy)
+                self.log.debug(f"Processing remove")
                 await self.config.proxies.set(proxies)
                 self.log.debug(f"Removed!")
             except ValueError:
+                pass
+            except Exception as e:
+                self.log.error(f"Unknown error {str(e)}")
                 pass
 
         if 'list' in proxies and len(proxies['list']) == 0:
@@ -255,7 +261,8 @@ class TikTok(commands.Cog):
                 if not channel:
                     self.log.warning(f"Guild channel not found: {sub['channel']['name']}")
                     self.log.info(f"Deleting {sub['id']} from {sub['channel']['name']}")
-                    subs[:] = [_sub for _sub in subs if _sub['id'] != sub['id'] and _sub['channel']['id'] != sub['channel']['id']]
+                    subs[:] = [_sub for _sub in subs if
+                               _sub['id'] != sub['id'] and _sub['channel']['id'] != sub['channel']['id']]
                     await self.config.guild(guild).subscriptions.set(subs)
                     continue
 
