@@ -205,6 +205,9 @@ class TikTok(commands.Cog):
 
         if 'list' in proxies and len(proxies['list']) == 0:
             self.log.warning("Proxy database is empty..")
+            self.proxies = proxies
+            await self.get_new_proxy(truncate)
+            return
 
         self.log.warning(f"Setting up a new proxy..")
         new_proxy = next(iter(proxies['list']))
