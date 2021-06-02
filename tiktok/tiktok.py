@@ -214,7 +214,7 @@ class TikTok(commands.Cog):
 
         if 'list' in proxies and truncate:
             try:
-                self.log.debug(f"Removing {self.api.proxy} from database")
+                self.log.debug(f"Removing {self.api.proxy} from database..")
                 proxies['list'].remove(self.api.proxy)
                 self.log.debug(f"Processing remove")
                 await self.config.proxies.set(proxies)
