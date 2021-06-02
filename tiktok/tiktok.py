@@ -160,13 +160,21 @@ class TikTok(commands.Cog):
               'limit=10&last_check=3600&ping=100&format=txt&type=http,https'
         hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}
         # res = None
-        self.log.debug("Attempting to get new proxy..")
         proxies = await self.config.proxies()
 
         if len(proxies) > 0:
             self.log.info(f"Cached proxies: {len(proxies['list'])}")
             self.log.info(f"Last update: {proxies['last-updated']}")
             # self.log.info(f"Cached: {proxies['list']}")
+
+        if 'list' in proxies and truncate:
+            try:
+                self.log.debug(f"Removing {self.api.proxy} from database..")
+                proxies['list'].remove(self.api.proxy)
+            except ValueError:
+                pass
+
+        self.log.debug("Attempting to get new proxy..")
 
         # More than 24 hours or empty
         if len(proxies) == 0 or \
@@ -189,61 +197,30 @@ class TikTok(commands.Cog):
                 self.log.error(f"Unable to get database: {str(e)}")
                 return
 
-            '''if len(re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', res.partition('\n')[0])) != 1:
-                if 'We have to temporarily stop you.' in res:
-                    url = 'https://www.proxyscan.io/api/proxy?' \
-                          'limit=10&last_check=3600&ping=100&format=txt&type=http,https'
-                    self.log.warning("Too fast, something went wrong..")
-                    self.log.info(f'Switched proxy database to {url}')
-                elif 'You reached the maximum 50 requests for today.' in res:
-                    url = 'https://www.proxyscan.io/api/proxy?' \
-                          'limit=10&last_check=3600&ping=100&format=txt&type=http,https'
-                    self.log.warning("Maximum requests have been reached on pubproxy.com")
-                    self.log.info(f'Switched proxy database to {url}')
-                else:
-                    url = 'https://www.proxyscan.io/api/proxy?' \
-                          'limit=10&last_check=3600&ping=100&format=txt&type=http,https'
-                    self.log.warning(f"Unexpected response: {res}")
-                    self.log.info(f'Switched proxy database to {url}')'''
-
             proxies = {'last-updated': str(datetime.now()), 'list': proxies_list}
-            await self.config.proxies.set(proxies)
             self.log.info(f"Proxies list updated: {proxies_list}")
         else:
             self.log.debug("No database update was performed")
 
-        if 'list' in proxies and truncate:
-            try:
-                self.log.debug(f"Removing {self.api.proxy} from database..")
-                proxies['list'].remove(self.api.proxy)
-                self.log.debug(f"Processing remove")
-                await self.config.proxies.set(proxies)
-                self.log.debug(f"Removed!")
-            except ValueError:
-                pass
-            except Exception as e:
-                self.log.error(f"Unknown error {str(e)}")
-                pass
-
         if 'list' in proxies and len(proxies['list']) == 0:
             self.log.warning("Proxy database is empty..")
-            await asyncio.sleep(1)
-            await self.get_new_proxy(truncate)
-            return
+            # await self.config.proxies.set(proxies)
+            # await self.get_new_proxy(truncate)
+            # return
 
         self.log.warning(f"Setting up a new proxy..")
         new_proxy = next(iter(proxies['list']))
         if len(re.findall(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', new_proxy)) != 1:
             self.log.warning(f"Invalid proxy format: {new_proxy}")
             self.log.warning(f"Clearing proxy database..")
-            await self.config.proxies.set([])
-            await asyncio.sleep(1)
-            await self.get_new_proxy(truncate)
-            return
+            proxies = []
+        else:
+            self.log.info(f"New proxy acquired: {self.api.proxy}")
+            self.api.proxy = new_proxy
+            await self.config.proxy.set(self.api.proxy)
 
-        self.log.info(f"New proxy acquired: {self.api.proxy}")
-        self.api.proxy = new_proxy
-        await self.config.proxy.set(self.api.proxy)
+        await self.config.proxies.set(proxies)
+        await asyncio.sleep(1)
 
     async def get_new_videos(self):
         for guild in self.bot.guilds:
