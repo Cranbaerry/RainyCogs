@@ -47,6 +47,7 @@ class TikTok(commands.Cog):
         self.driver = None
         self.background_task = None
         self.proxies = []
+        self.proxy = None
 
         self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
         self.config.register_guild(subscriptions=[], cache=[])
@@ -56,8 +57,6 @@ class TikTok(commands.Cog):
 
     async def initialize(self):
         await self.bot.wait_until_red_ready()
-        self.proxy = await self.config.proxy()
-        self.proxy = None if not self.proxy else self.proxy
 
         if platform.system() == 'Windows':
             self.driver = str(bundled_data_path(self)) + r'\chromedriver_win'
@@ -216,11 +215,9 @@ class TikTok(commands.Cog):
         else:
             self.log.info(f"New proxy acquired: {self.api.proxy}")
             self.api.proxy = new_proxy
-            await self.config.proxy.set(self.api.proxy)
+            self.proxy = new_proxy
 
         self.proxies = proxies
-        #await self.config.proxies.set(proxies)
-        #await asyncio.sleep(1)
 
     async def get_new_videos(self):
         for guild in self.bot.guilds:
@@ -618,7 +615,7 @@ class TikTok(commands.Cog):
     async def setproxy(self, ctx: commands.Context, proxy):
         """Set HTTP proxy address"""
         self.api.proxy = proxy
-        await self.config.proxy.set(proxy)
+        self.proxy = proxy
         await ctx.send(f"Proxy set to {proxy}")
         self.log.info(f"Proxy set to {proxy}")
 
