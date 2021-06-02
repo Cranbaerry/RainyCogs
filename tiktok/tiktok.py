@@ -46,6 +46,7 @@ class TikTok(commands.Cog):
         self.api = None
         self.driver = None
         self.background_task = None
+        self.proxies = []
 
         self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
         self.config.register_guild(subscriptions=[], cache=[])
@@ -160,7 +161,8 @@ class TikTok(commands.Cog):
               'limit=10&last_check=3600&ping=100&format=txt&type=http,https'
         hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}
         # res = None
-        proxies = await self.config.proxies()
+        # proxies = await self.config.proxies()
+        proxies = self.proxies
 
         if len(proxies) > 0:
             self.log.info(f"Cached proxies: {len(proxies['list'])}")
@@ -204,9 +206,6 @@ class TikTok(commands.Cog):
 
         if 'list' in proxies and len(proxies['list']) == 0:
             self.log.warning("Proxy database is empty..")
-            # await self.config.proxies.set(proxies)
-            # await self.get_new_proxy(truncate)
-            # return
 
         self.log.warning(f"Setting up a new proxy..")
         new_proxy = next(iter(proxies['list']))
@@ -219,8 +218,9 @@ class TikTok(commands.Cog):
             self.api.proxy = new_proxy
             await self.config.proxy.set(self.api.proxy)
 
-        await self.config.proxies.set(proxies)
-        await asyncio.sleep(1)
+        self.proxies = proxies
+        #await self.config.proxies.set(proxies)
+        #await asyncio.sleep(1)
 
     async def get_new_videos(self):
         for guild in self.bot.guilds:
@@ -543,7 +543,8 @@ class TikTok(commands.Cog):
     @checks.is_owner()
     async def clearproxy(self, ctx):
         """Clear proxies database"""
-        await self.config.proxies.set([])
+        #await self.config.proxies.set([])
+        self.proxies = []
         await ctx.send("Proxy database cleared!")
 
     @tiktok.command()
