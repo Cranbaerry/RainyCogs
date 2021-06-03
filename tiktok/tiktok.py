@@ -196,6 +196,7 @@ class TikTok(commands.Cog):
                             proxies_list.append(proxy)
             except Exception as e:
                 self.log.error(f"Unable to get database: {str(e)}")
+                await self.get_new_proxy(truncate)
                 return
 
             proxies = {'last-updated': str(datetime.now()), 'list': proxies_list}
