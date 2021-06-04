@@ -448,11 +448,18 @@ class TikTok(commands.Cog):
         pass
 
     @tiktok.group()
-    @commands.guild_only()
     @checks.admin_or_permissions(manage_guild=True)
     async def clear(self: commands.Cog, ctx: commands.Context) -> None:
         """
         Clear tools commands
+        """
+        pass
+
+    @tiktok.group()
+    @checks.admin_or_permissions(manage_guild=True)
+    async def set(self: commands.Cog, ctx: commands.Context) -> None:
+        """
+        Set up tiktok configurations
         """
         pass
 
@@ -581,15 +588,6 @@ class TikTok(commands.Cog):
         async with ctx.typing():
             await self.get_new_videos()
 
-    @tiktok.command()
-    @checks.is_owner()
-    async def setinterval(self, ctx: commands.Context, interval: int):
-        """Set the interval in seconds at which to check for updates
-
-        Very low values will probably get you rate limited"""
-        await self.config.interval.set(interval)
-        await ctx.send(f"Interval set to {await self.config.interval()}")
-
     @commands.guild_only()
     @tiktok.command()
     async def list(self, ctx: commands.Context):
@@ -624,26 +622,35 @@ class TikTok(commands.Cog):
                 await ctx.send(embed=embed)
                 del (sub_ids[0:9])
 
-    @tiktok.command()
+    @set.command()
     @checks.is_owner()
-    async def setproxy(self, ctx: commands.Context, proxy):
+    async def interval(self, ctx: commands.Context, interval: int):
+        """Set the interval in seconds at which to check for updates
+
+        Very low values will probably get you rate limited"""
+        await self.config.interval.set(interval)
+        await ctx.send(f"Interval set to {await self.config.interval()}")
+
+    @set.command()
+    @checks.is_owner()
+    async def proxy(self, ctx: commands.Context, proxy):
         """Set HTTP proxy address"""
         self.api.proxy = proxy
         self.proxy = proxy
         await ctx.send(f"Proxy set to {proxy}")
         self.log.info(f"Proxy set to {proxy}")
 
-    @tiktok.command()
+    @set.command()
     @checks.is_owner()
-    async def setsize(self, ctx: commands.Context, size):
+    async def size(self, ctx: commands.Context, size):
         """Set global_cache_size"""
         await self.config.global_cache_size.set(int(size))
         await ctx.send(f"Global cache's size set to {size}")
         self.log.info(f"Global cache's size set to {size}")
 
-    @tiktok.command()
+    @set.command()
     @checks.is_owner()
-    async def setverify(self, ctx: commands.Context, txt):
+    async def verifyfp(self, ctx: commands.Context, txt):
         """Set verifyFp cookie value"""
         self.api.custom_verifyFp = txt
         await self.config.verifyFp.set(txt)
