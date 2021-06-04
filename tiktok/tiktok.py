@@ -441,10 +441,18 @@ class TikTok(commands.Cog):
         self.background_task.cancel()
 
     @commands.group()
-    @commands.guild_only()
     async def tiktok(self: commands.Cog, ctx: commands.Context) -> None:
         """
-        Role tools commands
+        Tiktok commands
+        """
+        pass
+
+    @tiktok.group()
+    @commands.guild_only()
+    @checks.admin_or_permissions(manage_guild=True)
+    async def clear(self: commands.Cog, ctx: commands.Context) -> None:
+        """
+        Clear tools commands
         """
         pass
 
@@ -526,33 +534,33 @@ class TikTok(commands.Cog):
                             f'subscribed to {channels}'
         await ctx.send(embed=embed)
 
-    @tiktok.command()
+    @clear.command()
     @checks.admin_or_permissions(manage_guild=True)
     @commands.guild_only()
-    async def clearcache(self, ctx):
-        """Clear cached tiktok posts in the server"""
+    async def posts(self, ctx):
+        """Clear published tiktok posts cache in the server"""
         await self.config.guild(ctx.guild).cache.set([])
         await ctx.send("Cache cleared!")
 
-    @tiktok.command()
+    @clear.command()
     @checks.admin_or_permissions(manage_guild=True)
     @commands.guild_only()
-    async def clearsub(self, ctx):
+    async def sub(self, ctx):
         """Remove all subscriptions in the server"""
         await self.config.guild(ctx.guild).subscriptions.set([])
         await ctx.send("Subscriptions cleared!")
 
-    @tiktok.command()
+    @clear.command()
     @checks.is_owner()
-    async def clearproxy(self, ctx):
+    async def proxy(self, ctx):
         """Clear proxies database"""
         # await self.config.proxies.set([])
         self.proxies = []
         await ctx.send("Proxy database cleared!")
 
-    @tiktok.command()
+    @clear.command()
     @checks.is_owner()
-    async def clearglobal(self, ctx):
+    async def cache(self, ctx):
         """Clear global cache database"""
         folder = Path(f"{str(cog_data_path(self))}/caches/")
         for filename in os.listdir(folder):
