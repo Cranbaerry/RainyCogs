@@ -467,7 +467,7 @@ class TikTok(commands.Cog):
     @commands.guild_only()
     @checks.admin_or_permissions(manage_guild=True)
     async def add(self, ctx, tiktokId, channelDiscord: discord.TextChannel = None):
-        """Subscribe a Discord channel to a TikTok Channel
+        """Subscribe a Discord channel to a TikTok user
 
         If no discord channel is specified, the current channel will be subscribed
         """
@@ -504,7 +504,7 @@ class TikTok(commands.Cog):
     @commands.guild_only()
     @checks.admin_or_permissions(manage_guild=True)
     async def remove(self, ctx: commands.Context, tiktokId, channelDiscord: discord.TextChannel = None):
-        """Unsubscribe a Discord channel from a TikTok channel
+        """Unsubscribe a Discord channel from a TikTok user
 
         If no Discord channel is specified, the subscription will be removed from all channels"""
         profileLink = re.search(r'https://www.tiktok.com/@([^/?]+)', tiktokId)
@@ -584,14 +584,14 @@ class TikTok(commands.Cog):
     @tiktok.command()
     @checks.is_owner()
     async def update(self, ctx):
-        """Manually force feed update"""
+        """Force feed update"""
         async with ctx.typing():
             await self.get_new_videos()
 
     @commands.guild_only()
     @tiktok.command()
     async def list(self, ctx: commands.Context):
-        """List current subscriptions"""
+        """List active subscriptions in the server"""
         await self._showsubs(ctx, ctx.guild)
 
     async def _showsubs(self, ctx: commands.Context, guild: discord.Guild):
