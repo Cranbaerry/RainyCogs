@@ -89,15 +89,7 @@ class TikTok(commands.Cog):
         self.background_task = self.bot.loop.create_task(self.background_get_new_videos())
 
     def get_tiktok_by_name(self, username, count):
-        data = self.api.byUsername(username, count=count)
-
-        '''try:
-            data = self.api.byUsername(username, count=count)
-        except TikTokCaptchaError as e:
-            data = TikTokCaptchaError
-            self.log.error(f"[{type(e).__name__}] {str(e)}")'''
-        #
-        return data
+        return self.api.byUsername(username, count=count)
 
     def get_tiktok_dynamic_cover(self, post):
         # temporarily disable proxy
@@ -158,8 +150,6 @@ class TikTok(commands.Cog):
         url = 'https://www.proxyscan.io/api/proxy?' \
               'limit=10&last_check=3600&ping=100&format=txt&type=http,https'
         hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}
-        # res = None
-        # proxies = await self.config.proxies()
         proxies = self.proxies
 
         if len(proxies) > 0:
@@ -197,7 +187,6 @@ class TikTok(commands.Cog):
                             proxies_list.append(proxy)
             except TimeoutError as e:
                 self.log.error(f"Unable to get database: [{repr(e)}] {str(e)}")
-                # await self.get_new_proxy(truncate)
                 return False
 
             proxies = {'last-updated': str(datetime.now()), 'list': proxies_list}
@@ -208,7 +197,6 @@ class TikTok(commands.Cog):
         if 'list' in proxies and len(proxies['list']) == 0:
             self.log.warning("Proxy database is empty..")
             self.proxies = proxies
-            # await self.get_new_proxy(truncate)
             return False
 
         self.log.warning(f"Setting up a new proxy..")
@@ -341,9 +329,6 @@ class TikTok(commands.Cog):
                         # print(f"Response: {posts}")
                         self.log.debug("Response pass reached..")
                         break
-                    '''except Exception as e:
-                       self.log.error(f"[{type(e).__name__}] {str(e)}")
-                       traceback.print_exc()'''
 
                 if posts is None or len(posts) == 0:
                     self.log.warning("Empty posts for tiktok: " + sub["id"])
