@@ -177,7 +177,7 @@ class TikTok(commands.Cog):
                 # https://github.com/aio-libs/aiohttp/issues/3203
                 session_timeout = aiohttp.ClientTimeout(total=None, sock_connect=5, sock_read=5)
                 async with aiohttp.ClientSession(timeout=session_timeout) as session:
-                    async with session.get(url, headers=hdr) as r:
+                    async with session.get(url, headers=hdr, allow_redirects=False, timeout=1) as r:
                         res = await r.text()
 
                         for lines in res.split('\n'):
