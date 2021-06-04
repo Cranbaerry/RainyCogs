@@ -195,7 +195,7 @@ class TikTok(commands.Cog):
                             if len(proxy) == 0:
                                 continue
                             proxies_list.append(proxy)
-            except Exception as e:
+            except TimeoutError as e:
                 self.log.error(f"Unable to get database: [{repr(e)}] {str(e)}")
                 # await self.get_new_proxy(truncate)
                 return False
