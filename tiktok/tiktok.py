@@ -51,8 +51,7 @@ class TikTok(commands.Cog):
 
         self.config = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
         self.config.register_guild(subscriptions=[], cache=[])
-        self.config.register_global(interval=300, global_cache_size=500, global_cache=[],
-                                    proxy=[], proxies=[], verifyFp=[])
+        self.config.register_global(interval=300, global_cache_size=500, global_cache=[], verifyFp=[])
         self.main_task = self.bot.loop.create_task(self.initialize())
 
     async def initialize(self):
@@ -185,7 +184,9 @@ class TikTok(commands.Cog):
             proxies_list = []
 
             try:
-                async with aiohttp.ClientSession() as session:
+                # https://github.com/aio-libs/aiohttp/issues/3203
+                session_timeout = aiohttp.ClientTimeout(total=None, sock_connect=5, sock_read=5)
+                async with aiohttp.ClientSession(timeout=session_timeout) as session:
                     async with session.get(url, headers=hdr) as r:
                         res = await r.text()
 
@@ -197,7 +198,7 @@ class TikTok(commands.Cog):
             except Exception as e:
                 self.log.error(f"Unable to get database: [{repr(e)}] {str(e)}")
                 # await self.get_new_proxy(truncate)
-                return
+                return False
 
             proxies = {'last-updated': str(datetime.now()), 'list': proxies_list}
             self.log.info(f"Proxies list updated: {proxies_list}")
@@ -208,7 +209,7 @@ class TikTok(commands.Cog):
             self.log.warning("Proxy database is empty..")
             self.proxies = proxies
             # await self.get_new_proxy(truncate)
-            return
+            return False
 
         self.log.warning(f"Setting up a new proxy..")
         new_proxy = next(iter(proxies['list']))
@@ -222,6 +223,7 @@ class TikTok(commands.Cog):
             self.proxy = new_proxy
 
         self.proxies = proxies
+        return True
 
     async def get_new_videos(self):
         for guild in self.bot.guilds:
@@ -544,7 +546,7 @@ class TikTok(commands.Cog):
     @checks.is_owner()
     async def clearproxy(self, ctx):
         """Clear proxies database"""
-        #await self.config.proxies.set([])
+        # await self.config.proxies.set([])
         self.proxies = []
         await ctx.send("Proxy database cleared!")
 
