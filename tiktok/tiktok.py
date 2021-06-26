@@ -346,8 +346,10 @@ class TikTok(commands.Cog):
         cover_file = None
         for post in posts:
             if post["id"] in cache:
+                self.log.info("Skipping post: " + post["id"])
                 continue
 
+            self.log.info("DEBUG PASS 1")
             user_name = post['author']['nickname']
             user_color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
             user_link = f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}"
@@ -357,6 +359,7 @@ class TikTok(commands.Cog):
             user_avatar = post['author']['avatarMedium']
             user_content = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', f"{post['desc']}")
 
+            self.log.info("DEBUG PASS 2")
             # Send embed and post in channel
             embed = discord.Embed(color=user_color, url=user_link)
             embed.timestamp = datetime.utcfromtimestamp(post['createTime'])
@@ -405,11 +408,15 @@ class TikTok(commands.Cog):
                 self.log.debug(f"Deleting {str(cached_cover)} from disk..")
                 cached_cover.unlink()
 
+        self.log.info("DEBUG PASS 3")
         # Add id to published cache
         await self.config.guild(guild).cache.set(cache)
 
+        self.log.info("DEBUG PASS 4")   
         # Add post to global cache
         await self.config.global_cache.set(global_cache)
+
+        self.log.info("DEBUG PASS 5")
 
     async def background_get_new_videos(self):
         await self.bot.wait_until_red_ready()
