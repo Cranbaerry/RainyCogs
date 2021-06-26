@@ -412,7 +412,7 @@ class TikTok(commands.Cog):
         # Add id to published cache
         await self.config.guild(guild).cache.set(cache)
 
-        self.log.info("DEBUG PASS 4")   
+        self.log.info("DEBUG PASS 4")
         # Add post to global cache
         await self.config.global_cache.set(global_cache)
 
