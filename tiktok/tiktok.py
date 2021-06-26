@@ -351,12 +351,18 @@ class TikTok(commands.Cog):
 
             self.log.info("DEBUG PASS 1")
             user_name = post['author']['nickname']
+            self.log.info("DEBUG PASS 1.1")
             user_color = int(hex(int(ColorHash(post['author']['uniqueId']).hex.replace("#", ""), 16)), 0)
+            self.log.info("DEBUG PASS 1.2")
             user_link = f"https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']}"
+            self.log.info("DEBUG PASS 1.3")
             user_video = f"[Click to see full video!]" \
                          f"(https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})"
+            self.log.info("DEBUG PASS 1.4")
             user_music = f"♫ {post['music']['title']} - {post['music']['authorName']}"
+            self.log.info("DEBUG PASS 1.5")
             user_avatar = post['author']['avatarMedium']
+            self.log.info("DEBUG PASS 1.6")
             user_content = re.sub(r'#(\w+)', r'[#\1](https://www.tiktok.com/tag/\1)', f"{post['desc']}")
 
             self.log.info("DEBUG PASS 2")
