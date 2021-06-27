@@ -349,6 +349,7 @@ class TikTok(commands.Cog):
                 self.log.info("Skipping post: " + post["id"])
                 continue
 
+            self.log.info(post)
             self.log.info("DEBUG PASS 1")
             user_name = post['author']['nickname']
             self.log.info("DEBUG PASS 1.1")
