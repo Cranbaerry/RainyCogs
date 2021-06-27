@@ -360,7 +360,8 @@ class TikTok(commands.Cog):
             user_video = f"[Click to see full video!]" \
                          f"(https://www.tiktok.com/@{post['author']['uniqueId']}/video/{post['id']})"
             self.log.info("DEBUG PASS 1.4")
-            user_music = f"♫ {post['music']['title']} - {post['music']['authorName']}"
+            user_music = f"♫ {post['music']['title']} - {post['music']['authorName']}" \
+                if 'authorName' in post['music'] else f"♫ {post['music']['title']}"
             self.log.info("DEBUG PASS 1.5")
             user_avatar = post['author']['avatarMedium']
             self.log.info("DEBUG PASS 1.6")
