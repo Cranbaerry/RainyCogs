@@ -21,6 +21,7 @@ class Trakteer(commands.Cog):
         self.tasks = []
         self.websockets = []
         self.log = logging.getLogger("red")
+        self.log.debug("[trakteer] Trakteer initialized!")
         for key in self.keys:
             event = threading.Event()
             task = functools.partial(self.websocket_thread, key, event)
