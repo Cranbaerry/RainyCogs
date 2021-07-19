@@ -1,16 +1,10 @@
-import functools
 import logging
-import threading
-
 import discord
 import datetime
 import websockets
 import json
 import asyncio
 from redbot.core import commands
-
-log = logging.getLogger("red")
-
 
 class Trakteer(commands.Cog):
     # init method or constructor
@@ -28,15 +22,12 @@ class Trakteer(commands.Cog):
                       'debug': True}]
         self.tasks = []
         self.websockets = []
-        self.log = log
+        self.log = logging.getLogger("red")
         for key in self.keys:
             task = self.bot.loop.create_task(self.websocket_thread(key))
             self.tasks.append(task)
 
         self.log.debug("[trakteer] Trakteer threads initialized!")
-
-        # loop = asyncio.get_event_loop()
-        # loop.run_until_complete(self.websocket_thread())
 
     async def connect(self, key):
         uri = 'wss://socket.trakteer.id/app/2ae25d102cc6cd41100a'
@@ -44,9 +35,7 @@ class Trakteer(commands.Cog):
         websocket = await websockets.connect(uri)
         while True:
             response = json.loads(await websocket.recv())
-            # print(response)
             if response['event'] == 'pusher:connection_established':
-                # self.log.debug("[trakteer] Connected to %s" % uri)
                 await websocket.send(json.dumps({
                     "event": "pusher:subscribe",
                     "data": {"channel": key['channelKey']}
@@ -67,7 +56,7 @@ class Trakteer(commands.Cog):
                 response = json.loads(await websocket.recv())
                 if response['event'] == 'pusher_internal:subscription_succeeded':
                     self.log.debug('[trakteer] Successfully subscribed to %s' % response['channel'])
-                # print(response)
+
                 elif response['event'] != 'pusher:pong':
                     self.log.debug('[trakteer] %s' % response)
 
