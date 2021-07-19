@@ -24,9 +24,12 @@ class Trakteer(commands.Cog):
         self.log.debug("[trakteer] Trakteer initialized!")
         for key in self.keys:
             event = threading.Event()
+            self.log.debug("[trakteer] Adding thread %s" % key)
             task = functools.partial(self.websocket_thread, key, event, self.log)
             task = self.bot.loop.run_in_executor(None, task)
             self.tasks.append([task, event])
+
+        self.log.debug("[trakteer] Trakteer initialized end!")
 
         # loop = asyncio.get_event_loop()
         # loop.run_until_complete(self.websocket_thread())
