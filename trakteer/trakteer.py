@@ -11,14 +11,17 @@ from redbot.core import commands
 
 log = logging.getLogger("red")
 
+
 class Trakteer(commands.Cog):
     # init method or constructor
     def __init__(self, bot, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.bot = bot
-        self.keys = ['creator-stream.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw',
-                     'creator-stream.6am740y9vaj5z0vp.trstream-6Oml9NSUZMm4yuQK5Z7H']
+        self.keys = [{'channelKey:': 'creator-stream.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw',
+                      'channelId': 803626623596363786, 'debug': True},
+                     {'channelKey:': 'creator-stream.6am740y9vaj5z0vp.trstream-6Oml9NSUZMm4yuQK5Z7H',
+                      'channelId': 842043854294220840, 'debug': True}]
         self.tasks = []
         self.websockets = []
         self.log = log
@@ -33,7 +36,7 @@ class Trakteer(commands.Cog):
 
     async def connect(self, key):
         uri = 'wss://socket.trakteer.id/app/2ae25d102cc6cd41100a'
-        self.log.debug("[trakteer] Attempting to connect for key %s" % key)
+        self.log.debug("[trakteer] Attempting to connect for key %s" % key['channelKey'])
         websocket = await websockets.connect(uri)
         while True:
             response = json.loads(await websocket.recv())
@@ -42,12 +45,14 @@ class Trakteer(commands.Cog):
                 # self.log.debug("[trakteer] Connected to %s" % uri)
                 await websocket.send(json.dumps({
                     "event": "pusher:subscribe",
-                    "data": {"channel": key}
+                    "data": {"channel": key['channelKey']}
                 }))
-                await websocket.send(json.dumps({
-                    "event": "pusher:subscribe",
-                    "data": {"channel": key.replace('creator-stream', 'creator-stream-test')}
-                }))
+
+                if key['debug']:
+                    await websocket.send(json.dumps({
+                        "event": "pusher:subscribe",
+                        "data": {"channel": key['channelKey'].replace('creator-stream', 'creator-stream-test')}
+                    }))
                 return websocket
 
     async def websocket_thread(self, key):
@@ -76,7 +81,7 @@ class Trakteer(commands.Cog):
                     if 'supporter_message' in donator:
                         embed.set_footer(text=donator['supporter_message'], icon_url=donator['supporter_avatar'])
 
-                    await self.bot.get_channel(803626623596363786).send(embed=embed)
+                    await self.bot.get_channel(key['channelId']).send(embed=embed)
                 else:
                     await websocket.send(json.dumps({"event": "pusher:ping", "data": {}}))
                     await asyncio.sleep(1)
