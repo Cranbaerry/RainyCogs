@@ -39,7 +39,7 @@ class Trakteer(commands.Cog):
             response = json.loads(await websocket.recv())
             # print(response)
             if response['event'] == 'pusher:connection_established':
-                self.log.debug("[trakteer] Connected to %s" % uri)
+                # self.log.debug("[trakteer] Connected to %s" % uri)
                 await websocket.send(json.dumps({
                     "event": "pusher:subscribe",
                     "data": {"channel": key}
@@ -56,8 +56,10 @@ class Trakteer(commands.Cog):
             self.websockets.append(websocket)
             while True:
                 response = json.loads(await websocket.recv())
+                if response['event'] == 'pusher_internal:subscription_succeeded':
+                    self.log.debug('[trakteer] Successfully subscribed to %s' % response['channel'])
                 # print(response)
-                if response['event'] != 'pusher:pong':
+                elif response['event'] != 'pusher:pong':
                     self.log.debug('[trakteer] %s' % response)
 
                 if response['event'] == 'Illuminate\\Notifications\\Events\\BroadcastNotificationCreated':
