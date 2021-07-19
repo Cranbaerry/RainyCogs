@@ -75,7 +75,7 @@ class Trakteer(commands.Cog):
                     donator = json.loads(response['data'])
 
                     click_here = f"[Klik disini untuk ikut mentraktir!]({key.get('channelUrl')})"
-                    donate_info = f"♥ Baru saja memberikan {donator['price']}"
+                    donate_info = f"🎁 Baru saja memberikan {donator['price']}"
 
                     embed = discord.Embed(color=0xEE2222, url=key.get('channelUrl'))
                     embed.timestamp = datetime.datetime.utcnow()
