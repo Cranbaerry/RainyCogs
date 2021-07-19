@@ -12,6 +12,8 @@ class Trakteer(commands.Cog):
     def __init__(self, bot, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.log = logging.getLogger("red")
+
         self.bot = bot
         self.keys = ['creator-stream.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw'
                      'creator-stream.6am740y9vaj5z0vp.trstream-6Oml9NSUZMm4yuQK5Z7H']
@@ -19,9 +21,7 @@ class Trakteer(commands.Cog):
         self.websockets = []
         for key in self.keys:
             task = self.bot.loop.create_task(self.websocket_thread(key))
-            self.task.append(task)
-
-        self.log = logging.getLogger("red")
+            self.tasks.append(task)
 
         # loop = asyncio.get_event_loop()
         # loop.run_until_complete(self.websocket_thread())
@@ -84,9 +84,7 @@ class Trakteer(commands.Cog):
             await self.websocket_thread(key)
 
     def cog_unload(self):
-        self.tasks.cancel()
+        for task in self.tasks:
+            task.cancel()
         for socket in self.websockets:
             self.bot.loop.create_task(socket.close())
-
-
-#Trakteer(None)
