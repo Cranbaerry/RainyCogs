@@ -18,10 +18,14 @@ class Trakteer(commands.Cog):
         super().__init__(*args, **kwargs)
 
         self.bot = bot
-        self.keys = [{'channelKey': 'creator-stream.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw',
-                      'channelId': 803626623596363786, 'debug': True},
-                     {'channelKey': 'creator-stream.6am740y9vaj5z0vp.trstream-6Oml9NSUZMm4yuQK5Z7H',
-                      'channelId': 842043854294220840, 'debug': True}]
+        self.keys = [{'channelId': 803626623596363786,
+                      'channelKey': 'creator-stream.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw',
+                      'channelUrl': 'https://trakteer.id/overwatch-idn',
+                      'debug': True},
+                     {'channelId': 842043854294220840,
+                      'channelKey': 'creator-stream.6am740y9vaj5z0vp.trstream-6Oml9NSUZMm4yuQK5Z7H',
+                      'channelUrl': 'https://trakteer.id/itspurinch',
+                      'debug': True}]
         self.tasks = []
         self.websockets = []
         self.log = log
@@ -73,11 +77,10 @@ class Trakteer(commands.Cog):
                     embed = discord.Embed(color=0xEE2222, title='%s mentraktir %s %s' % (
                         donator['supporter_name'], donator['quantity'], donator['unit']),
                                           timestamp=datetime.datetime.utcnow())
-                    embed.url = 'https://trakteer.id/overwatch-idn/'
+                    embed.url = key.get('channelUrl')
                     embed.description = 'Baru saja memberikan **%s**' % donator['price']
                     embed.set_thumbnail(url=donator['unit_icon'])
-                    embed.add_field(name='Klik disini untuk ikut mentraktir',
-                                    value='https://trakteer.id/overwatch-idn/')
+                    embed.add_field(name='Klik disini untuk ikut mentraktir', value=key.get('channelUrl'))
                     if 'supporter_message' in donator:
                         embed.set_footer(text=donator['supporter_message'], icon_url=donator['supporter_avatar'])
 
