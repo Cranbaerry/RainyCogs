@@ -9,6 +9,7 @@ import json
 import asyncio
 from redbot.core import commands
 
+log = logging.getLogger("red")
 
 class Trakteer(commands.Cog):
     # init method or constructor
@@ -20,16 +21,15 @@ class Trakteer(commands.Cog):
                      'creator-stream.6am740y9vaj5z0vp.trstream-6Oml9NSUZMm4yuQK5Z7H']
         self.tasks = []
         self.websockets = []
-        self.log = logging.getLogger("red")
-        self.log.debug("[trakteer] Trakteer initialized!")
+        self.log = log
         for key in self.keys:
             event = threading.Event()
-            self.log.debug("[trakteer] Adding thread %s --" % key)
+            self.log.debug("[trakteer] Adding thread %s" % key)
             task = functools.partial(self.websocket_thread, key, event, self.log)
             task = self.bot.loop.run_in_executor(None, task)
             self.tasks.append([task, event])
 
-        self.log.debug("[trakteer] Trakteer initialized end!")
+        self.log.debug("[trakteer] Trakteer threads initialized!")
 
         # loop = asyncio.get_event_loop()
         # loop.run_until_complete(self.websocket_thread())
