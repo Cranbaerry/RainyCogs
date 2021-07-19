@@ -23,12 +23,8 @@ class Trakteer(commands.Cog):
         self.websockets = []
         self.log = log
         for key in self.keys:
-            event = threading.Event()
-            #self.log.debug("[trakteer] Adding thread %s" % key)
-            #task = functools.partial(self.websocket_thread, key, event, self.log)
-            #task = self.bot.loop.run_in_executor(None, task)
-            task = self.bot.loop.create_task(self.websocket_thread(key, event, self.log))
-            self.tasks.append([task, event])
+            task = self.bot.loop.create_task(self.websocket_thread(key))
+            self.tasks.append(task)
 
         self.log.debug("[trakteer] Trakteer threads initialized!")
 
@@ -54,17 +50,11 @@ class Trakteer(commands.Cog):
                 }))
                 return websocket
 
-    async def websocket_thread(self, key, event, logu):
+    async def websocket_thread(self, key):
         try:
-            self.log = logging.getLogger("red")
-            log.debug("[trakteer] Web socket test ")
             websocket = await asyncio.wait_for(self.connect(key), 30)
             self.websockets.append(websocket)
             while True:
-                if event.is_set():
-                    self.log.info("[trakteer] Websocket stopped gracefully for %s" % key)
-                    return
-
                 response = json.loads(await websocket.recv())
                 # print(response)
                 if response['event'] != 'pusher:pong':
@@ -100,7 +90,6 @@ class Trakteer(commands.Cog):
 
     def cog_unload(self):
         for task in self.tasks:
-            task[0].cancel()
-            task[1].set()
+            task.cancel()
         for socket in self.websockets:
             self.bot.loop.create_task(socket.close())
