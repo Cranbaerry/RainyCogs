@@ -18,9 +18,9 @@ class Trakteer(commands.Cog):
         super().__init__(*args, **kwargs)
 
         self.bot = bot
-        self.keys = [{'channelKey:': 'creator-stream.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw',
+        self.keys = [{'channelKey': 'creator-stream.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw',
                       'channelId': 803626623596363786, 'debug': True},
-                     {'channelKey:': 'creator-stream.6am740y9vaj5z0vp.trstream-6Oml9NSUZMm4yuQK5Z7H',
+                     {'channelKey': 'creator-stream.6am740y9vaj5z0vp.trstream-6Oml9NSUZMm4yuQK5Z7H',
                       'channelId': 842043854294220840, 'debug': True}]
         self.tasks = []
         self.websockets = []
