@@ -27,7 +27,7 @@ class Trakteer(commands.Cog):
             #self.log.debug("[trakteer] Adding thread %s" % key)
             #task = functools.partial(self.websocket_thread, key, event, self.log)
             #task = self.bot.loop.run_in_executor(None, task)
-            task = self.bot.loop.create_task(self.wsrun())
+            task = self.bot.loop.create_task(self.websocket_thread(key, event, self.log))
             self.tasks.append([task, event])
 
         self.log.debug("[trakteer] Trakteer threads initialized!")
