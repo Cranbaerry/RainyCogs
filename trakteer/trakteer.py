@@ -24,7 +24,7 @@ class Trakteer(commands.Cog):
         self.log.debug("[trakteer] Trakteer initialized!")
         for key in self.keys:
             event = threading.Event()
-            task = functools.partial(self.websocket_thread, key, event)
+            task = functools.partial(self.websocket_thread, key, event, self.log)
             task = self.bot.loop.run_in_executor(None, task)
             self.tasks.append([task, event])
 
@@ -50,10 +50,10 @@ class Trakteer(commands.Cog):
                 }))
                 return websocket
 
-    async def websocket_thread(self, key, event):
+    async def websocket_thread(self, key, event, log):
         try:
             self.log = logging.getLogger("red")
-            self.log.debug("[trakteer] Web socket test ")
+            log.debug("[trakteer] Web socket test ")
             websocket = await asyncio.wait_for(self.connect(key), 30)
             self.websockets.append(websocket)
             while True:
