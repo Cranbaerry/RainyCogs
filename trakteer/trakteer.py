@@ -53,7 +53,7 @@ class Trakteer(commands.Cog):
                 }))
                 return websocket
 
-    async def websocket_thread(self, key, event, log):
+    async def websocket_thread(self, key, event, logu):
         try:
             self.log = logging.getLogger("red")
             log.debug("[trakteer] Web socket test ")
