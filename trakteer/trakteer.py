@@ -1,4 +1,7 @@
+import functools
 import logging
+import threading
+
 import discord
 import datetime
 import websockets
@@ -20,8 +23,10 @@ class Trakteer(commands.Cog):
         self.tasks = []
         self.websockets = []
         for key in self.keys:
-            task = self.bot.loop.create_task(self.websocket_thread(key))
-            self.tasks.append(task)
+            event = threading.Event()
+            task = functools.partial(self.websocket_thread, key, event)
+            task = self.bot.loop.run_in_executor(None. task)
+            self.tasks.append([task, event])
 
         # loop = asyncio.get_event_loop()
         # loop.run_until_complete(self.websocket_thread())
@@ -45,11 +50,15 @@ class Trakteer(commands.Cog):
                 }))
                 return websocket
 
-    async def websocket_thread(self, key):
+    async def websocket_thread(self, key, event):
         try:
             websocket = await asyncio.wait_for(self.connect(key), 30)
             self.websockets.append(websocket)
             while True:
+                if event.is_set():
+                    self.log.info("[trakteer] Websocket stopped gracefully for %s" % key)
+                    return
+
                 response = json.loads(await websocket.recv())
                 # print(response)
                 if response['event'] != 'pusher:pong':
@@ -85,6 +94,7 @@ class Trakteer(commands.Cog):
 
     def cog_unload(self):
         for task in self.tasks:
-            task.cancel()
+            task[0].cancel()
+            task[1].set()
         for socket in self.websockets:
             self.bot.loop.create_task(socket.close())
