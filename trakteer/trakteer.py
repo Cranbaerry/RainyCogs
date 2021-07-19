@@ -15,13 +15,12 @@ class Trakteer(commands.Cog):
     def __init__(self, bot, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.log = logging.getLogger("red")
-
         self.bot = bot
         self.keys = ['creator-stream.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw'
                      'creator-stream.6am740y9vaj5z0vp.trstream-6Oml9NSUZMm4yuQK5Z7H']
         self.tasks = []
         self.websockets = []
+        self.log = logging.getLogger("red")
         for key in self.keys:
             event = threading.Event()
             task = functools.partial(self.websocket_thread, key, event)
