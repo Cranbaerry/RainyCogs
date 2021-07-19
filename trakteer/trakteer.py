@@ -52,6 +52,7 @@ class Trakteer(commands.Cog):
 
     async def websocket_thread(self, key, event):
         try:
+            self.log = logging.getLogger("red")
             websocket = await asyncio.wait_for(self.connect(key), 30)
             self.websockets.append(websocket)
             while True:
