@@ -25,7 +25,7 @@ class Trakteer(commands.Cog):
         for key in self.keys:
             event = threading.Event()
             task = functools.partial(self.websocket_thread, key, event)
-            task = self.bot.loop.run_in_executor(None. task)
+            task = self.bot.loop.run_in_executor(None, task)
             self.tasks.append([task, event])
 
         # loop = asyncio.get_event_loop()
