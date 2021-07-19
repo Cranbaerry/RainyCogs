@@ -13,15 +13,22 @@ class Trakteer(commands.Cog):
         super().__init__(*args, **kwargs)
 
         self.bot = bot
-        self.socket_task = self.bot.loop.create_task(self.wsrun())
+        self.keys = ['creator-stream.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw'
+                     'creator-stream.6am740y9vaj5z0vp.trstream-6Oml9NSUZMm4yuQK5Z7H']
+        self.tasks = []
+        self.websockets = []
+        for key in self.keys:
+            task = self.bot.loop.create_task(self.websocket_thread(key))
+            self.task.append(task)
+
         self.log = logging.getLogger("red")
 
         # loop = asyncio.get_event_loop()
-        # loop.run_until_complete(self.wsrun())
+        # loop.run_until_complete(self.websocket_thread())
 
-    async def connect(self):
+    async def connect(self, key):
         uri = 'wss://socket.trakteer.id/app/2ae25d102cc6cd41100a'
-        self.log.debug("[trakteer] Attempting to connect")
+        self.log.debug("[trakteer] Attempting to connect for key %s" % key)
         websocket = await websockets.connect(uri)
         while True:
             response = json.loads(await websocket.recv())
@@ -30,19 +37,20 @@ class Trakteer(commands.Cog):
                 self.log.debug("[trakteer] Connected to %s" % uri)
                 await websocket.send(json.dumps({
                     "event": "pusher:subscribe",
-                    "data": {"channel": "creator-stream.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw"}
+                    "data": {"channel": key}
                 }))
                 await websocket.send(json.dumps({
                     "event": "pusher:subscribe",
-                    "data": {"channel": "creator-stream-test.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw"}
+                    "data": {"channel": key.replace('creator-stream', 'creator-stream-test')}
                 }))
                 return websocket
 
-    async def wsrun(self):
+    async def websocket_thread(self, key):
         try:
-            self.websocket = await asyncio.wait_for(self.connect(), 30)
+            websocket = await asyncio.wait_for(self.connect(key), 30)
+            self.websockets.append(websocket)
             while True:
-                response = json.loads(await self.websocket.recv())
+                response = json.loads(await websocket.recv())
                 # print(response)
                 if response['event'] != 'pusher:pong':
                     self.log.debug('[trakteer] %s' % response)
@@ -63,21 +71,22 @@ class Trakteer(commands.Cog):
 
                     await self.bot.get_channel(803626623596363786).send(embed=embed)
                 else:
-                    await self.websocket.send(json.dumps({"event": "pusher:ping", "data": {}}))
+                    await websocket.send(json.dumps({"event": "pusher:ping", "data": {}}))
                     await asyncio.sleep(1)
         except asyncio.exceptions.TimeoutError:
             self.log.warning("[trakteer] Attempting to reconnect due to connection timeout")
-            await self.wsrun()
+            await self.websocket_thread(key)
         except websockets.exceptions.ConnectionClosed:
             self.log.warning("[trakteer] Attempting to reconnect due to connection closed")
-            await self.wsrun()
+            await self.websocket_thread(key)
         except Exception as e:
             self.log.warning("[trakteer] Attempting to reconnect due to: " + str(e))
-            await self.wsrun()
+            await self.websocket_thread(key)
 
     def cog_unload(self):
-        self.socket_task.cancel()
-        self.bot.loop.create_task(self.websocket.close())
+        self.tasks.cancel()
+        for socket in self.websockets:
+            self.bot.loop.create_task(socket.close())
 
 
 #Trakteer(None)
