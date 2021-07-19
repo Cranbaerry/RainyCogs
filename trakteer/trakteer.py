@@ -74,15 +74,17 @@ class Trakteer(commands.Cog):
                 if response['event'] == 'Illuminate\\Notifications\\Events\\BroadcastNotificationCreated':
                     donator = json.loads(response['data'])
 
-                    embed = discord.Embed(color=0xEE2222, title='%s mentraktir %s %s' % (
-                        donator['supporter_name'], donator['quantity'], donator['unit']),
-                                          timestamp=datetime.datetime.utcnow())
-                    embed.url = key.get('channelUrl')
-                    embed.description = 'Baru saja memberikan **%s**' % donator['price']
-                    embed.set_thumbnail(url=donator['unit_icon'])
-                    embed.add_field(name='Klik disini untuk ikut mentraktir', value=key.get('channelUrl'))
+                    click_here = f"[Klik disini untuk ikut mentraktir!]({key.get('channelUrl')})"
+                    donate_info = f"♥ Baru saja memberikan {donator['price']}"
+
+                    embed = discord.Embed(color=0xEE2222, url=key.get('channelUrl'))
+                    embed.timestamp = datetime.datetime.utcnow()
                     if 'supporter_message' in donator:
-                        embed.set_footer(text=donator['supporter_message'], icon_url=donator['supporter_avatar'])
+                        embed.description = donator['supporter_message']
+                    embed.add_field(name=donate_info, value=click_here, inline=False)
+                    embed.set_author(name=donator['supporter_name'], url=key.get('channelUrl'),
+                                     icon_url=donator['supporter_avatar'])
+                    embed.set_thumbnail(url=donator['unit_icon'])
 
                     await self.bot.get_channel(key['channelId']).send(embed=embed)
                 else:
