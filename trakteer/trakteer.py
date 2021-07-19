@@ -16,7 +16,7 @@ class Trakteer(commands.Cog):
         super().__init__(*args, **kwargs)
 
         self.bot = bot
-        self.keys = ['creator-stream.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw'
+        self.keys = ['creator-stream.n8rx3ldzx7o4wamg.trstream-t6ZPmsNYQM061wcg5slw',
                      'creator-stream.6am740y9vaj5z0vp.trstream-6Oml9NSUZMm4yuQK5Z7H']
         self.tasks = []
         self.websockets = []
@@ -24,7 +24,7 @@ class Trakteer(commands.Cog):
         self.log.debug("[trakteer] Trakteer initialized!")
         for key in self.keys:
             event = threading.Event()
-            self.log.debug("[trakteer] Adding thread %s" % key)
+            self.log.debug("[trakteer] Adding thread %s --" % key)
             task = functools.partial(self.websocket_thread, key, event, self.log)
             task = self.bot.loop.run_in_executor(None, task)
             self.tasks.append([task, event])
