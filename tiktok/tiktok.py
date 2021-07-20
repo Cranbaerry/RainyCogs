@@ -122,10 +122,13 @@ class TikTok(commands.Cog):
 
         options = webdriver.ChromeOptions()
         options.add_argument('--ignore-certificate-errors')
+        options.add_argument('--window-size=1420,1080')
         options.add_argument("--test-type")
         options.add_argument("--headless")
         options.add_argument("--test-type")
+        options.add_argument('--disable-gpu')
         options.add_argument("--no-sandbox")
+
         options.add_argument("--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) "
                              "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36")
 

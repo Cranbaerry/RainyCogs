@@ -6,6 +6,7 @@ import json
 import asyncio
 from redbot.core import commands
 
+
 class Trakteer(commands.Cog):
     # init method or constructor
     def __init__(self, bot, *args, **kwargs):
