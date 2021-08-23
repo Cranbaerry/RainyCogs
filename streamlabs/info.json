@@ -1,0 +1,25 @@
+{
+  "author" : [
+    "Rainy"
+  ],
+  "description" : "Streamlabs",
+  "disabled" : false,
+  "hidden" : false,
+  "install_msg" : "Thank you for installing!`",
+  "max_bot_version" : "0.0.0",
+  "min_bot_version" : "3.1.8",
+  "min_python_version" : [
+    3,
+    7,
+    2
+  ],
+  "name" : "Pugs",
+  "permissions" : [],
+  "required_cogs" : {},
+  "requirements" : ["aiohttp", "python-socketio[client]==4.6.04", "python-engineio==3.14.2"],
+  "short" : "Overwatch ID Pug System",
+  "tags" : [
+    "streamlabs"
+  ],
+  "type" : "COG"
+}
