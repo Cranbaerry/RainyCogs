@@ -114,7 +114,7 @@ class Streamlabs(commands.Cog):
         """
         pass
 
-    @streamlabs.group()
+    @streamlabs.command()
     @checks.admin_or_permissions(manage_guild=True)
     @commands.guild_only()
     async def clear(self, ctx):
@@ -244,8 +244,8 @@ class Streamlabs(commands.Cog):
                 self.log.info(f"[streamlabs] Disconnecting socket client: {conn.sub.get('id')}")
                 break
 
-    @commands.guild_only()
     @streamlabs.command()
+    @commands.guild_only()
     async def list(self, ctx: commands.Context):
         """List active subscriptions in the server"""
         subs = await self.config.guild(ctx.guild).subscriptions()

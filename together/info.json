@@ -1,0 +1,25 @@
+{
+    "author" : [
+        "Rainy"
+    ],
+    "description" : "Discord Together",
+    "disabled" : false,
+    "hidden" : false,
+    "install_msg" : "Thank you for installing!",
+    "max_bot_version" : "0.0.0",
+    "min_bot_version" : "3.1.8",
+    "min_python_version" : [
+        3,
+        7,
+        2
+    ],
+    "name" : "Discord Together",
+    "permissions" : [],
+    "required_cogs" : {},
+    "requirements" : ["discord-together"],
+    "short" : "Discord Together",
+    "tags" : [
+        "fun"
+    ],
+    "type" : "COG"
+}
