@@ -16,7 +16,7 @@
   "name" : "Pugs",
   "permissions" : [],
   "required_cogs" : {},
-  "requirements" : ["aiohttp", "python-socketio[client]==4.6.0", "python-engineio==3.14.2"],
+  "requirements" : ["aiohttp", "python-socketio[asyncio_client]==4.6.0", "python-engineio==3.14.2"],
   "short" : "Streamlab events notifications",
   "tags" : [
     "streamlabs"
