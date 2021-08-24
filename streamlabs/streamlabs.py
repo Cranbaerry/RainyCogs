@@ -1,6 +1,5 @@
 import datetime
 import re
-
 import socketio
 import asyncio
 import discord
@@ -10,13 +9,14 @@ from redbot.core import commands, Config, checks
 UNIQUE_ID = 0x696969667
 EMBED_COLOR = 0xCF83FF
 
-class client():
+
+class Client:
     def __init__(self, sub, bot, log):
         self.bot = bot
         self.sub = sub
         self.log = log
 
-        self.log.info("[streamlabs] Initializing socket client: " + self.sub.get("id"))
+        # self.log.info(f"[streamlabs] {self.sub.get('id')}")
 
         self.sio = socketio.AsyncClient(reconnection=True, logger=True, engineio_logger=True)
         self.sio.on('connect', self.on_connect)
@@ -35,7 +35,7 @@ class client():
         self.log.info(f"[streamlabs] {self.sub.get('id')} encountered connection error!")
 
     async def on_disconnect(self):
-        self.log.info(f"[streamlabs] {self.sub.get('id')} Disconnected!")
+        self.log.info(f"[streamlabs] {self.sub.get('id')} disconnected!")
 
     async def on_message(self, data):
         if data.get('type') == 'follow':
@@ -70,7 +70,7 @@ class client():
                          url=f"http://twitch.tv/{self.sub.get('id')}",
                          icon_url=self.sub.get('icon'))
 
-        await self.bot.get_channel(self.sub.get['channel'].get('id')).send(embed=embed)
+        await self.bot.get_channel(self.sub.get('channel').get('id')).send(embed=embed)
 
 
 class Streamlabs(commands.Cog):
@@ -90,7 +90,7 @@ class Streamlabs(commands.Cog):
         for guild in self.bot.guilds:
             subs = await self.config.guild(guild).subscriptions()
             for sub in subs:
-                conn = client(sub, self.bot, self.log)
+                conn = Client(sub, self.bot, self.log)
                 task = self.bot.loop.create_task(conn.initialize())
                 self.tasks.append(task)
                 self.connections.append(conn)
@@ -98,7 +98,7 @@ class Streamlabs(commands.Cog):
     def clear_connections(self):
         for conn in self.connections:
             self.bot.loop.create_task(conn.sio.disconnect())
-            self.log.info(f"[streamlabs] Disconnecting socket client: {conn.sub.get('id')}")
+            self.log.info(f"[streamlabs] {conn.sub.get('id')} disconnected")
 
         for task in self.tasks:
             task.cancel()
@@ -192,7 +192,7 @@ class Streamlabs(commands.Cog):
         embed.description = f'Twitch events of channel [{twitchChannel}](https://www.twitch.tv/{twitchChannel}) ' \
                             f'added to <#{channelDiscord.id}>'
 
-        conn = client(newSub, self.bot, self.log)
+        conn = Client(newSub, self.bot, self.log)
         task = self.bot.loop.create_task(conn.initialize())
         self.tasks.append(task)
         self.connections.append(conn)
@@ -241,7 +241,7 @@ class Streamlabs(commands.Cog):
         for conn in self.connections:
             if conn.sub.get("id") == twitchChannel:
                 self.bot.loop.create_task(conn.sio.disconnect())
-                self.log.info(f"[streamlabs] Disconnecting socket client: {conn.sub.get('id')}")
+                self.log.info(f"[streamlabs] {conn.sub.get('id')} disconnected")
                 break
 
     @streamlabs.command()
