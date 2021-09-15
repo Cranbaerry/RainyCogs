@@ -1,2 +1,2 @@
-# OWID_Cogs
-A collection of hardcoded cogs for Overwatch IDN's bot.
+# Rainy Cogs
+A collection of custom cogs for Hana.
