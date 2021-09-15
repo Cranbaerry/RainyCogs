@@ -11,7 +11,7 @@ class Together(commands.Cog):
         super().__init__(*args, **kwargs)
         self.bot = bot
         self.log = logging.getLogger("red")
-        self.togetherControl = DiscordTogether(self.bot)
+        self.togetherControl = DiscordTogether(self.bot, debug=True)
         self.log.info("[together] Initialized")
 
     @commands.guild_only()

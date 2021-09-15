@@ -56,7 +56,7 @@ class Trakteer(commands.Cog):
             while True:
                 response = json.loads(await websocket.recv())
                 if response['event'] == 'pusher_internal:subscription_succeeded':
-                    self.log.debug('[trakteer] Successfully subscribed to %s' % response['channel'])
+                    self.log.info('[trakteer] Successfully subscribed to %s' % response['channel'])
 
                 elif response['event'] != 'pusher:pong':
                     self.log.debug('[trakteer] %s' % response)
